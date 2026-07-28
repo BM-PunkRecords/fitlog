@@ -1,0 +1,15 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VITE_APP_NAME: ${VITE_APP_NAME:-FitLog}
+        VITE_DEFAULT_REST_SECONDS: ${VITE_DEFAULT_REST_SECONDS:-90}
+    ports:
+      - "${FITLOG_PORT:-8080}:8080"
+    restart: unless-stopped
+    environment:
+      # Runtime placeholders for a future sync API (not required for local-only MVP)
+      FITLOG_API_BASE_URL: ${FITLOG_API_BASE_URL:-}
+      FITLOG_PUBLIC_ORIGIN: ${FITLOG_PUBLIC_ORIGIN:-http://localhost:8080}

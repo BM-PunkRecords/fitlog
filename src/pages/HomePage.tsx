@@ -3,6 +3,7 @@ import { ResumeBanner } from '../components/ResumeBanner'
 import { useAppData } from '../context/AppDataContext'
 import { relativeTime, routineTargets } from '../lib/format'
 import { createId } from '../store/createId'
+import { APP_NAME } from '../types/models'
 import type { Session } from '../types/models'
 import { useMemo } from 'react'
 
@@ -40,7 +41,7 @@ export function HomePage() {
   return (
     <div className="stack">
       <header>
-        <h1 className="page-title">FitLog</h1>
+        <h1 className="page-title">{APP_NAME}</h1>
         <p className="muted">루틴을 고르거나 바로 기록하세요</p>
       </header>
 

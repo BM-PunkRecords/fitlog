@@ -38,6 +38,9 @@ export interface AppSettings {
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {
-  defaultRestSeconds: 90,
+  defaultRestSeconds: Number(import.meta.env.VITE_DEFAULT_REST_SECONDS) || 90,
   weightUnit: 'kg',
 }
+
+export const APP_NAME = String(import.meta.env.VITE_APP_NAME || 'FitLog')
+
