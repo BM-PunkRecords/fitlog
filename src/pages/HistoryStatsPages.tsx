@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useAppData } from '../context/AppDataContext'
 import { formatDateKey } from '../lib/format'
+import { tKo } from '../lib/tKo'
 import { exerciseVolume, sessionVolume } from '../store/volume'
 import { weeklyStats } from '../store/stats'
 import type { Session } from '../types/models'
@@ -43,7 +44,7 @@ export function HistoryPage() {
                 <div className="muted" style={{ fontSize: 12 }}>
                   {s.items
                     .slice(0, 3)
-                    .map((i) => byId.get(i.exerciseId)?.name ?? i.exerciseId)
+                    .map((i) => tKo(byId.get(i.exerciseId)?.name ?? i.exerciseId))
                     .join(', ')}
                 </div>
               </div>
@@ -110,7 +111,7 @@ export function SessionDetailPage() {
         const delta = prev === undefined ? null : vol - prev
         return (
           <div key={`${item.exerciseId}-${item.order}`} className="card stack">
-            <strong>{ex?.name ?? item.exerciseId}</strong>
+            <strong>{ex ? tKo(ex.name) : item.exerciseId}</strong>
             <div style={{ color: 'var(--accent)' }}>
               볼륨 {vol} kg
               {delta !== null && (
