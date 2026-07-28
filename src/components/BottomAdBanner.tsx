@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { memo, useEffect, useRef } from 'react'
 
 declare global {
   interface Window {
@@ -50,7 +50,7 @@ function waitForAdSenseScript(): Promise<void> {
   })
 }
 
-export function BottomAdBanner() {
+export const BottomAdBanner = memo(function BottomAdBanner() {
   const slotRef = useRef<HTMLModElement>(null)
   const pushed = useRef(false)
 
@@ -95,4 +95,4 @@ export function BottomAdBanner() {
       />
     </div>
   )
-}
+})

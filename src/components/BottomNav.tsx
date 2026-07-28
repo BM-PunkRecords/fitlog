@@ -1,6 +1,7 @@
+import { memo } from 'react'
 import { NavLink } from 'react-router-dom'
 
-export function BottomNav() {
+export const BottomNav = memo(function BottomNav() {
   return (
     <nav className="bottom-nav" aria-label="주요 메뉴">
       <NavLink to="/" end>
@@ -10,4 +11,4 @@ export function BottomNav() {
       <NavLink to="/stats">통계</NavLink>
     </nav>
   )
-}
+})

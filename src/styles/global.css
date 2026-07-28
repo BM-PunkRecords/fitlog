@@ -127,18 +127,20 @@ a.btn {
   gap: 10px;
 }
 
-/* 하단 탭 + 광고: body 포탈 + visualViewport 보정으로 스크롤 시에도 유지 */
+/* 하단 탭 + 광고: body 포탈. bottom은 JS(visualViewport)가 직접 갱신(리렌더 없음) */
 .bottom-chrome {
   position: fixed;
   left: 0;
   right: 0;
-  bottom: var(--chrome-bottom, 0px);
+  bottom: 0;
   margin: 0 auto;
   width: min(480px, 100%);
   z-index: 100;
   display: flex;
   flex-direction: column;
   pointer-events: none;
+  /* 스크롤 중 레이어 유지 — transform은 AdSense 부모에 쓰지 말 것 */
+  backface-visibility: hidden;
 }
 
 .bottom-chrome > * {
