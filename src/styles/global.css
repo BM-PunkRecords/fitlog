@@ -127,43 +127,41 @@ a.btn {
   gap: 10px;
 }
 
-/* 탭바 아래 = 화면 맨 아래(세이프 에리어 포함) */
+/* 탭바 아래 = 화면 맨 아래(세이프 에리어 포함)
+   주의: transform/contain 은 AdSense iframe을 빈 칸으로 만드는 경우가 많음 */
 .bottom-ad {
   position: fixed;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0;
+  right: 0;
   bottom: 0;
+  margin: 0 auto;
   width: min(480px, 100%);
   height: calc(var(--ad-h) + var(--safe-bottom));
   min-height: calc(var(--ad-h) + var(--safe-bottom));
-  max-height: calc(var(--ad-h) + var(--safe-bottom));
   padding-bottom: var(--safe-bottom);
   box-sizing: border-box;
   overflow: hidden;
   background: color-mix(in srgb, var(--bg) 96%, transparent);
   border-top: 1px solid color-mix(in srgb, var(--text) 8%, transparent);
   z-index: 35;
-  isolation: isolate;
-  contain: layout paint size;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   pointer-events: auto;
 }
 
 .bottom-ad .adsbygoogle {
   display: block !important;
   width: 100% !important;
-  height: var(--ad-h) !important;
-  max-height: var(--ad-h) !important;
-  overflow: hidden !important;
-}
-
-.bottom-ad iframe {
-  max-height: var(--ad-h) !important;
+  min-height: 50px;
+  max-height: var(--ad-h);
 }
 
 .bottom-nav {
   position: fixed;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0;
+  right: 0;
+  margin: 0 auto;
   bottom: calc(var(--ad-h) + var(--safe-bottom));
   width: min(480px, 100%);
   height: var(--nav-h);
