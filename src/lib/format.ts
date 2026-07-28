@@ -71,3 +71,19 @@ export function formatElapsed(ms: number): string {
   if (h > 0) return `${h}:${mm}:${ss}`
   return `${mm}:${ss}`
 }
+
+/** Apply the same kg to every set (optionally skip completed). */
+export function applyWeightKgToSets(
+  item: SessionExercise,
+  weightKg: number,
+  options: { onlyIncomplete?: boolean } = {},
+): SessionExercise {
+  const kg = Number.isFinite(weightKg) && weightKg >= 0 ? weightKg : 0
+  return {
+    ...item,
+    sets: item.sets.map((set) => {
+      if (options.onlyIncomplete && set.completed) return set
+      return { ...set, weightKg: kg }
+    }),
+  }
+}

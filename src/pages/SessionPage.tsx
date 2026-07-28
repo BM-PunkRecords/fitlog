@@ -8,7 +8,7 @@ import { ExercisePreview } from '../components/ExercisePreview'
 import { RestTimer } from '../components/RestTimer'
 import { Sheet } from '../components/Sheet'
 import { useAppData } from '../context/AppDataContext'
-import { formatElapsed, sessionItemFromExercise } from '../lib/format'
+import { applyWeightKgToSets, formatElapsed, sessionItemFromExercise } from '../lib/format'
 import { targetKo } from '../lib/labelsKo'
 import { tKo } from '../lib/tKo'
 import {
@@ -34,6 +34,7 @@ export function SessionPage() {
   const [burstSet, setBurstSet] = useState<number | null>(null)
   const [flashSet, setFlashSet] = useState<number | null>(null)
   const [now, setNow] = useState(() => Date.now())
+  const [bulkKg, setBulkKg] = useState('')
   const byId = useMemo(() => new Map(catalog.map((e) => [e.id, e])), [catalog])
 
   useEffect(() => {
@@ -57,6 +58,13 @@ export function SessionPage() {
     const timer = window.setInterval(() => setNow(Date.now()), 1000)
     return () => window.clearInterval(timer)
   }, [session?.id, session?.status])
+
+  useEffect(() => {
+    if (!session) return
+    const item = session.items[index]
+    const seed = item?.sets.find((s) => s.weightKg > 0)?.weightKg ?? item?.sets[0]?.weightKg ?? 0
+    setBulkKg(seed > 0 ? String(seed) : '')
+  }, [session?.id, index, session?.items[index]?.exerciseId])
 
   const persist = async (next: Session) => {
     setSession(next)
@@ -144,6 +152,20 @@ export function SessionPage() {
             sets: item.sets.slice(0, -1).map((s, idx) => ({ ...s, setNumber: idx + 1 })),
           }
         : item,
+    )
+    void persist({ ...session, items })
+  }
+
+  const applyBulkKg = (onlyIncomplete: boolean) => {
+    if (!current) return
+    const kg = Number(bulkKg)
+    if (!Number.isFinite(kg) || kg < 0) {
+      setError('KG는 0 이상 숫자를 입력하세요')
+      return
+    }
+    setError('')
+    const items = session.items.map((item, i) =>
+      i === index ? applyWeightKgToSets(item, kg, { onlyIncomplete }) : item,
     )
     void persist({ ...session, items })
   }
@@ -288,6 +310,39 @@ export function SessionPage() {
           </div>
 
           <div className="stack">
+            <div className="row bulk-kg-bar">
+              <span className="muted" style={{ fontSize: 12, flexShrink: 0 }}>
+                KG 일괄
+              </span>
+              <input
+                className="field"
+                type="number"
+                min={0}
+                step="any"
+                inputMode="decimal"
+                aria-label="일괄 적용할 중량(kg)"
+                placeholder="kg"
+                value={bulkKg}
+                onChange={(e) => setBulkKg(e.target.value)}
+                style={{ flex: 1, minWidth: 0 }}
+              />
+              <button
+                type="button"
+                className="btn btn-ghost interactive"
+                style={{ padding: '10px 12px', flexShrink: 0 }}
+                onClick={() => applyBulkKg(false)}
+              >
+                전체
+              </button>
+              <button
+                type="button"
+                className="btn btn-ghost interactive"
+                style={{ padding: '10px 12px', flexShrink: 0 }}
+                onClick={() => applyBulkKg(true)}
+              >
+                미완료
+              </button>
+            </div>
             <div className="set-grid muted" style={{ fontSize: 12 }}>
               <span>세트</span>
               <span>KG</span>
