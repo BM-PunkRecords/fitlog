@@ -107,7 +107,7 @@ export function RoutineEditPage() {
           role="presentation"
         >
           <div
-            className="sheet stack"
+            className="sheet sheet-fill stack"
             onClick={(e) => e.stopPropagation()}
             role="dialog"
             aria-label="운동 담기"

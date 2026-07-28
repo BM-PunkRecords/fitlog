@@ -366,7 +366,7 @@ export function SessionPage() {
 
       {pickerMode && (
         <div className="sheet-backdrop" onClick={() => setPickerMode(null)} role="presentation">
-          <div className="sheet stack" onClick={(e) => e.stopPropagation()} role="dialog">
+          <div className="sheet sheet-fill stack" onClick={(e) => e.stopPropagation()} role="dialog">
             <div className="row" style={{ justifyContent: 'space-between' }}>
               <h2>{pickerMode === 'replace' ? '운동 대체' : '운동 추가'}</h2>
               <button

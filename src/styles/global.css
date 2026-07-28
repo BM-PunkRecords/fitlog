@@ -127,15 +127,18 @@ a.btn {
   gap: 10px;
 }
 
+/* 탭바 아래 = 화면 맨 아래(세이프 에리어 포함) */
 .bottom-ad {
   position: fixed;
   left: 50%;
   transform: translateX(-50%);
-  bottom: calc(var(--nav-h) + var(--safe-bottom));
+  bottom: 0;
   width: min(480px, 100%);
-  height: var(--ad-h);
-  min-height: var(--ad-h);
-  max-height: var(--ad-h);
+  height: calc(var(--ad-h) + var(--safe-bottom));
+  min-height: calc(var(--ad-h) + var(--safe-bottom));
+  max-height: calc(var(--ad-h) + var(--safe-bottom));
+  padding-bottom: var(--safe-bottom);
+  box-sizing: border-box;
   overflow: hidden;
   background: color-mix(in srgb, var(--bg) 96%, transparent);
   border-top: 1px solid color-mix(in srgb, var(--text) 8%, transparent);
@@ -148,6 +151,7 @@ a.btn {
 .bottom-ad .adsbygoogle {
   display: block !important;
   width: 100% !important;
+  height: var(--ad-h) !important;
   max-height: var(--ad-h) !important;
   overflow: hidden !important;
 }
@@ -160,10 +164,10 @@ a.btn {
   position: fixed;
   left: 50%;
   transform: translateX(-50%);
-  bottom: 0;
+  bottom: calc(var(--ad-h) + var(--safe-bottom));
   width: min(480px, 100%);
-  height: calc(var(--nav-h) + var(--safe-bottom));
-  padding: 8px 12px var(--safe-bottom);
+  height: var(--nav-h);
+  padding: 8px 12px;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 4px;
@@ -241,13 +245,38 @@ a.btn {
 
 .sheet {
   width: min(480px, 100%);
-  max-height: 85dvh;
+  max-height: min(85dvh, 720px);
   overflow: auto;
   background: var(--bg-elevated);
   border-radius: 20px 20px 0 0;
   padding: 16px;
   position: relative;
   z-index: 61;
+}
+
+/* 운동 피커: 시트 전체 높이를 쓰고 목록만 스크롤 */
+.sheet.sheet-fill {
+  height: min(85dvh, 720px);
+  max-height: min(85dvh, 720px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.exercise-picker {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.exercise-picker-list {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .banner {

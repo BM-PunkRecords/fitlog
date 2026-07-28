@@ -41,7 +41,7 @@ export function ExercisePicker({
   }, [catalog, query, bodyPart, equipment, excludeIds])
 
   return (
-    <div className="stack">
+    <div className="exercise-picker">
       <input
         className="field"
         placeholder="운동 검색"
@@ -78,7 +78,7 @@ export function ExercisePicker({
           ))}
         </select>
       </div>
-      <div className="stack" style={{ maxHeight: 320, overflow: 'auto' }}>
+      <div className="exercise-picker-list stack">
         {results.slice(0, 40).map((ex) => (
           <button
             key={ex.id}
