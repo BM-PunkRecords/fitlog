@@ -78,7 +78,7 @@ export function ExercisePicker({
           ))}
         </select>
       </div>
-      <div className="exercise-picker-list stack">
+      <div className="exercise-picker-list">
         {results.slice(0, 40).map((ex) => (
           <button
             key={ex.id}

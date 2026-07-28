@@ -6,6 +6,7 @@ import { ExerciseInfoSheet } from '../components/ExerciseInfoSheet'
 import { ExercisePicker } from '../components/ExercisePicker'
 import { ExercisePreview } from '../components/ExercisePreview'
 import { RestTimer } from '../components/RestTimer'
+import { Sheet } from '../components/Sheet'
 import { useAppData } from '../context/AppDataContext'
 import { sessionItemFromExercise } from '../lib/format'
 import { targetKo } from '../lib/labelsKo'
@@ -365,41 +366,33 @@ export function SessionPage() {
       </button>
 
       {pickerMode && (
-        <div className="sheet-backdrop" onClick={() => setPickerMode(null)} role="presentation">
-          <div className="sheet sheet-fill stack" onClick={(e) => e.stopPropagation()} role="dialog">
-            <div className="row" style={{ justifyContent: 'space-between' }}>
-              <h2>{pickerMode === 'replace' ? '운동 대체' : '운동 추가'}</h2>
-              <button
-                type="button"
-                className="btn btn-ghost interactive"
-                onClick={() => setPickerMode(null)}
-              >
-                닫기
-              </button>
-            </div>
-            <ExercisePicker
-              key={`${pickerMode}-${exercise?.bodyPart ?? 'all'}`}
-              catalog={catalog}
-              preferBodyPart={pickerMode === 'replace' ? exercise?.bodyPart : undefined}
-              excludeIds={pickerMode === 'replace' && current ? [current.exerciseId] : []}
-              onPick={(ex) => {
-                if (pickerMode === 'replace') {
-                  replaceExercise(ex.id)
-                  return
-                }
-                const item = sessionItemFromExercise(
-                  ex.id,
-                  session.items.length,
-                  settings.defaultRestSeconds,
-                )
-                void persist({ ...session, items: [...session.items, item] }).then(() => {
-                  setIndex(session.items.length)
-                  setPickerMode(null)
-                })
-              }}
-            />
-          </div>
-        </div>
+        <Sheet
+          title={pickerMode === 'replace' ? '운동 대체' : '운동 추가'}
+          fill
+          onClose={() => setPickerMode(null)}
+        >
+          <ExercisePicker
+            key={`${pickerMode}-${exercise?.bodyPart ?? 'all'}`}
+            catalog={catalog}
+            preferBodyPart={pickerMode === 'replace' ? exercise?.bodyPart : undefined}
+            excludeIds={pickerMode === 'replace' && current ? [current.exerciseId] : []}
+            onPick={(ex) => {
+              if (pickerMode === 'replace') {
+                replaceExercise(ex.id)
+                return
+              }
+              const item = sessionItemFromExercise(
+                ex.id,
+                session.items.length,
+                settings.defaultRestSeconds,
+              )
+              void persist({ ...session, items: [...session.items, item] }).then(() => {
+                setIndex(session.items.length)
+                setPickerMode(null)
+              })
+            }}
+          />
+        </Sheet>
       )}
 
       {showInfo && exercise && (

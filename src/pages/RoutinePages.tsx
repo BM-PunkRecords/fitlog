@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { ExercisePicker } from '../components/ExercisePicker'
+import { Sheet } from '../components/Sheet'
 import { useAppData } from '../context/AppDataContext'
 import { sessionItemFromExercise } from '../lib/format'
 import { createId } from '../store/createId'
@@ -101,37 +102,16 @@ export function RoutineEditPage() {
       </button>
 
       {showPicker && (
-        <div
-          className="sheet-backdrop"
-          onClick={() => setShowPicker(false)}
-          role="presentation"
-        >
-          <div
-            className="sheet sheet-fill stack"
-            onClick={(e) => e.stopPropagation()}
-            role="dialog"
-            aria-label="운동 담기"
-          >
-            <div className="row" style={{ justifyContent: 'space-between' }}>
-              <h2>운동 담기</h2>
-              <button
-                type="button"
-                className="btn btn-ghost interactive"
-                onClick={() => setShowPicker(false)}
-              >
-                닫기
-              </button>
-            </div>
-            <ExercisePicker
-              catalog={catalog}
-              excludeIds={exerciseIds}
-              onPick={(ex) => {
-                setExerciseIds((ids) => [...ids, ex.id])
-                setShowPicker(false)
-              }}
-            />
-          </div>
-        </div>
+        <Sheet title="운동 담기" fill onClose={() => setShowPicker(false)}>
+          <ExercisePicker
+            catalog={catalog}
+            excludeIds={exerciseIds}
+            onPick={(ex) => {
+              setExerciseIds((ids) => [...ids, ex.id])
+              setShowPicker(false)
+            }}
+          />
+        </Sheet>
       )}
     </div>
   )
