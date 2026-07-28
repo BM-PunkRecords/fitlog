@@ -48,7 +48,7 @@ h3 {
   max-width: 480px;
   margin: 0 auto;
   min-height: 100dvh;
-  padding: 16px 16px calc(var(--nav-h) + var(--safe-bottom) + 24px);
+  padding: 16px 16px calc(var(--nav-h) + var(--ad-h) + var(--safe-bottom) + 24px);
 }
 
 .page-title {
@@ -123,6 +123,24 @@ h3 {
   gap: 10px;
 }
 
+.bottom-ad {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(var(--nav-h) + var(--safe-bottom));
+  width: min(480px, 100%);
+  min-height: var(--ad-h);
+  max-height: 100px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--bg) 96%, transparent);
+  border-top: 1px solid color-mix(in srgb, var(--text) 8%, transparent);
+  z-index: 35;
+}
+
+.bottom-ad .adsbygoogle {
+  min-height: 50px;
+}
+
 .bottom-nav {
   position: fixed;
   left: 50%;
@@ -160,7 +178,7 @@ h3 {
 
 .fab-bar {
   position: sticky;
-  bottom: calc(var(--nav-h) + var(--safe-bottom) + 8px);
+  bottom: calc(var(--nav-h) + var(--ad-h) + var(--safe-bottom) + 8px);
   display: flex;
   gap: 10px;
   margin-top: 20px;

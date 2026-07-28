@@ -12,5 +12,6 @@
   --font-display: "Syne", system-ui, sans-serif;
   --font-body: "DM Sans", system-ui, sans-serif;
   --nav-h: 64px;
+  --ad-h: 70px;
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
