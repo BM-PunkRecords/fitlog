@@ -8,7 +8,7 @@ import { ExercisePreview } from '../components/ExercisePreview'
 import { RestTimer } from '../components/RestTimer'
 import { Sheet } from '../components/Sheet'
 import { useAppData } from '../context/AppDataContext'
-import { sessionItemFromExercise } from '../lib/format'
+import { formatElapsed, sessionItemFromExercise } from '../lib/format'
 import { targetKo } from '../lib/labelsKo'
 import { tKo } from '../lib/tKo'
 import {
@@ -33,6 +33,7 @@ export function SessionPage() {
   const [restToken, setRestToken] = useState(0)
   const [burstSet, setBurstSet] = useState<number | null>(null)
   const [flashSet, setFlashSet] = useState<number | null>(null)
+  const [now, setNow] = useState(() => Date.now())
   const byId = useMemo(() => new Map(catalog.map((e) => [e.id, e])), [catalog])
 
   useEffect(() => {
@@ -49,6 +50,13 @@ export function SessionPage() {
       setIndex(firstIncomplete >= 0 ? firstIncomplete : Math.max(0, s.items.length - 1))
     })
   }, [id, store])
+
+  useEffect(() => {
+    if (!session || session.status !== 'in_progress') return
+    setNow(Date.now())
+    const timer = window.setInterval(() => setNow(Date.now()), 1000)
+    return () => window.clearInterval(timer)
+  }, [session?.id, session?.status])
 
   const persist = async (next: Session) => {
     setSession(next)
@@ -71,6 +79,8 @@ export function SessionPage() {
   const currentReps = current ? exerciseRepsEntered(current) : 0
   const currentVolumeLive = current ? exerciseVolumeEntered(current) : 0
   const exerciseName = exercise ? tKo(exercise.name) : current?.exerciseId
+  const endMs = session.endedAt ? new Date(session.endedAt).getTime() : now
+  const elapsedLabel = formatElapsed(endMs - new Date(session.startedAt).getTime())
 
   const updateSet = (setNumber: number, patch: Partial<SessionSet>) => {
     if (!current) return
@@ -184,10 +194,15 @@ export function SessionPage() {
 
   return (
     <div className="stack page-enter stagger">
-      <div className="row" style={{ justifyContent: 'space-between' }}>
-        <Link to="/" className="muted interactive">
-          ← 홈
-        </Link>
+      <div className="row" style={{ justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <div className="stack" style={{ gap: 4 }}>
+          <div className="session-elapsed" aria-live="polite" title="세션 시간">
+            {elapsedLabel}
+          </div>
+          <Link to="/" className="muted interactive" style={{ fontSize: 13 }}>
+            ← 홈
+          </Link>
+        </div>
         <div className="progress-pills" aria-hidden>
           {session.items.map((item, i) => {
             const done = item.sets.length > 0 && item.sets.every((s) => s.completed)
