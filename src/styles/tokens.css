@@ -1,0 +1,16 @@
+:root {
+  --bg: #0f1c1a;
+  --bg-elevated: #17302b;
+  --bg-input: #1f3d37;
+  --text: #f2f7f5;
+  --text-muted: #9bb5ad;
+  --accent: #b6f34d;
+  --accent-ink: #132419;
+  --danger: #ff6b6b;
+  --ok: #5ddea0;
+  --radius: 14px;
+  --font-display: "Syne", system-ui, sans-serif;
+  --font-body: "DM Sans", system-ui, sans-serif;
+  --nav-h: 64px;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
