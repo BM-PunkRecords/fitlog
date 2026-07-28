@@ -1,5 +1,6 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { BottomAdBanner } from './components/BottomAdBanner'
+import { BottomChrome } from './components/BottomChrome'
 import { BottomNav } from './components/BottomNav'
 import { AppDataProvider } from './context/AppDataContext'
 import { HomePage } from './pages/HomePage'
@@ -26,8 +27,10 @@ export default function App() {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </div>
-        <BottomNav />
-        <BottomAdBanner />
+        <BottomChrome>
+          <BottomNav />
+          <BottomAdBanner />
+        </BottomChrome>
       </BrowserRouter>
     </AppDataProvider>
   )
