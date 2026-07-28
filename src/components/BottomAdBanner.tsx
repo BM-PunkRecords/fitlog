@@ -8,6 +8,9 @@ declare global {
 
 const AD_CLIENT = 'ca-pub-7426857657290789'
 const AD_SLOT = '1171291020'
+/** Classic mobile banner — avoid `auto` which expands into huge blocks */
+const AD_W = 320
+const AD_H = 50
 
 function waitForAdSenseScript(): Promise<void> {
   return new Promise((resolve) => {
@@ -26,7 +29,6 @@ function waitForAdSenseScript(): Promise<void> {
       }
       existing.addEventListener('load', done, { once: true })
       existing.addEventListener('error', () => resolve(), { once: true })
-      // Script may already be complete (from cache) without firing load again
       window.setTimeout(() => resolve(), 1500)
       return
     }
@@ -82,11 +84,14 @@ export function BottomAdBanner() {
       <ins
         ref={slotRef}
         className="adsbygoogle"
-        style={{ display: 'block' }}
+        style={{
+          display: 'inline-block',
+          width: `${AD_W}px`,
+          height: `${AD_H}px`,
+          overflow: 'hidden',
+        }}
         data-ad-client={AD_CLIENT}
         data-ad-slot={AD_SLOT}
-        data-ad-format="auto"
-        data-full-width-responsive="true"
       />
     </div>
   )
