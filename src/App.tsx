@@ -7,6 +7,7 @@ import { HistoryPage, SessionDetailPage, StatsPage } from './pages/HistoryStatsP
 import { RoutineDetailPage, RoutineEditPage } from './pages/RoutinePages'
 import { SessionPage } from './pages/SessionPage'
 import './styles/global.css'
+import './styles/motion.css'
 
 export default function App() {
   return (

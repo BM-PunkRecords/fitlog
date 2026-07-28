@@ -1,0 +1,293 @@
+/* Intentional motion — hierarchy & feedback, not decoration noise */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes pop-in {
+  0% {
+    transform: scale(0.7);
+    opacity: 0.4;
+  }
+  60% {
+    transform: scale(1.12);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes soft-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.03);
+  }
+}
+
+@keyframes timer-urgent {
+  0%,
+  100% {
+    color: var(--text);
+  }
+  50% {
+    color: var(--accent);
+  }
+}
+
+@keyframes sheet-up {
+  from {
+    transform: translateY(24px);
+    opacity: 0.4;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes backdrop-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes burst-particle {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--dx), var(--dy)) scale(0.2);
+    opacity: 0;
+  }
+}
+
+@keyframes tick-flash {
+  0% {
+    background: color-mix(in srgb, var(--accent) 35%, transparent);
+  }
+  100% {
+    background: transparent;
+  }
+}
+
+@keyframes count-pop {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.18);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.page-enter {
+  animation: page-in 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.stagger > * {
+  animation: rise-in 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.stagger > *:nth-child(1) {
+  animation-delay: 0.02s;
+}
+.stagger > *:nth-child(2) {
+  animation-delay: 0.06s;
+}
+.stagger > *:nth-child(3) {
+  animation-delay: 0.1s;
+}
+.stagger > *:nth-child(4) {
+  animation-delay: 0.14s;
+}
+.stagger > *:nth-child(5) {
+  animation-delay: 0.18s;
+}
+.stagger > *:nth-child(6) {
+  animation-delay: 0.22s;
+}
+.stagger > *:nth-child(7) {
+  animation-delay: 0.26s;
+}
+.stagger > *:nth-child(8) {
+  animation-delay: 0.3s;
+}
+
+.interactive {
+  transition:
+    transform 0.16s ease,
+    background-color 0.16s ease,
+    box-shadow 0.2s ease,
+    border-color 0.16s ease,
+    color 0.16s ease;
+  touch-action: manipulation;
+}
+
+.interactive:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+.card.interactive:hover {
+  border-color: color-mix(in srgb, var(--accent) 28%, transparent);
+  transform: translateY(-1px);
+}
+
+.btn.interactive:hover:not(:disabled) {
+  filter: brightness(1.06);
+}
+
+.btn-primary.interactive:hover:not(:disabled) {
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--accent) 28%, transparent);
+}
+
+.stat-value {
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+
+.stat-value.is-updating {
+  animation: count-pop 0.35s ease;
+}
+
+.set-done-btn {
+  position: relative;
+  overflow: visible;
+  transition:
+    transform 0.16s ease,
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.set-done-btn.is-complete {
+  animation: pop-in 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.set-done-burst {
+  pointer-events: none;
+  position: absolute;
+  inset: 50% auto auto 50%;
+  width: 0;
+  height: 0;
+}
+
+.set-done-burst span {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: burst-particle 0.55s ease-out forwards;
+}
+
+.timer-display {
+  transition: color 0.2s ease;
+}
+
+.timer-display.is-running {
+  animation: soft-pulse 1.6s ease-in-out infinite;
+}
+
+.timer-display.is-urgent {
+  animation: timer-urgent 0.7s ease-in-out infinite;
+}
+
+.sheet-backdrop {
+  animation: backdrop-in 0.2s ease both;
+}
+
+.sheet {
+  animation: sheet-up 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.bottom-nav a {
+  transition:
+    transform 0.16s ease,
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.bottom-nav a:active {
+  transform: scale(0.94);
+}
+
+.bottom-nav a.active {
+  animation: pop-in 0.28s ease;
+}
+
+.exercise-preview {
+  transition: transform 0.25s ease;
+}
+
+.exercise-preview:hover {
+  transform: scale(1.03);
+}
+
+.field:focus {
+  transition: outline-color 0.15s ease;
+}
+
+.set-row-flash {
+  animation: tick-flash 0.45s ease;
+}
+
+.progress-pills {
+  display: flex;
+  gap: 4px;
+  flex: 1;
+  max-width: 140px;
+}
+
+.progress-pills span {
+  flex: 1;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--bg-input);
+  transition: background-color 0.25s ease, transform 0.2s ease;
+}
+
+.progress-pills span.done {
+  background: var(--accent);
+}
+
+.progress-pills span.current {
+  background: color-mix(in srgb, var(--accent) 55%, white);
+  transform: scaleY(1.35);
+}

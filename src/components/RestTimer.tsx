@@ -11,6 +11,8 @@ export function RestTimer({ initialSeconds, restartToken, onAdjustDefault }: Pro
   const [paused, setPaused] = useState(false)
   const remainingRef = useRef(remaining)
   remainingRef.current = remaining
+  const running = !paused && remaining > 0 && restartToken > 0
+  const urgent = running && remaining <= 10
 
   useEffect(() => {
     setRemaining(initialSeconds)
@@ -34,22 +36,29 @@ export function RestTimer({ initialSeconds, restartToken, onAdjustDefault }: Pro
   return (
     <div className="card stack">
       <div className="muted">휴식 시간</div>
-      <div style={{ fontFamily: 'var(--font-display)', fontSize: '2rem' }}>
+      <div
+        className={`timer-display ${running ? 'is-running' : ''} ${urgent ? 'is-urgent' : ''}`}
+        style={{ fontFamily: 'var(--font-display)', fontSize: '2rem' }}
+      >
         {remaining} 초
       </div>
       <div className="row" style={{ flexWrap: 'wrap' }}>
-        <button type="button" className="btn btn-ghost" onClick={() => bump(-15)}>
+        <button type="button" className="btn btn-ghost interactive" onClick={() => bump(-15)}>
           −15
         </button>
-        <button type="button" className="btn btn-ghost" onClick={() => bump(15)}>
+        <button type="button" className="btn btn-ghost interactive" onClick={() => bump(15)}>
           +15
         </button>
-        <button type="button" className="btn btn-ghost" onClick={() => setPaused((p) => !p)}>
+        <button
+          type="button"
+          className="btn btn-ghost interactive"
+          onClick={() => setPaused((p) => !p)}
+        >
           {paused ? '재개' : '일시정지'}
         </button>
         <button
           type="button"
-          className="btn btn-ghost"
+          className="btn btn-ghost interactive"
           onClick={() => {
             setRemaining(initialSeconds)
             setPaused(false)

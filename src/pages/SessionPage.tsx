@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
+import { AnimatedStat } from '../components/AnimatedStat'
+import { CompleteBurst } from '../components/CompleteBurst'
 import { ExerciseInfoSheet } from '../components/ExerciseInfoSheet'
 import { ExercisePicker } from '../components/ExercisePicker'
 import { ExercisePreview } from '../components/ExercisePreview'
@@ -28,6 +30,8 @@ export function SessionPage() {
   const [showInfo, setShowInfo] = useState(false)
   const [pickerMode, setPickerMode] = useState<PickerMode>(null)
   const [restToken, setRestToken] = useState(0)
+  const [burstSet, setBurstSet] = useState<number | null>(null)
+  const [flashSet, setFlashSet] = useState<number | null>(null)
   const byId = useMemo(() => new Map(catalog.map((e) => [e.id, e])), [catalog])
 
   useEffect(() => {
@@ -52,7 +56,7 @@ export function SessionPage() {
 
   if (!session) {
     return (
-      <div className="stack">
+      <div className="stack page-enter">
         <p>세션을 찾을 수 없어요.</p>
         <Link to="/">홈</Link>
       </div>
@@ -91,6 +95,13 @@ export function SessionPage() {
       setError('')
       updateSet(setNumber, { completed: true })
       setRestToken((n) => n + 1)
+      setBurstSet(setNumber)
+      setFlashSet(setNumber)
+      window.setTimeout(() => setBurstSet(null), 600)
+      window.setTimeout(() => setFlashSet(null), 450)
+      if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+        navigator.vibrate?.(12)
+      }
     } else {
       updateSet(setNumber, { completed: false })
     }
@@ -171,11 +182,22 @@ export function SessionPage() {
   }
 
   return (
-    <div className="stack">
+    <div className="stack page-enter stagger">
       <div className="row" style={{ justifyContent: 'space-between' }}>
-        <Link to="/" className="muted">
+        <Link to="/" className="muted interactive">
           ← 홈
         </Link>
+        <div className="progress-pills" aria-hidden>
+          {session.items.map((item, i) => {
+            const done = item.sets.length > 0 && item.sets.every((s) => s.completed)
+            return (
+              <span
+                key={`${item.exerciseId}-${i}`}
+                className={`${done ? 'done' : ''} ${i === index ? 'current' : ''}`}
+              />
+            )
+          })}
+        </div>
         <span className="muted">
           {session.items.length === 0 ? '0/0' : `${index + 1}/${session.items.length}`}
         </span>
@@ -184,18 +206,24 @@ export function SessionPage() {
       <div className="card row" style={{ justifyContent: 'space-between', gap: 16 }}>
         <div>
           <div className="muted">세션 볼륨(완료)</div>
-          <strong style={{ color: 'var(--accent)' }}>{volume} kg</strong>
+          <AnimatedStat value={volume}>
+            <span style={{ color: 'var(--accent)' }}>{volume} kg</span>
+          </AnimatedStat>
         </div>
         <div style={{ textAlign: 'right' }}>
           <div className="muted">세션 횟수 합</div>
-          <strong>{sessionReps} 회</strong>
+          <AnimatedStat value={sessionReps}>{sessionReps} 회</AnimatedStat>
         </div>
       </div>
 
       {session.items.length === 0 ? (
         <div className="card stack">
           <p className="muted">운동을 추가해서 기록을 시작하세요.</p>
-          <button type="button" className="btn btn-primary" onClick={() => setPickerMode('add')}>
+          <button
+            type="button"
+            className="btn btn-primary interactive"
+            onClick={() => setPickerMode('add')}
+          >
             운동 추가
           </button>
         </div>
@@ -212,24 +240,30 @@ export function SessionPage() {
                     <span className="muted" style={{ fontSize: 12 }}>
                       횟수 합{' '}
                     </span>
-                    <strong style={{ color: 'var(--accent)' }}>{currentReps} 회</strong>
+                    <AnimatedStat value={currentReps}>
+                      <span style={{ color: 'var(--accent)' }}>{currentReps} 회</span>
+                    </AnimatedStat>
                   </div>
                   <div>
                     <span className="muted" style={{ fontSize: 12 }}>
                       이 운동 볼륨{' '}
                     </span>
-                    <strong>{currentVolumeLive} kg</strong>
+                    <AnimatedStat value={currentVolumeLive}>{currentVolumeLive} kg</AnimatedStat>
                   </div>
                 </div>
               </div>
             </div>
             <div className="row" style={{ flexWrap: 'wrap' }}>
-              <button type="button" className="btn btn-ghost" onClick={() => setShowInfo(true)}>
+              <button
+                type="button"
+                className="btn btn-ghost interactive"
+                onClick={() => setShowInfo(true)}
+              >
                 정보
               </button>
               <button
                 type="button"
-                className="btn btn-ghost"
+                className="btn btn-ghost interactive"
                 onClick={() => setPickerMode('replace')}
               >
                 운동 대체
@@ -245,7 +279,10 @@ export function SessionPage() {
               <span>완료</span>
             </div>
             {current.sets.map((set) => (
-              <div key={set.setNumber} className="set-grid">
+              <div
+                key={set.setNumber}
+                className={`set-grid ${flashSet === set.setNumber ? 'set-row-flash' : ''}`}
+              >
                 <span>{set.setNumber}</span>
                 <input
                   className="field"
@@ -267,7 +304,7 @@ export function SessionPage() {
                 />
                 <button
                   type="button"
-                  className="btn"
+                  className={`btn set-done-btn interactive ${set.completed ? 'is-complete' : ''}`}
                   style={{
                     background: set.completed ? 'var(--accent)' : 'var(--bg-input)',
                     color: set.completed ? 'var(--accent-ink)' : 'var(--text)',
@@ -278,6 +315,7 @@ export function SessionPage() {
                   aria-label={`세트 ${set.setNumber} 완료`}
                 >
                   {set.completed ? '✓' : '○'}
+                  <CompleteBurst active={burstSet === set.setNumber} />
                 </button>
               </div>
             ))}
@@ -285,10 +323,10 @@ export function SessionPage() {
           </div>
 
           <div className="row">
-            <button type="button" className="btn btn-ghost" onClick={addSet}>
+            <button type="button" className="btn btn-ghost interactive" onClick={addSet}>
               + 세트
             </button>
-            <button type="button" className="btn btn-ghost" onClick={removeSet}>
+            <button type="button" className="btn btn-ghost interactive" onClick={removeSet}>
               − 세트
             </button>
           </div>
@@ -302,23 +340,27 @@ export function SessionPage() {
           />
 
           <div className="row" style={{ flexWrap: 'wrap' }}>
-            <button type="button" className="btn btn-ghost" onClick={goNext}>
+            <button type="button" className="btn btn-ghost interactive" onClick={goNext}>
               다음 운동
             </button>
-            <button type="button" className="btn btn-ghost" onClick={skip}>
+            <button type="button" className="btn btn-ghost interactive" onClick={skip}>
               스킵
             </button>
-            <button type="button" className="btn btn-ghost" onClick={() => setPickerMode('add')}>
+            <button
+              type="button"
+              className="btn btn-ghost interactive"
+              onClick={() => setPickerMode('add')}
+            >
               운동 추가
             </button>
           </div>
         </>
       )}
 
-      <button type="button" className="btn btn-primary" onClick={() => void finish()}>
+      <button type="button" className="btn btn-primary interactive" onClick={() => void finish()}>
         세션 종료
       </button>
-      <button type="button" className="btn btn-danger" onClick={() => void discard()}>
+      <button type="button" className="btn btn-danger interactive" onClick={() => void discard()}>
         폐기
       </button>
 
@@ -327,19 +369,19 @@ export function SessionPage() {
           <div className="sheet stack" onClick={(e) => e.stopPropagation()} role="dialog">
             <div className="row" style={{ justifyContent: 'space-between' }}>
               <h2>{pickerMode === 'replace' ? '운동 대체' : '운동 추가'}</h2>
-              <button type="button" className="btn btn-ghost" onClick={() => setPickerMode(null)}>
+              <button
+                type="button"
+                className="btn btn-ghost interactive"
+                onClick={() => setPickerMode(null)}
+              >
                 닫기
               </button>
             </div>
             <ExercisePicker
               key={`${pickerMode}-${exercise?.bodyPart ?? 'all'}`}
               catalog={catalog}
-              preferBodyPart={
-                pickerMode === 'replace' ? exercise?.bodyPart : undefined
-              }
-              excludeIds={
-                pickerMode === 'replace' && current ? [current.exerciseId] : []
-              }
+              preferBodyPart={pickerMode === 'replace' ? exercise?.bodyPart : undefined}
+              excludeIds={pickerMode === 'replace' && current ? [current.exerciseId] : []}
               onPick={(ex) => {
                 if (pickerMode === 'replace') {
                   replaceExercise(ex.id)

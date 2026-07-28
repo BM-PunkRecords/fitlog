@@ -79,6 +79,10 @@ h3 {
   cursor: pointer;
 }
 
+a.btn {
+  text-decoration: none;
+}
+
 .btn:disabled {
   opacity: 0.45;
   cursor: not-allowed;
