@@ -24,11 +24,12 @@ interface FitLogDB extends DBSchema {
 }
 
 const DB_NAME = 'fitlog-db'
-const DB_VERSION = 2
+const DB_VERSION = 3
 
 async function openFitLogDB(): Promise<IDBPDatabase<FitLogDB>> {
   return openDB<FitLogDB>(DB_NAME, DB_VERSION, {
-    upgrade(db, oldVersion) {
+    upgrade(db) {
+      // Always create missing stores (covers failed/partial upgrades)
       if (!db.objectStoreNames.contains('settings')) {
         db.createObjectStore('settings')
       }
@@ -40,7 +41,7 @@ async function openFitLogDB(): Promise<IDBPDatabase<FitLogDB>> {
         store.createIndex('by-status', 'status')
         store.createIndex('by-started', 'startedAt')
       }
-      if (oldVersion < 2 && !db.objectStoreNames.contains('customExercises')) {
+      if (!db.objectStoreNames.contains('customExercises')) {
         db.createObjectStore('customExercises', { keyPath: 'id' })
       }
     },
@@ -153,17 +154,22 @@ export class LocalWorkoutStore implements WorkoutStore {
 
   async listCustomExercises(): Promise<CustomExercise[]> {
     const db = await this.dbPromise
+    if (!db.objectStoreNames.contains('customExercises')) return []
     const all = await db.getAll('customExercises')
     return all.sort((a, b) => b.createdAt.localeCompare(a.createdAt))
   }
 
   async upsertCustomExercise(exercise: CustomExercise): Promise<void> {
     const db = await this.dbPromise
+    if (!db.objectStoreNames.contains('customExercises')) {
+      throw new Error('customExercises store missing — reload the app')
+    }
     await db.put('customExercises', exercise)
   }
 
   async deleteCustomExercise(id: string): Promise<void> {
     const db = await this.dbPromise
+    if (!db.objectStoreNames.contains('customExercises')) return
     await db.delete('customExercises', id)
   }
 }

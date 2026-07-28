@@ -36,7 +36,14 @@ const AppDataContext = createContext<AppDataValue | null>(null)
 
 export function AppDataProvider({ children }: { children: ReactNode }) {
   const store = useMemo(() => new LocalWorkoutStore(), [])
-  const baseCatalog = useMemo(() => loadCatalog(), [])
+  const baseCatalog = useMemo(() => {
+    try {
+      return loadCatalog()
+    } catch (err) {
+      console.error('FitLog catalog load failed', err)
+      return [] as Exercise[]
+    }
+  }, [])
   const [ready, setReady] = useState(false)
   const [settings, setSettingsState] = useState<AppSettings>(DEFAULT_SETTINGS)
   const [routines, setRoutines] = useState<Routine[]>([])
@@ -46,43 +53,48 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   const [frequentExerciseIds, setFrequentExerciseIds] = useState<string[]>([])
 
   const refresh = useCallback(async () => {
-    const [nextSettings, nextRoutines, nextInProgress, nextCustom, completed] =
-      await Promise.all([
-        store.getSettings(),
-        store.listRoutines(),
-        store.getInProgressSession(),
-        store.listCustomExercises(),
-        store.listSessions({ status: 'completed' }),
-      ])
-    setSettingsState({
-      ...DEFAULT_SETTINGS,
-      ...nextSettings,
-      favoriteExerciseIds: nextSettings.favoriteExerciseIds ?? [],
-    })
-    setRoutines(nextRoutines)
-    setInProgress(nextInProgress)
-    setCustomExercises(nextCustom)
+    try {
+      const [nextSettings, nextRoutines, nextInProgress, nextCustom, completed] =
+        await Promise.all([
+          store.getSettings(),
+          store.listRoutines(),
+          store.getInProgressSession(),
+          store.listCustomExercises().catch(() => [] as CustomExercise[]),
+          store.listSessions({ status: 'completed' }),
+        ])
+      setSettingsState({
+        ...DEFAULT_SETTINGS,
+        ...nextSettings,
+        favoriteExerciseIds: nextSettings.favoriteExerciseIds ?? [],
+      })
+      setRoutines(nextRoutines)
+      setInProgress(nextInProgress)
+      setCustomExercises(nextCustom)
 
-    const recent: string[] = []
-    const seen = new Set<string>()
-    const counts = new Map<string, number>()
-    for (const session of completed) {
-      for (const item of session.items) {
-        counts.set(item.exerciseId, (counts.get(item.exerciseId) ?? 0) + 1)
-        if (!seen.has(item.exerciseId)) {
-          seen.add(item.exerciseId)
-          recent.push(item.exerciseId)
+      const recent: string[] = []
+      const seen = new Set<string>()
+      const counts = new Map<string, number>()
+      for (const session of completed) {
+        for (const item of session.items) {
+          counts.set(item.exerciseId, (counts.get(item.exerciseId) ?? 0) + 1)
+          if (!seen.has(item.exerciseId)) {
+            seen.add(item.exerciseId)
+            recent.push(item.exerciseId)
+          }
         }
       }
+      setRecentExerciseIds(recent.slice(0, 40))
+      setFrequentExerciseIds(
+        [...counts.entries()]
+          .sort((a, b) => b[1] - a[1])
+          .map(([id]) => id)
+          .slice(0, 40),
+      )
+    } catch (err) {
+      console.error('FitLog refresh failed', err)
+    } finally {
+      setReady(true)
     }
-    setRecentExerciseIds(recent.slice(0, 40))
-    setFrequentExerciseIds(
-      [...counts.entries()]
-        .sort((a, b) => b[1] - a[1])
-        .map(([id]) => id)
-        .slice(0, 40),
-    )
-    setReady(true)
   }, [store])
 
   useEffect(() => {
