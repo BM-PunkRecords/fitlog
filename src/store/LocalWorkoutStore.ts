@@ -1,5 +1,5 @@
 import { openDB, type DBSchema, type IDBPDatabase } from 'idb'
-import type { AppSettings, Routine, Session } from '../types/models'
+import type { AppSettings, CustomExercise, Routine, Session } from '../types/models'
 import { DEFAULT_SETTINGS } from '../types/models'
 import type { WorkoutStore } from './WorkoutStore'
 
@@ -17,14 +17,18 @@ interface FitLogDB extends DBSchema {
     value: Session
     indexes: { 'by-status': string; 'by-started': string }
   }
+  customExercises: {
+    key: string
+    value: CustomExercise
+  }
 }
 
 const DB_NAME = 'fitlog-db'
-const DB_VERSION = 1
+const DB_VERSION = 2
 
 async function openFitLogDB(): Promise<IDBPDatabase<FitLogDB>> {
   return openDB<FitLogDB>(DB_NAME, DB_VERSION, {
-    upgrade(db) {
+    upgrade(db, oldVersion) {
       if (!db.objectStoreNames.contains('settings')) {
         db.createObjectStore('settings')
       }
@@ -35,6 +39,9 @@ async function openFitLogDB(): Promise<IDBPDatabase<FitLogDB>> {
         const store = db.createObjectStore('sessions', { keyPath: 'id' })
         store.createIndex('by-status', 'status')
         store.createIndex('by-started', 'startedAt')
+      }
+      if (oldVersion < 2 && !db.objectStoreNames.contains('customExercises')) {
+        db.createObjectStore('customExercises', { keyPath: 'id' })
       }
     },
   })
@@ -142,5 +149,21 @@ export class LocalWorkoutStore implements WorkoutStore {
     }
     await db.put('sessions', discarded)
     return discarded
+  }
+
+  async listCustomExercises(): Promise<CustomExercise[]> {
+    const db = await this.dbPromise
+    const all = await db.getAll('customExercises')
+    return all.sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+  }
+
+  async upsertCustomExercise(exercise: CustomExercise): Promise<void> {
+    const db = await this.dbPromise
+    await db.put('customExercises', exercise)
+  }
+
+  async deleteCustomExercise(id: string): Promise<void> {
+    const db = await this.dbPromise
+    await db.delete('customExercises', id)
   }
 }

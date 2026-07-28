@@ -23,4 +23,6 @@ export interface Exercise {
   breathing?: string
   videos: ExerciseMedia
   thumbnails: ExerciseMedia
+  /** bundled catalog | yuhonas supplement | user-created */
+  source?: 'bundled' | 'supplement' | 'custom'
 }

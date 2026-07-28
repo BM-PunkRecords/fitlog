@@ -66,4 +66,19 @@ describe('LocalWorkoutStore', () => {
     expect(await store.listSessions({ status: 'completed' })).toEqual([])
     expect((await store.getSession(session.id))?.status).toBe('discarded')
   })
+
+  it('stores custom exercises', async () => {
+    const row = {
+      id: createId(),
+      name: '스미스 머신 스쿼트(커스텀)',
+      bodyPart: 'upper legs',
+      target: 'quads',
+      equipment: 'smith machine',
+      createdAt: new Date().toISOString(),
+    }
+    await store.upsertCustomExercise(row)
+    expect((await store.listCustomExercises()).map((e) => e.id)).toEqual([row.id])
+    await store.deleteCustomExercise(row.id)
+    expect(await store.listCustomExercises()).toEqual([])
+  })
 })

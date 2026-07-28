@@ -37,6 +37,16 @@ export interface AppSettings {
   weightUnit: 'kg'
 }
 
+/** User-defined exercise stored in IndexedDB */
+export interface CustomExercise {
+  id: string
+  name: string
+  bodyPart: string
+  target: string
+  equipment: string
+  createdAt: string
+}
+
 export const DEFAULT_SETTINGS: AppSettings = {
   defaultRestSeconds: Number(import.meta.env.VITE_DEFAULT_REST_SECONDS) || 90,
   weightUnit: 'kg',

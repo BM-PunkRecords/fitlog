@@ -1,4 +1,4 @@
-import type { AppSettings, Routine, Session } from '../types/models'
+import type { AppSettings, CustomExercise, Routine, Session } from '../types/models'
 
 export interface WorkoutStore {
   getSettings(): Promise<AppSettings>
@@ -13,4 +13,7 @@ export interface WorkoutStore {
   saveSession(session: Session): Promise<void>
   completeSession(sessionId: string): Promise<Session>
   discardSession(sessionId: string): Promise<Session>
+  listCustomExercises(): Promise<CustomExercise[]>
+  upsertCustomExercise(exercise: CustomExercise): Promise<void>
+  deleteCustomExercise(id: string): Promise<void>
 }

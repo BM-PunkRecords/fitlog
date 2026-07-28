@@ -1,0 +1,548 @@
+[
+  {
+    "id": "yo-decline-smith-press",
+    "name": "Decline Smith Press",
+    "aliases": [],
+    "bodyPart": "chest",
+    "target": "chest",
+    "secondaryMuscles": [
+      "shoulders",
+      "triceps"
+    ],
+    "equipment": "smith machine",
+    "difficulty": "beginner",
+    "compound": true,
+    "instructions": "Place a decline bench underneath the Smith machine. Now place the barbell at a height that you can reach when lying down and your arms are almost fully extended. Using a pronated grip that is wider than shoulder width, unlock the bar from the rack and hold it straight over you with your arms extended. This will be your starting position. As you inhale, lower the bar under control by allowing the elbows to flex, lightly contacting the torso. After a brief pause, bring the bar back to the starting position by extending the elbows, exhaling as you do so. Repeat the movement for the prescribed amount of repetitions. When the set is complete, lock the bar back in the rack.",
+    "steps": [
+      "Place a decline bench underneath the Smith machine. Now place the barbell at a height that you can reach when lying down and your arms are almost fully extended. Using a pronated grip that is wider than shoulder width, unlock the bar from the rack and hold it straight over you with your arms extended. This will be your starting position.",
+      "As you inhale, lower the bar under control by allowing the elbows to flex, lightly contacting the torso.",
+      "After a brief pause, bring the bar back to the starting position by extending the elbows, exhaling as you do so.",
+      "Repeat the movement for the prescribed amount of repetitions.",
+      "When the set is complete, lock the bar back in the rack."
+    ],
+    "formCues": [],
+    "commonMistakes": [],
+    "videos": {},
+    "thumbnails": {
+      "male": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Decline_Smith_Press/0.jpg",
+      "female": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Decline_Smith_Press/0.jpg"
+    },
+    "source": "supplement"
+  },
+  {
+    "id": "yo-smith-incline-shoulder-raise",
+    "name": "Smith Incline Shoulder Raise",
+    "aliases": [],
+    "bodyPart": "shoulders",
+    "target": "shoulders",
+    "secondaryMuscles": [
+      "chest"
+    ],
+    "equipment": "smith machine",
+    "difficulty": "beginner",
+    "compound": false,
+    "instructions": "Place an incline bench underneath the smith machine. Place the barbell at a height that you can reach when lying down and your arms are almost fully extended. Once the weight you need is selected, lie down on the incline bench and make sure your shoulders are aligned right under the barbell. Using a shoulder width pronated (palms forward) grip, lift the bar from the rack and hold it straight over you with a slight bend at the elbows. This will be your starting position. As you breathe out, lift the bar up until your arms are fully extended. Note: The contraction should be felt around the shoulders. After a second pause, bring the bar back down to the starting position as you breathe in. Repeat the movement for the prescribed amount of repetitions. When you are done, place the bar back in the rack.",
+    "steps": [
+      "Place an incline bench underneath the smith machine. Place the barbell at a height that you can reach when lying down and your arms are almost fully extended. Once the weight you need is selected, lie down on the incline bench and make sure your shoulders are aligned right under the barbell.",
+      "Using a shoulder width pronated (palms forward) grip, lift the bar from the rack and hold it straight over you with a slight bend at the elbows. This will be your starting position.",
+      "As you breathe out, lift the bar up until your arms are fully extended. Note: The contraction should be felt around the shoulders.",
+      "After a second pause, bring the bar back down to the starting position as you breathe in.",
+      "Repeat the movement for the prescribed amount of repetitions.",
+      "When you are done, place the bar back in the rack."
+    ],
+    "formCues": [],
+    "commonMistakes": [],
+    "videos": {},
+    "thumbnails": {
+      "male": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Smith_Incline_Shoulder_Raise/0.jpg",
+      "female": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Smith_Incline_Shoulder_Raise/0.jpg"
+    },
+    "source": "supplement"
+  },
+  {
+    "id": "yo-smith-machine-behind-the-back-shrug",
+    "name": "Smith Machine Behind the Back Shrug",
+    "aliases": [],
+    "bodyPart": "back",
+    "target": "traps",
+    "secondaryMuscles": [
+      "shoulders"
+    ],
+    "equipment": "smith machine",
+    "difficulty": "beginner",
+    "compound": false,
+    "instructions": "With the bar at thigh level, load an appropriate weight. Stand with the bar behind you, taking a shoulder-width, pronated grip on the bar and unhook the weight. You should be standing up straight with your head and chest up and your arms extended. This will be your starting position. Initiate the movement by shrugging your shoulders straight up. Do not flex the arms or wrist during the movement. After a brief pause return the weight to the starting position. Repeat for the desired number of repetitions before engaging the hooks to rack the weight.",
+    "steps": [
+      "With the bar at thigh level, load an appropriate weight.",
+      "Stand with the bar behind you, taking a shoulder-width, pronated grip on the bar and unhook the weight. You should be standing up straight with your head and chest up and your arms extended. This will be your starting position.",
+      "Initiate the movement by shrugging your shoulders straight up. Do not flex the arms or wrist during the movement.",
+      "After a brief pause return the weight to the starting position.",
+      "Repeat for the desired number of repetitions before engaging the hooks to rack the weight."
+    ],
+    "formCues": [],
+    "commonMistakes": [],
+    "videos": {},
+    "thumbnails": {
+      "male": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Smith_Machine_Behind_the_Back_Shrug/0.jpg",
+      "female": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Smith_Machine_Behind_the_Back_Shrug/0.jpg"
+    },
+    "source": "supplement"
+  },
+  {
+    "id": "yo-smith-machine-bench-press",
+    "name": "Smith Machine Bench Press",
+    "aliases": [],
+    "bodyPart": "chest",
+    "target": "chest",
+    "secondaryMuscles": [
+      "shoulders",
+      "triceps"
+    ],
+    "equipment": "smith machine",
+    "difficulty": "beginner",
+    "compound": true,
+    "instructions": "Place a flat bench underneath the smith machine. Now place the barbell at a height that you can reach when lying down and your arms are almost fully extended. Once the weight you need is selected, lie down on the flat bench. Using a pronated grip that is wider than shoulder width, unlock the bar from the rack and hold it straight over you with your arms locked. This will be your starting position. As you breathe in, come down slowly until you feel the bar on your middle chest. After a second pause, bring the bar back to the starting position as you breathe out and push the bar using your chest muscles. Lock your arms in the contracted position, hold for a second and then start coming down slowly again. Tip: It should take at least twice as long to go down than to come up. Repeat the movement for the prescribed amount of repetitions. When you are done, lock the bar back in the rack.",
+    "steps": [
+      "Place a flat bench underneath the smith machine. Now place the barbell at a height that you can reach when lying down and your arms are almost fully extended. Once the weight you need is selected, lie down on the flat bench. Using a pronated grip that is wider than shoulder width, unlock the bar from the rack and hold it straight over you with your arms locked. This will be your starting position.",
+      "As you breathe in, come down slowly until you feel the bar on your middle chest.",
+      "After a second pause, bring the bar back to the starting position as you breathe out and push the bar using your chest muscles. Lock your arms in the contracted position, hold for a second and then start coming down slowly again. Tip: It should take at least twice as long to go down than to come up.",
+      "Repeat the movement for the prescribed amount of repetitions.",
+      "When you are done, lock the bar back in the rack."
+    ],
+    "formCues": [],
+    "commonMistakes": [],
+    "videos": {},
+    "thumbnails": {
+      "male": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Smith_Machine_Bench_Press/0.jpg",
+      "female": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Smith_Machine_Bench_Press/0.jpg"
+    },
+    "source": "supplement"
+  },
+  {
+    "id": "yo-smith-machine-bent-over-row",
+    "name": "Smith Machine Bent Over Row",
+    "aliases": [],
+    "bodyPart": "back",
+    "target": "upper back",
+    "secondaryMuscles": [
+      "biceps",
+      "lats",
+      "shoulders"
+    ],
+    "equipment": "smith machine",
+    "difficulty": "beginner",
+    "compound": true,
+    "instructions": "Set the barbell attached to the smith machine to a height that is about 2 inches below your knees. Bend your knees slightly and bring your torso forward, by bending at the waist, while keeping the back straight until it is almost parallel to the floor. Tip: Make sure that you keep the head up. Now grasp the barbell using an overhand (pronated) grip and unlock it from the smith machine rack. Then let it hang directly in front of you as your arms hang extended perpendicular to the floor and your torso. This is your starting position. While keeping the torso stationary, lift the barbell as you breathe out, keeping the elbows close to the body and not doing any force with the forearm other than holding the weights. On the top contracted position, squeeze the back muscles and hold for a second. Slowly lower the weight again to the starting position as you inhale. Repeat for the recommended amount of repetitions.",
+    "steps": [
+      "Set the barbell attached to the smith machine to a height that is about 2 inches below your knees.",
+      "Bend your knees slightly and bring your torso forward, by bending at the waist, while keeping the back straight until it is almost parallel to the floor. Tip: Make sure that you keep the head up.",
+      "Now grasp the barbell using an overhand (pronated) grip and unlock it from the smith machine rack. Then let it hang directly in front of you as your arms hang extended perpendicular to the floor and your torso. This is your starting position.",
+      "While keeping the torso stationary, lift the barbell as you breathe out, keeping the elbows close to the body and not doing any force with the forearm other than holding the weights. On the top contracted position, squeeze the back muscles and hold for a second.",
+      "Slowly lower the weight again to the starting position as you inhale.",
+      "Repeat for the recommended amount of repetitions."
+    ],
+    "formCues": [],
+    "commonMistakes": [],
+    "videos": {},
+    "thumbnails": {
+      "male": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Smith_Machine_Bent_Over_Row/0.jpg",
+      "female": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Smith_Machine_Bent_Over_Row/0.jpg"
+    },
+    "source": "supplement"
+  },
+  {
+    "id": "yo-smith-machine-close-grip-bench-press",
+    "name": "Smith Machine Close-Grip Bench Press",
+    "aliases": [],
+    "bodyPart": "upper arms",
+    "target": "triceps",
+    "secondaryMuscles": [
+      "chest",
+      "shoulders"
+    ],
+    "equipment": "smith machine",
+    "difficulty": "beginner",
+    "compound": true,
+    "instructions": "Place a flat bench underneath the smith machine. Place the barbell at a height that you can reach when lying down and your arms are almost fully extended. Once the weight you need is selected, lie down on the flat bench. Using a close and pronated grip (palms facing forward) that is around shoulder width, unlock the bar from the rack and hold it straight over you with your arms locked. This will be your starting position. As you breathe in, come down slowly until you feel the bar on your middle chest. Tip: Make sure that as opposed to a regular bench press, you keep the elbows close to the torso at all times in order to maximize triceps involvement. After a second pause, bring the bar back to the starting position as you breathe out and push the bar using your triceps muscles. Lock your arms in the contracted position, hold for a second and then start coming down slowly again. Tip: It should take at least twice as long to go down than to come up. Repeat the movement for the prescribed amount of repetitions. When you are done, lock the bar back in the rack.",
+    "steps": [
+      "Place a flat bench underneath the smith machine. Place the barbell at a height that you can reach when lying down and your arms are almost fully extended. Once the weight you need is selected, lie down on the flat bench. Using a close and pronated grip (palms facing forward) that is around shoulder width, unlock the bar from the rack and hold it straight over you with your arms locked. This will be your starting position.",
+      "As you breathe in, come down slowly until you feel the bar on your middle chest. Tip: Make sure that as opposed to a regular bench press, you keep the elbows close to the torso at all times in order to maximize triceps involvement.",
+      "After a second pause, bring the bar back to the starting position as you breathe out and push the bar using your triceps muscles. Lock your arms in the contracted position, hold for a second and then start coming down slowly again. Tip: It should take at least twice as long to go down than to come up.",
+      "Repeat the movement for the prescribed amount of repetitions.",
+      "When you are done, lock the bar back in the rack."
+    ],
+    "formCues": [],
+    "commonMistakes": [],
+    "videos": {},
+    "thumbnails": {
+      "male": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Smith_Machine_Close-Grip_Bench_Press/0.jpg",
+      "female": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Smith_Machine_Close-Grip_Bench_Press/0.jpg"
+    },
+    "source": "supplement"
+  },
+  {
+    "id": "yo-smith-machine-decline-press",
+    "name": "Smith Machine Decline Press",
+    "aliases": [],
+    "bodyPart": "chest",
+    "target": "chest",
+    "secondaryMuscles": [
+      "shoulders",
+      "triceps"
+    ],
+    "equipment": "smith machine",
+    "difficulty": "beginner",
+    "compound": true,
+    "instructions": "Position a decline bench in the rack so that the bar will be above your chest. Load an appropriate weight and take your place on the bench. Rotate the bar to unhook it from the rack and fully extend your arms. Your back should be slightly arched and your shoulder blades retracted. This will be your starting position. Begin the movement by flexing your arms, lowering the bar to your chest. Pause briefly, and then extend your arms to push the weight back to the starting position. After completing the desired number of repetitions, rotate the bar to rack the weight.",
+    "steps": [
+      "Position a decline bench in the rack so that the bar will be above your chest. Load an appropriate weight and take your place on the bench.",
+      "Rotate the bar to unhook it from the rack and fully extend your arms. Your back should be slightly arched and your shoulder blades retracted. This will be your starting position.",
+      "Begin the movement by flexing your arms, lowering the bar to your chest.",
+      "Pause briefly, and then extend your arms to push the weight back to the starting position.",
+      "After completing the desired number of repetitions, rotate the bar to rack the weight."
+    ],
+    "formCues": [],
+    "commonMistakes": [],
+    "videos": {},
+    "thumbnails": {
+      "male": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Smith_Machine_Decline_Press/0.jpg",
+      "female": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Smith_Machine_Decline_Press/0.jpg"
+    },
+    "source": "supplement"
+  },
+  {
+    "id": "yo-smith-machine-hang-power-clean",
+    "name": "Smith Machine Hang Power Clean",
+    "aliases": [],
+    "bodyPart": "upper legs",
+    "target": "hamstrings",
+    "secondaryMuscles": [
+      "glutes",
+      "lower back",
+      "quads",
+      "shoulders",
+      "traps"
+    ],
+    "equipment": "smith machine",
+    "difficulty": "intermediate",
+    "compound": true,
+    "instructions": "Position the bar at knee height and load it to an appropriate weight. Take a pronated grip on the bar outside of shoulder width and unhook the bar from the machine. Your arms should be fully extended with your head and chest up. Your elbows should be pointed out with your shoulders back and down. Your hips should be back, loading the tension into the hamstrings. This will be your starting position. Initate the movement by forcefully extending the hips and knees, accelerating into the bar. Ensure that you keep your arms straight during this part of the motion. Upon full extension, rebend the hips and knees to lower your receiving position. Allow the arms to flex at this point, rotating the elbows around the bar to receive it on your shoulders. Extend through the hips and knees to come to a standing position with the bar racked on your shoulders to complete the movement.",
+    "steps": [
+      "Position the bar at knee height and load it to an appropriate weight.",
+      "Take a pronated grip on the bar outside of shoulder width and unhook the bar from the machine. Your arms should be fully extended with your head and chest up. Your elbows should be pointed out with your shoulders back and down. Your hips should be back, loading the tension into the hamstrings. This will be your starting position.",
+      "Initate the movement by forcefully extending the hips and knees, accelerating into the bar. Ensure that you keep your arms straight during this part of the motion.",
+      "Upon full extension, rebend the hips and knees to lower your receiving position.",
+      "Allow the arms to flex at this point, rotating the elbows around the bar to receive it on your shoulders.",
+      "Extend through the hips and knees to come to a standing position with the bar racked on your shoulders to complete the movement."
+    ],
+    "formCues": [],
+    "commonMistakes": [],
+    "videos": {},
+    "thumbnails": {
+      "male": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Smith_Machine_Hang_Power_Clean/0.jpg",
+      "female": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Smith_Machine_Hang_Power_Clean/0.jpg"
+    },
+    "source": "supplement"
+  },
+  {
+    "id": "yo-smith-machine-hip-raise",
+    "name": "Smith Machine Hip Raise",
+    "aliases": [],
+    "bodyPart": "waist",
+    "target": "abs",
+    "secondaryMuscles": [],
+    "equipment": "smith machine",
+    "difficulty": "beginner",
+    "compound": false,
+    "instructions": "Position a bench in the rack and load the bar to an appropriate weight. Lie down on the bench, placing the bottom of your feet against the bar. Unlock the bar and extend your legs. You may need to use your hands to assist you. For added stability grasp the sides of the Smith Machine. This will be your starting position. Initiate the movement by rotating your pelvis, flexing your spine to raise your hips off of the bench. Maintain a slight bend in the knees throughout the motion. After a brief pause, return the hips to the bench. Repeat for the desired number of repetitions.",
+    "steps": [
+      "Position a bench in the rack and load the bar to an appropriate weight. Lie down on the bench, placing the bottom of your feet against the bar. Unlock the bar and extend your legs. You may need to use your hands to assist you. For added stability grasp the sides of the Smith Machine. This will be your starting position.",
+      "Initiate the movement by rotating your pelvis, flexing your spine to raise your hips off of the bench. Maintain a slight bend in the knees throughout the motion.",
+      "After a brief pause, return the hips to the bench.",
+      "Repeat for the desired number of repetitions."
+    ],
+    "formCues": [],
+    "commonMistakes": [],
+    "videos": {},
+    "thumbnails": {
+      "male": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Smith_Machine_Hip_Raise/0.jpg",
+      "female": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Smith_Machine_Hip_Raise/0.jpg"
+    },
+    "source": "supplement"
+  },
+  {
+    "id": "yo-smith-machine-incline-bench-press",
+    "name": "Smith Machine Incline Bench Press",
+    "aliases": [],
+    "bodyPart": "chest",
+    "target": "chest",
+    "secondaryMuscles": [
+      "shoulders",
+      "triceps"
+    ],
+    "equipment": "smith machine",
+    "difficulty": "beginner",
+    "compound": true,
+    "instructions": "Place an incline bench underneath the smith machine. Place the barbell at a height that you can reach when lying down and your arms are almost fully extended. Once the weight you need is selected, lie down on the incline bench and make sure your upper chest is aligned with the barbell. Using a pronated grip (palms facing forward) that is wider than shoulder width, unlock the bar from the rack and hold it straight over you with your arms locked. This will be your starting position. As you breathe in, come down slowly until you feel the bar on your upper chest. After a second pause, bring the bar back to the starting position as you breathe out and push the bar using your chest muscles. Lock your arms in the contracted position, hold for a second and then start coming down slowly again. Tip: It should take at least twice as long to go down than to come up. Repeat the movement for the prescribed amount of repetitions. When you are done, place the bar back in the rack.",
+    "steps": [
+      "Place an incline bench underneath the smith machine. Place the barbell at a height that you can reach when lying down and your arms are almost fully extended. Once the weight you need is selected, lie down on the incline bench and make sure your upper chest is aligned with the barbell. Using a pronated grip (palms facing forward) that is wider than shoulder width, unlock the bar from the rack and hold it straight over you with your arms locked. This will be your starting position.",
+      "As you breathe in, come down slowly until you feel the bar on your upper chest.",
+      "After a second pause, bring the bar back to the starting position as you breathe out and push the bar using your chest muscles. Lock your arms in the contracted position, hold for a second and then start coming down slowly again. Tip: It should take at least twice as long to go down than to come up.",
+      "Repeat the movement for the prescribed amount of repetitions.",
+      "When you are done, place the bar back in the rack."
+    ],
+    "formCues": [],
+    "commonMistakes": [],
+    "videos": {},
+    "thumbnails": {
+      "male": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Smith_Machine_Incline_Bench_Press/0.jpg",
+      "female": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Smith_Machine_Incline_Bench_Press/0.jpg"
+    },
+    "source": "supplement"
+  },
+  {
+    "id": "yo-smith-machine-one-arm-upright-row",
+    "name": "Smith Machine One-Arm Upright Row",
+    "aliases": [],
+    "bodyPart": "shoulders",
+    "target": "shoulders",
+    "secondaryMuscles": [
+      "biceps",
+      "traps"
+    ],
+    "equipment": "smith machine",
+    "difficulty": "beginner",
+    "compound": true,
+    "instructions": "With the bar at thigh level, load an appropriate weight. Take a wide grip on the bar and unhook the weight, removing your off hand from the bar. Your arm should be extended as you stand up straight with your head and chest up. This will be your starting position. Begin the movement by flexing the elbow, raising the upper arm with the elbow pointed out. Continue until your upper arm is parallel to the floor. After a brief pause, return the weight to the starting position. Repeat for the desired number of repetitions before engaging the hooks to rack the weight.",
+    "steps": [
+      "With the bar at thigh level, load an appropriate weight.",
+      "Take a wide grip on the bar and unhook the weight, removing your off hand from the bar. Your arm should be extended as you stand up straight with your head and chest up. This will be your starting position.",
+      "Begin the movement by flexing the elbow, raising the upper arm with the elbow pointed out. Continue until your upper arm is parallel to the floor.",
+      "After a brief pause, return the weight to the starting position.",
+      "Repeat for the desired number of repetitions before engaging the hooks to rack the weight."
+    ],
+    "formCues": [],
+    "commonMistakes": [],
+    "videos": {},
+    "thumbnails": {
+      "male": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Smith_Machine_One-Arm_Upright_Row/0.jpg",
+      "female": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Smith_Machine_One-Arm_Upright_Row/0.jpg"
+    },
+    "source": "supplement"
+  },
+  {
+    "id": "yo-smith-machine-overhead-shoulder-press",
+    "name": "Smith Machine Overhead Shoulder Press",
+    "aliases": [],
+    "bodyPart": "shoulders",
+    "target": "shoulders",
+    "secondaryMuscles": [
+      "triceps"
+    ],
+    "equipment": "smith machine",
+    "difficulty": "beginner",
+    "compound": true,
+    "instructions": "To begin, place a flat bench (or preferably one with back support) underneath a smith machine. Position the barbell at a height so that when seated on the flat bench, the arms must be almost fully extended to reach the barbell. Once you have the correct height, sit slightly in behind the barbell so that there is an imaginary straight line from the tip of your nose to the barbell. Your feet should be stationary. Grab the barbell with the palms facing forward, unlock it and lift it up so that your arms are fully extended. This is the starting position. Slowly begin to lower the barbell until it is level with your chin while inhaling. Then lift the barbell back to the starting position using your shoulders while exhaling. Repeat for the recommended amount of repetitions.",
+    "steps": [
+      "To begin, place a flat bench (or preferably one with back support) underneath a smith machine. Position the barbell at a height so that when seated on the flat bench, the arms must be almost fully extended to reach the barbell.",
+      "Once you have the correct height, sit slightly in behind the barbell so that there is an imaginary straight line from the tip of your nose to the barbell. Your feet should be stationary. Grab the barbell with the palms facing forward, unlock it and lift it up so that your arms are fully extended. This is the starting position.",
+      "Slowly begin to lower the barbell until it is level with your chin while inhaling.",
+      "Then lift the barbell back to the starting position using your shoulders while exhaling.",
+      "Repeat for the recommended amount of repetitions."
+    ],
+    "formCues": [],
+    "commonMistakes": [],
+    "videos": {},
+    "thumbnails": {
+      "male": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Smith_Machine_Overhead_Shoulder_Press/0.jpg",
+      "female": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Smith_Machine_Overhead_Shoulder_Press/0.jpg"
+    },
+    "source": "supplement"
+  },
+  {
+    "id": "yo-smith-machine-pistol-squat",
+    "name": "Smith Machine Pistol Squat",
+    "aliases": [],
+    "bodyPart": "upper legs",
+    "target": "quads",
+    "secondaryMuscles": [
+      "calves",
+      "glutes",
+      "hamstrings"
+    ],
+    "equipment": "smith machine",
+    "difficulty": "intermediate",
+    "compound": true,
+    "instructions": "To begin, first set the bar to a position that best matches your height. Step under it and position the bar across the back of your shoulders. Take the bar with your hands facing forward, unlock it and lift it off the rack by extending your legs. 3 Move one foot forward about 12 inches in front of the bar. Extend the other leg out in front of you, holding it off the ground. Look forward at all times and maintain a neutral or slightly arched spine. This will be your starting position. Maintaining good posture, lower yourself by flexing the knee and hip, going down as far as flexibility allows. Pause briefly at the bottom and then return to the starting position by driving through the heel of your foot, extending the knee and hip.",
+    "steps": [
+      "To begin, first set the bar to a position that best matches your height. Step under it and position the bar across the back of your shoulders.",
+      "Take the bar with your hands facing forward, unlock it and lift it off the rack by extending your legs. 3",
+      "Move one foot forward about 12 inches in front of the bar. Extend the other leg out in front of you, holding it off the ground. Look forward at all times and maintain a neutral or slightly arched spine. This will be your starting position.",
+      "Maintaining good posture, lower yourself by flexing the knee and hip, going down as far as flexibility allows.",
+      "Pause briefly at the bottom and then return to the starting position by driving through the heel of your foot, extending the knee and hip."
+    ],
+    "formCues": [],
+    "commonMistakes": [],
+    "videos": {},
+    "thumbnails": {
+      "male": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Smith_Machine_Pistol_Squat/0.jpg",
+      "female": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Smith_Machine_Pistol_Squat/0.jpg"
+    },
+    "source": "supplement"
+  },
+  {
+    "id": "yo-smith-machine-reverse-calf-raises",
+    "name": "Smith Machine Reverse Calf Raises",
+    "aliases": [],
+    "bodyPart": "lower legs",
+    "target": "calves",
+    "secondaryMuscles": [],
+    "equipment": "smith machine",
+    "difficulty": "beginner",
+    "compound": false,
+    "instructions": "Adjust the barbell on the smith machine to fit your height and align a raised platform right under the bar. Stand on the platform with the heels of your feet secured on top of it with the balls of your feet extending off it. Position your toes facing forward with a shoulder width stance. Now, place your shoulders under the barbell while maintaining the foot positioning described and push the barbell up by extending your hips and knees until your torso is standing erect. The knees should be kept with a slight bend; never locked. This will be your starting position. Tip: The barbell on your back is only for balance purposes. Raise the balls of your feet as you breathe out by extending your toes as high as possible and flexing your calf. Ensure that the knee is kept stationary at all times. There should be no bending at any time. Hold the contracted position for a second before you start to go back down. Slowly go back down to the starting position as you breathe in by lowering the balls of your feet and toes. Repeat for the recommended amount of repetitions.",
+    "steps": [
+      "Adjust the barbell on the smith machine to fit your height and align a raised platform right under the bar.",
+      "Stand on the platform with the heels of your feet secured on top of it with the balls of your feet extending off it. Position your toes facing forward with a shoulder width stance.",
+      "Now, place your shoulders under the barbell while maintaining the foot positioning described and push the barbell up by extending your hips and knees until your torso is standing erect. The knees should be kept with a slight bend; never locked. This will be your starting position. Tip: The barbell on your back is only for balance purposes.",
+      "Raise the balls of your feet as you breathe out by extending your toes as high as possible and flexing your calf. Ensure that the knee is kept stationary at all times. There should be no bending at any time. Hold the contracted position for a second before you start to go back down.",
+      "Slowly go back down to the starting position as you breathe in by lowering the balls of your feet and toes.",
+      "Repeat for the recommended amount of repetitions."
+    ],
+    "formCues": [],
+    "commonMistakes": [],
+    "videos": {},
+    "thumbnails": {
+      "male": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Smith_Machine_Reverse_Calf_Raises/0.jpg",
+      "female": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Smith_Machine_Reverse_Calf_Raises/0.jpg"
+    },
+    "source": "supplement"
+  },
+  {
+    "id": "yo-smith-machine-squat",
+    "name": "Smith Machine Squat",
+    "aliases": [],
+    "bodyPart": "upper legs",
+    "target": "quads",
+    "secondaryMuscles": [
+      "calves",
+      "glutes",
+      "hamstrings",
+      "lower back"
+    ],
+    "equipment": "smith machine",
+    "difficulty": "beginner",
+    "compound": true,
+    "instructions": "To begin, first set the bar on the height that best matches your height. Once the correct height is chosen and the bar is loaded, step under the bar and place the back of your shoulders (slightly below the neck) across it. Hold on to the bar using both arms at each side (palms facing forward), unlock it and lift it off the rack by first pushing with your legs and at the same time straightening your torso. Position your legs using a shoulder width medium stance with the toes slightly pointed out. Keep your head up at all times and also maintain a straight back. This will be your starting position. (Note: For the purposes of this discussion we will use the medium stance which targets overall development; however you can choose any of the three stances discussed in the foot stances section). Begin to slowly lower the bar by bending the knees as you maintain a straight posture with the head up. Continue down until the angle between the upper leg and the calves becomes slightly less than 90-degrees (which is the point in which the upper legs are below parallel to the floor). Inhale as you perform this portion of the movement. Tip: If you performed the exercise correctly, the front of the knees should make an imaginary straight line with the toes that is perpendicular to the front. If your knees are past that imaginary line (if they are past your toes) then you are placing undue stress on the knee and the exercise has been performed incorrectly. Begin to raise the bar as you exhale by pushing the floor with the heel of your foot as you straighten the legs again and go back to the starting position. Repeat for the recommended amount of repetitions.",
+    "steps": [
+      "To begin, first set the bar on the height that best matches your height. Once the correct height is chosen and the bar is loaded, step under the bar and place the back of your shoulders (slightly below the neck) across it.",
+      "Hold on to the bar using both arms at each side (palms facing forward), unlock it and lift it off the rack by first pushing with your legs and at the same time straightening your torso.",
+      "Position your legs using a shoulder width medium stance with the toes slightly pointed out. Keep your head up at all times and also maintain a straight back. This will be your starting position. (Note: For the purposes of this discussion we will use the medium stance which targets overall development; however you can choose any of the three stances discussed in the foot stances section).",
+      "Begin to slowly lower the bar by bending the knees as you maintain a straight posture with the head up. Continue down until the angle between the upper leg and the calves becomes slightly less than 90-degrees (which is the point in which the upper legs are below parallel to the floor). Inhale as you perform this portion of the movement. Tip: If you performed the exercise correctly, the front of the knees should make an imaginary straight line with the toes that is perpendicular to the front. If your knees are past that imaginary line (if they are past your toes) then you are placing undue stress on the knee and the exercise has been performed incorrectly.",
+      "Begin to raise the bar as you exhale by pushing the floor with the heel of your foot as you straighten the legs again and go back to the starting position.",
+      "Repeat for the recommended amount of repetitions."
+    ],
+    "formCues": [],
+    "commonMistakes": [],
+    "videos": {},
+    "thumbnails": {
+      "male": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Smith_Machine_Squat/0.jpg",
+      "female": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Smith_Machine_Squat/0.jpg"
+    },
+    "source": "supplement"
+  },
+  {
+    "id": "yo-smith-machine-stiff-legged-deadlift",
+    "name": "Smith Machine Stiff-Legged Deadlift",
+    "aliases": [],
+    "bodyPart": "upper legs",
+    "target": "hamstrings",
+    "secondaryMuscles": [
+      "glutes",
+      "lower back"
+    ],
+    "equipment": "smith machine",
+    "difficulty": "beginner",
+    "compound": true,
+    "instructions": "To begin, set the bar on the smith machine to a height that is around the middle of your thighs. Once the correct height is chosen and the bar is loaded, grasp the bar using a pronated (palms forward) grip that is shoulder width apart. You may need some wrist wraps if using a significant amount of weight. Lift the bar up by fully extending your arms while keeping your back straight. Stand with your torso straight and your legs spaced using a shoulder width or narrower stance. The knees should be slightly bent. This is your starting position. Keeping the knees stationary, lower the barbell to over the top of your feet by bending at the waist while keeping your back straight. Keep moving forward as if you were going to pick something from the floor until you feel a stretch on the hamstrings. Exhale as you perform this movement Start bringing your torso up straight again as soon as you feel the hamstrings stretch by extending your hips and waist until you are back at the starting position. Inhale as you perform this movement. Repeat for the recommended amount of repetitions.",
+    "steps": [
+      "To begin, set the bar on the smith machine to a height that is around the middle of your thighs. Once the correct height is chosen and the bar is loaded, grasp the bar using a pronated (palms forward) grip that is shoulder width apart. You may need some wrist wraps if using a significant amount of weight.",
+      "Lift the bar up by fully extending your arms while keeping your back straight. Stand with your torso straight and your legs spaced using a shoulder width or narrower stance. The knees should be slightly bent. This is your starting position.",
+      "Keeping the knees stationary, lower the barbell to over the top of your feet by bending at the waist while keeping your back straight. Keep moving forward as if you were going to pick something from the floor until you feel a stretch on the hamstrings. Exhale as you perform this movement",
+      "Start bringing your torso up straight again as soon as you feel the hamstrings stretch by extending your hips and waist until you are back at the starting position. Inhale as you perform this movement.",
+      "Repeat for the recommended amount of repetitions."
+    ],
+    "formCues": [],
+    "commonMistakes": [],
+    "videos": {},
+    "thumbnails": {
+      "male": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Smith_Machine_Stiff-Legged_Deadlift/0.jpg",
+      "female": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Smith_Machine_Stiff-Legged_Deadlift/0.jpg"
+    },
+    "source": "supplement"
+  },
+  {
+    "id": "yo-smith-machine-upright-row",
+    "name": "Smith Machine Upright Row",
+    "aliases": [],
+    "bodyPart": "back",
+    "target": "traps",
+    "secondaryMuscles": [
+      "biceps",
+      "upper back",
+      "shoulders"
+    ],
+    "equipment": "smith machine",
+    "difficulty": "beginner",
+    "compound": true,
+    "instructions": "To begin, set the bar on the smith machine to a height that is around the middle of your thighs. Once the correct height is chosen and the bar is loaded, grasp the bar using a pronated (palms forward) grip that is shoulder width apart. You may need some wrist wraps if using a significant amount of weight. Lift the barbell up and fully extend your arms with your back straight. There should be a slight bend at the elbows. This is the starting position. Use your side shoulders to lift the bar as you exhale. The bar should be close to the body as you move it up. Continue to lift it until it nearly touches your chin. Tip: Your elbows should drive the motion. As you lift the bar, your elbows should always be higher than your forearms. Also, keep your torso stationary and pause for a second at the top of the movement. Lower the bar back down slowly to the starting position. Inhale as you perform this portion of the movement. Repeat for the recommended amount of repetitions.",
+    "steps": [
+      "To begin, set the bar on the smith machine to a height that is around the middle of your thighs. Once the correct height is chosen and the bar is loaded, grasp the bar using a pronated (palms forward) grip that is shoulder width apart. You may need some wrist wraps if using a significant amount of weight.",
+      "Lift the barbell up and fully extend your arms with your back straight. There should be a slight bend at the elbows. This is the starting position.",
+      "Use your side shoulders to lift the bar as you exhale. The bar should be close to the body as you move it up. Continue to lift it until it nearly touches your chin. Tip: Your elbows should drive the motion. As you lift the bar, your elbows should always be higher than your forearms. Also, keep your torso stationary and pause for a second at the top of the movement.",
+      "Lower the bar back down slowly to the starting position. Inhale as you perform this portion of the movement.",
+      "Repeat for the recommended amount of repetitions."
+    ],
+    "formCues": [],
+    "commonMistakes": [],
+    "videos": {},
+    "thumbnails": {
+      "male": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Smith_Machine_Upright_Row/0.jpg",
+      "female": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Smith_Machine_Upright_Row/0.jpg"
+    },
+    "source": "supplement"
+  },
+  {
+    "id": "yo-smith-single-leg-split-squat",
+    "name": "Smith Single-Leg Split Squat",
+    "aliases": [],
+    "bodyPart": "upper legs",
+    "target": "quads",
+    "secondaryMuscles": [
+      "calves",
+      "glutes",
+      "hamstrings"
+    ],
+    "equipment": "smith machine",
+    "difficulty": "beginner",
+    "compound": true,
+    "instructions": "To begin, place a flat bench 2-3 feet behind the smith machine. Then, set the bar on the height that best matches your height. Once the correct height is chosen and the bar is loaded, step under the bar and place the back of your shoulders (slightly below the neck) across it. Hold on to the bar using both arms at each side (palms facing forward), unlock it and lift it off the rack by first pushing with your legs and at the same time straightening your torso. Position your legs by placing one foot slightly forward under the bar and extending your other leg back and place the top of your foot on the bench. This will be your starting position Begin to slowly lower the bar by bending the knee as you maintain a straight posture with the head up. Continue down until the angle between the upper leg and the calf becomes slightly less than 90-degrees (which is the point in which the upper legs are below parallel to the floor). Inhale as you perform this portion of the movement. Tip: If you performed the exercise correctly, the front of the knee should make an imaginary straight line with the toes that is perpendicular to the front. If your knee is past that imaginary line (if it is past your toes) then you are placing undue stress on the knee and the exercise has been performed incorrectly. Begin to raise the bar as you exhale by pushing the floor with the heel of your foot mainly as you straighten your leg again and go back to the starting position. Repeat for the recommended amount of repetitions. Switch legs and repeat the movement.",
+    "steps": [
+      "To begin, place a flat bench 2-3 feet behind the smith machine. Then, set the bar on the height that best matches your height. Once the correct height is chosen and the bar is loaded, step under the bar and place the back of your shoulders (slightly below the neck) across it.",
+      "Hold on to the bar using both arms at each side (palms facing forward), unlock it and lift it off the rack by first pushing with your legs and at the same time straightening your torso.",
+      "Position your legs by placing one foot slightly forward under the bar and extending your other leg back and place the top of your foot on the bench. This will be your starting position",
+      "Begin to slowly lower the bar by bending the knee as you maintain a straight posture with the head up. Continue down until the angle between the upper leg and the calf becomes slightly less than 90-degrees (which is the point in which the upper legs are below parallel to the floor). Inhale as you perform this portion of the movement. Tip: If you performed the exercise correctly, the front of the knee should make an imaginary straight line with the toes that is perpendicular to the front. If your knee is past that imaginary line (if it is past your toes) then you are placing undue stress on the knee and the exercise has been performed incorrectly.",
+      "Begin to raise the bar as you exhale by pushing the floor with the heel of your foot mainly as you straighten your leg again and go back to the starting position.",
+      "Repeat for the recommended amount of repetitions.",
+      "Switch legs and repeat the movement."
+    ],
+    "formCues": [],
+    "commonMistakes": [],
+    "videos": {},
+    "thumbnails": {
+      "male": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Smith_Single-Leg_Split_Squat/0.jpg",
+      "female": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Smith_Single-Leg_Split_Squat/0.jpg"
+    },
+    "source": "supplement"
+  }
+]
