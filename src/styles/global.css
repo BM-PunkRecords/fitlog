@@ -133,16 +133,27 @@ a.btn {
   transform: translateX(-50%);
   bottom: calc(var(--nav-h) + var(--safe-bottom));
   width: min(480px, 100%);
+  height: var(--ad-h);
   min-height: var(--ad-h);
-  max-height: 100px;
+  max-height: var(--ad-h);
   overflow: hidden;
   background: color-mix(in srgb, var(--bg) 96%, transparent);
   border-top: 1px solid color-mix(in srgb, var(--text) 8%, transparent);
   z-index: 35;
+  isolation: isolate;
+  contain: layout paint size;
+  pointer-events: auto;
 }
 
 .bottom-ad .adsbygoogle {
-  min-height: 50px;
+  display: block !important;
+  width: 100% !important;
+  max-height: var(--ad-h) !important;
+  overflow: hidden !important;
+}
+
+.bottom-ad iframe {
+  max-height: var(--ad-h) !important;
 }
 
 .bottom-nav {
@@ -222,7 +233,7 @@ a.btn {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.55);
-  z-index: 50;
+  z-index: 60;
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -235,6 +246,8 @@ a.btn {
   background: var(--bg-elevated);
   border-radius: 20px 20px 0 0;
   padding: 16px;
+  position: relative;
+  z-index: 61;
 }
 
 .banner {

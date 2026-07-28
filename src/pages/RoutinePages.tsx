@@ -50,8 +50,8 @@ export function RoutineEditPage() {
   }
 
   return (
-    <div className="stack">
-      <Link to={isNew ? '/' : `/routines/${id}`} className="muted">
+    <div className="stack page-enter">
+      <Link to={isNew ? '/' : `/routines/${id}`} className="muted interactive">
         ← 뒤로
       </Link>
       <h1 className="page-title">{isNew ? '루틴 추가' : '루틴 편집'}</h1>
@@ -64,20 +64,14 @@ export function RoutineEditPage() {
       <div className="stack">
         <div className="row" style={{ justifyContent: 'space-between' }}>
           <strong>운동 {exerciseIds.length}</strong>
-          <button type="button" className="btn btn-ghost" onClick={() => setShowPicker((v) => !v)}>
-            {showPicker ? '닫기' : '운동 담기'}
+          <button
+            type="button"
+            className="btn btn-ghost interactive"
+            onClick={() => setShowPicker(true)}
+          >
+            운동 담기
           </button>
         </div>
-        {showPicker && (
-          <ExercisePicker
-            catalog={catalog}
-            excludeIds={exerciseIds}
-            onPick={(ex) => {
-              setExerciseIds((ids) => [...ids, ex.id])
-              setShowPicker(false)
-            }}
-          />
-        )}
         {exerciseIds.map((eid, index) => {
           const ex = byId.get(eid)
           return (
@@ -93,7 +87,7 @@ export function RoutineEditPage() {
               </div>
               <button
                 type="button"
-                className="btn btn-ghost"
+                className="btn btn-ghost interactive"
                 onClick={() => setExerciseIds((ids) => ids.filter((_, i) => i !== index))}
               >
                 삭제
@@ -102,9 +96,43 @@ export function RoutineEditPage() {
           )
         })}
       </div>
-      <button type="button" className="btn btn-primary" onClick={() => void save()}>
+      <button type="button" className="btn btn-primary interactive" onClick={() => void save()}>
         저장
       </button>
+
+      {showPicker && (
+        <div
+          className="sheet-backdrop"
+          onClick={() => setShowPicker(false)}
+          role="presentation"
+        >
+          <div
+            className="sheet stack"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-label="운동 담기"
+          >
+            <div className="row" style={{ justifyContent: 'space-between' }}>
+              <h2>운동 담기</h2>
+              <button
+                type="button"
+                className="btn btn-ghost interactive"
+                onClick={() => setShowPicker(false)}
+              >
+                닫기
+              </button>
+            </div>
+            <ExercisePicker
+              catalog={catalog}
+              excludeIds={exerciseIds}
+              onPick={(ex) => {
+                setExerciseIds((ids) => [...ids, ex.id])
+                setShowPicker(false)
+              }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   )
 }

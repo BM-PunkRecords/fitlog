@@ -4,17 +4,24 @@ import type { Exercise } from '../catalog/types'
 interface Props {
   exercise: Exercise
   className?: string
-  /** larger preview for session screen */
   size?: 'thumb' | 'hero'
+  /** Lists should use image to avoid video layering bugs on mobile */
+  media?: 'auto' | 'image'
 }
 
-export function ExercisePreview({ exercise, className = '', size = 'thumb' }: Props) {
+export function ExercisePreview({
+  exercise,
+  className = '',
+  size = 'thumb',
+  media = 'auto',
+}: Props) {
   const [failed, setFailed] = useState(false)
   const videoUrl = exercise.videos.male ?? exercise.videos.female
   const poster = exercise.thumbnails.male ?? exercise.thumbnails.female
   const dim = size === 'hero' ? 120 : 52
+  const useVideo = media === 'auto' && !failed && Boolean(videoUrl)
 
-  if (!failed && videoUrl) {
+  if (useVideo && videoUrl) {
     return (
       <video
         key={videoUrl}
@@ -26,7 +33,7 @@ export function ExercisePreview({ exercise, className = '', size = 'thumb' }: Pr
         autoPlay
         loop
         preload="metadata"
-        style={{ width: dim, height: dim }}
+        style={{ width: dim, height: dim, objectFit: 'cover' }}
         onError={() => setFailed(true)}
         aria-label={`${exercise.name} 시연`}
       />
@@ -38,7 +45,8 @@ export function ExercisePreview({ exercise, className = '', size = 'thumb' }: Pr
       className={`thumb ${className}`.trim()}
       src={poster}
       alt=""
-      style={{ width: dim, height: dim }}
+      loading="lazy"
+      style={{ width: dim, height: dim, objectFit: 'cover' }}
     />
   ) : (
     <div className={`thumb ${className}`.trim()} style={{ width: dim, height: dim }} />

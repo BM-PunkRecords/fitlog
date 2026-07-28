@@ -87,7 +87,7 @@ export function ExercisePicker({
             style={{ width: '100%', textAlign: 'left', cursor: 'pointer' }}
             onClick={() => onPick(ex)}
           >
-            <ExercisePreview exercise={ex} />
+            <ExercisePreview exercise={ex} media="image" />
             <div>
               <div>{tKo(ex.name)}</div>
               <div className="muted">
