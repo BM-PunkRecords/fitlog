@@ -7,7 +7,13 @@ import { RestTimer } from '../components/RestTimer'
 import { useAppData } from '../context/AppDataContext'
 import { sessionItemFromExercise } from '../lib/format'
 import { targetKo } from '../lib/labelsKo'
-import { sessionVolume } from '../store/volume'
+import { tKo } from '../lib/tKo'
+import {
+  exerciseRepsEntered,
+  exerciseVolumeEntered,
+  sessionRepsEntered,
+  sessionVolume,
+} from '../store/volume'
 import type { Session, SessionSet } from '../types/models'
 
 type PickerMode = 'add' | 'replace' | null
@@ -56,6 +62,10 @@ export function SessionPage() {
   const current = session.items[index]
   const exercise = current ? byId.get(current.exerciseId) : undefined
   const volume = sessionVolume(session)
+  const sessionReps = sessionRepsEntered(session)
+  const currentReps = current ? exerciseRepsEntered(current) : 0
+  const currentVolumeLive = current ? exerciseVolumeEntered(current) : 0
+  const exerciseName = exercise ? tKo(exercise.name) : current?.exerciseId
 
   const updateSet = (setNumber: number, patch: Partial<SessionSet>) => {
     if (!current) return
@@ -171,9 +181,15 @@ export function SessionPage() {
         </span>
       </div>
 
-      <div className="card">
-        <div className="muted">세션 볼륨</div>
-        <strong style={{ color: 'var(--accent)' }}>{volume} kg</strong>
+      <div className="card row" style={{ justifyContent: 'space-between', gap: 16 }}>
+        <div>
+          <div className="muted">세션 볼륨(완료)</div>
+          <strong style={{ color: 'var(--accent)' }}>{volume} kg</strong>
+        </div>
+        <div style={{ textAlign: 'right' }}>
+          <div className="muted">세션 횟수 합</div>
+          <strong>{sessionReps} 회</strong>
+        </div>
       </div>
 
       {session.items.length === 0 ? (
@@ -189,8 +205,22 @@ export function SessionPage() {
             <div className="row">
               {exercise && <ExercisePreview exercise={exercise} size="hero" />}
               <div style={{ flex: 1, minWidth: 0 }}>
-                <h2 style={{ fontSize: '1.15rem' }}>{exercise?.name ?? current.exerciseId}</h2>
+                <h2 style={{ fontSize: '1.15rem' }}>{exerciseName}</h2>
                 <div className="muted">{exercise ? targetKo(exercise.target) : ''}</div>
+                <div className="row" style={{ marginTop: 8, gap: 16, flexWrap: 'wrap' }}>
+                  <div>
+                    <span className="muted" style={{ fontSize: 12 }}>
+                      횟수 합{' '}
+                    </span>
+                    <strong style={{ color: 'var(--accent)' }}>{currentReps} 회</strong>
+                  </div>
+                  <div>
+                    <span className="muted" style={{ fontSize: 12 }}>
+                      이 운동 볼륨{' '}
+                    </span>
+                    <strong>{currentVolumeLive} kg</strong>
+                  </div>
+                </div>
               </div>
             </div>
             <div className="row" style={{ flexWrap: 'wrap' }}>

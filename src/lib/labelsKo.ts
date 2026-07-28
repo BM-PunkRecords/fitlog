@@ -80,3 +80,13 @@ export function equipmentKo(value: string): string {
 export function targetKo(value: string): string {
   return TARGET_KO[value] ?? value
 }
+
+const DIFFICULTY_KO: Record<string, string> = {
+  beginner: '초급',
+  intermediate: '중급',
+  advanced: '고급',
+}
+
+export function difficultyKo(value: string): string {
+  return DIFFICULTY_KO[value] ?? value
+}

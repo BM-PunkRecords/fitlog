@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest'
-import { sessionVolume, exerciseVolume } from './volume'
+import {
+  sessionVolume,
+  exerciseVolume,
+  exerciseRepsEntered,
+  exerciseVolumeEntered,
+} from './volume'
 import type { Session, SessionExercise } from '../types/models'
 
 const item = (
@@ -26,5 +31,16 @@ describe('sessionVolume', () => {
     }
     expect(sessionVolume(session)).toBe(500)
     expect(exerciseVolume(session.items[0])).toBe(500)
+  })
+})
+
+describe('entered totals', () => {
+  it('sums reps and volume from entered fields', () => {
+    const ex = item([
+      { weightKg: 50, reps: 10, completed: true },
+      { weightKg: 40, reps: 8, completed: false },
+    ])
+    expect(exerciseRepsEntered(ex)).toBe(18)
+    expect(exerciseVolumeEntered(ex)).toBe(500 + 320)
   })
 })

@@ -1,5 +1,12 @@
 import { useState } from 'react'
 import type { Exercise } from '../catalog/types'
+import {
+  bodyPartKo,
+  difficultyKo,
+  equipmentKo,
+  targetKo,
+} from '../lib/labelsKo'
+import { tKo, tKoList } from '../lib/tKo'
 
 interface Props {
   exercise: Exercise
@@ -10,6 +17,10 @@ export function ExerciseInfoSheet({ exercise, onClose }: Props) {
   const [videoFailed, setVideoFailed] = useState(false)
   const videoUrl = exercise.videos.male ?? exercise.videos.female
   const thumb = exercise.thumbnails.male ?? exercise.thumbnails.female
+  const nameKo = tKo(exercise.name)
+  const steps = tKoList(exercise.steps)
+  const cues = tKoList(exercise.formCues)
+  const mistakes = tKoList(exercise.commonMistakes)
 
   return (
     <div className="sheet-backdrop" onClick={onClose} role="presentation">
@@ -17,10 +28,17 @@ export function ExerciseInfoSheet({ exercise, onClose }: Props) {
         className="sheet stack"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
-        aria-label={`${exercise.name} 정보`}
+        aria-label={`${nameKo} 정보`}
       >
         <div className="row" style={{ justifyContent: 'space-between' }}>
-          <h2>{exercise.name}</h2>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <h2>{nameKo}</h2>
+            {nameKo !== exercise.name && (
+              <div className="muted" style={{ fontSize: 12 }}>
+                {exercise.name}
+              </div>
+            )}
+          </div>
           <button type="button" className="btn btn-ghost" onClick={onClose}>
             닫기
           </button>
@@ -44,11 +62,22 @@ export function ExerciseInfoSheet({ exercise, onClose }: Props) {
             />
           )
         )}
-        {exercise.shortDescription && <p className="muted">{exercise.shortDescription}</p>}
+
+        <div className="muted" style={{ fontSize: 13, lineHeight: 1.5 }}>
+          {bodyPartKo(exercise.bodyPart)} · {targetKo(exercise.target)} ·{' '}
+          {equipmentKo(exercise.equipment)} · {difficultyKo(exercise.difficulty)}
+          {exercise.secondaryMuscles?.length
+            ? ` · 보조 ${exercise.secondaryMuscles.map((m) => targetKo(m)).join(', ')}`
+            : ''}
+        </div>
+
+        {exercise.shortDescription && (
+          <p className="muted">{tKo(exercise.shortDescription)}</p>
+        )}
         <section className="stack">
           <strong>단계</strong>
           <ol>
-            {exercise.steps.map((step) => (
+            {steps.map((step) => (
               <li key={step}>{step}</li>
             ))}
           </ol>
@@ -56,7 +85,7 @@ export function ExerciseInfoSheet({ exercise, onClose }: Props) {
         <section className="stack">
           <strong>폼 큐</strong>
           <ul>
-            {exercise.formCues.map((c) => (
+            {cues.map((c) => (
               <li key={c}>{c}</li>
             ))}
           </ul>
@@ -64,14 +93,14 @@ export function ExerciseInfoSheet({ exercise, onClose }: Props) {
         <section className="stack">
           <strong>흔한 실수</strong>
           <ul>
-            {exercise.commonMistakes.map((c) => (
+            {mistakes.map((c) => (
               <li key={c}>{c}</li>
             ))}
           </ul>
         </section>
         {exercise.breathing && (
           <p>
-            <strong>호흡</strong> · {exercise.breathing}
+            <strong>호흡</strong> · {tKo(exercise.breathing)}
           </p>
         )}
       </div>

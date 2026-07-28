@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { searchExercises } from '../catalog/searchExercises'
 import type { Exercise } from '../catalog/types'
 import { bodyPartKo, equipmentKo, targetKo } from '../lib/labelsKo'
+import { tKo } from '../lib/tKo'
 import { ExercisePreview } from './ExercisePreview'
 
 interface Props {
@@ -88,7 +89,7 @@ export function ExercisePicker({
           >
             <ExercisePreview exercise={ex} />
             <div>
-              <div>{ex.name}</div>
+              <div>{tKo(ex.name)}</div>
               <div className="muted">
                 {targetKo(ex.target)} · {equipmentKo(ex.equipment)}
               </div>

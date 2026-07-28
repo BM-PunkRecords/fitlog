@@ -5,6 +5,7 @@ import { useAppData } from '../context/AppDataContext'
 import { sessionItemFromExercise } from '../lib/format'
 import { createId } from '../store/createId'
 import { targetKo } from '../lib/labelsKo'
+import { tKo } from '../lib/tKo'
 import type { Routine, Session } from '../types/models'
 
 export function RoutineEditPage() {
@@ -87,7 +88,7 @@ export function RoutineEditPage() {
                 alt=""
               />
               <div style={{ flex: 1 }}>
-                <div>{ex?.name ?? eid}</div>
+                <div>{ex ? tKo(ex.name) : eid}</div>
                 <div className="muted">{ex ? targetKo(ex.target) : ''}</div>
               </div>
               <button
@@ -169,7 +170,7 @@ export function RoutineDetailPage() {
           <div key={eid} className="card row">
             <img className="thumb" src={ex?.thumbnails.male ?? ex?.thumbnails.female} alt="" />
             <div>
-              <strong>{ex?.name ?? eid}</strong>
+              <strong>{ex ? tKo(ex.name) : eid}</strong>
               <div className="muted">
                 {ex ? targetKo(ex.target) : ''}
                 {ex?.secondaryMuscles?.length
