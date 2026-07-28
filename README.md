@@ -34,12 +34,26 @@ docker compose up --build
 | `FITLOG_API_BASE_URL` | runtime | 향후 동기화 API (MVP 미사용) |
 | `FITLOG_PUBLIC_ORIGIN` | runtime | 공개 URL (향후용) |
 
+## Vercel / duckmu.com
+
+- Production alias: https://fitlog-sage.vercel.app
+- Custom domain (Vercel 연결됨, DNS 대기): `fitlog.duckmu.com` (`duckgung.duckmu.com`과 같은 패턴)
+
+Cloudflare DNS에 아래 레코드를 추가하면 서브도메인이 살아납니다 (`duckgung`과 동일하게 Proxied 가능):
+
+| Type | Name | Target |
+|------|------|--------|
+| CNAME | `fitlog` | `cname.vercel-dns.com` |
+
+(또는 Vercel이 안내하는 `db5e027c52187bba.vercel-dns-017.com`)
+
 ## 스택
 
 - Vite + React + TypeScript
 - IndexedDB (`idb`) via `WorkoutStore`
 - PWA (`vite-plugin-pwa`)
 - Docker multi-stage build + nginx
+- Vercel (team: parkbeommins-projects)
 - Exercise catalog: [harshvishu/free-exercise-db-with-videos](https://github.com/harshvishu/free-exercise-db-with-videos) (MIT)
 
 ## 설계/계획
