@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { searchExercises } from '../catalog/searchExercises'
 import type { Exercise } from '../catalog/types'
 import { useAppData } from '../context/AppDataContext'
@@ -8,27 +8,72 @@ import { createId } from '../store/createId'
 import type { CustomExercise } from '../types/models'
 import { ExercisePreview } from './ExercisePreview'
 
-type StatusFilter = 'all' | 'recent' | 'custom'
+type StatusFilter = 'all' | 'favorite' | 'frequent' | 'recent' | 'custom'
 
 interface Props {
   catalog: Exercise[]
   onPick: (exercise: Exercise) => void
+  onClose?: () => void
   excludeIds?: string[]
   preferBodyPart?: string
+}
+
+const BODY_CHIP_ORDER = [
+  'chest',
+  'back',
+  'shoulders',
+  'upper arms',
+  'upper legs',
+  'waist',
+  'hips',
+  'lower legs',
+  'cardio',
+]
+
+const EQUIP_CHIP_ORDER = [
+  'body weight',
+  'dumbbell',
+  'barbell',
+  'cable',
+  'smith machine',
+  'band',
+  'kettlebell',
+  'leverage machine',
+]
+
+function muscleLine(ex: Exercise): string {
+  const parts = [targetKo(ex.target)]
+  for (const m of ex.secondaryMuscles ?? []) {
+    const label = targetKo(m)
+    if (label && !parts.includes(label)) parts.push(label)
+    if (parts.length >= 2) break
+  }
+  return parts.join(', ')
 }
 
 export function ExercisePicker({
   catalog,
   onPick,
+  onClose,
   excludeIds = [],
   preferBodyPart,
 }: Props) {
-  const { recentExerciseIds, saveCustomExercise } = useAppData()
+  const {
+    recentExerciseIds,
+    frequentExerciseIds,
+    settings,
+    toggleFavorite,
+    saveCustomExercise,
+    removeCustomExercise,
+  } = useAppData()
+  const listRef = useRef<HTMLDivElement>(null)
   const [query, setQuery] = useState('')
   const [status, setStatus] = useState<StatusFilter>('all')
   const [bodyPart, setBodyPart] = useState(preferBodyPart ?? '')
   const [equipment, setEquipment] = useState('')
   const [showCustomForm, setShowCustomForm] = useState(false)
+  const [menuId, setMenuId] = useState<string | null>(null)
+  const [showTop, setShowTop] = useState(false)
   const [customName, setCustomName] = useState('')
   const [customBodyPart, setCustomBodyPart] = useState(preferBodyPart || 'upper legs')
   const [customTarget, setCustomTarget] = useState('quads')
@@ -39,20 +84,29 @@ export function ExercisePicker({
     if (preferBodyPart) setBodyPart(preferBodyPart)
   }, [preferBodyPart])
 
-  const bodyParts = useMemo(
-    () => [...new Set(catalog.map((e) => e.bodyPart))].sort(),
-    [catalog],
-  )
-  const equipments = useMemo(
-    () => [...new Set(catalog.map((e) => e.equipment))].sort(),
-    [catalog],
-  )
+  const favorites = settings.favoriteExerciseIds ?? []
+  const favoriteSet = useMemo(() => new Set(favorites), [favorites])
+  const recentSet = useMemo(() => new Set(recentExerciseIds), [recentExerciseIds])
+  const frequentSet = useMemo(() => new Set(frequentExerciseIds), [frequentExerciseIds])
+
+  const bodyParts = useMemo(() => {
+    const present = new Set(catalog.map((e) => e.bodyPart))
+    const ordered = BODY_CHIP_ORDER.filter((p) => present.has(p))
+    const rest = [...present].filter((p) => !ordered.includes(p)).sort()
+    return [...ordered, ...rest]
+  }, [catalog])
+
+  const equipments = useMemo(() => {
+    const present = new Set(catalog.map((e) => e.equipment))
+    const ordered = EQUIP_CHIP_ORDER.filter((e) => present.has(e))
+    const rest = [...present].filter((e) => !ordered.includes(e)).sort()
+    return [...ordered, ...rest]
+  }, [catalog])
+
   const targets = useMemo(
     () => [...new Set(catalog.map((e) => e.target))].sort(),
     [catalog],
   )
-
-  const recentSet = useMemo(() => new Set(recentExerciseIds), [recentExerciseIds])
 
   const results = useMemo(() => {
     const excluded = new Set(excludeIds)
@@ -61,8 +115,13 @@ export function ExercisePicker({
       equipment: equipment || undefined,
     }).filter((e) => !excluded.has(e.id))
 
-    if (status === 'custom') {
-      list = list.filter((e) => e.source === 'custom')
+    if (status === 'custom') list = list.filter((e) => e.source === 'custom')
+    else if (status === 'favorite') list = list.filter((e) => favoriteSet.has(e.id))
+    else if (status === 'frequent') {
+      list = list.filter((e) => frequentSet.has(e.id))
+      list.sort(
+        (a, b) => frequentExerciseIds.indexOf(a.id) - frequentExerciseIds.indexOf(b.id),
+      )
     } else if (status === 'recent') {
       list = list.filter((e) => recentSet.has(e.id))
       list.sort(
@@ -78,7 +137,10 @@ export function ExercisePicker({
     equipment,
     excludeIds,
     status,
+    favoriteSet,
+    frequentSet,
     recentSet,
+    frequentExerciseIds,
     recentExerciseIds,
   ])
 
@@ -101,8 +163,6 @@ export function ExercisePicker({
     setShowCustomForm(false)
     setCustomName('')
     setStatus('custom')
-    const asExercise = catalog.find((e) => e.id === row.id)
-    // catalog updates async after refresh — pick via constructed entry
     onPick({
       id: row.id,
       name: row.name,
@@ -118,22 +178,50 @@ export function ExercisePicker({
       thumbnails: {},
       source: 'custom',
     })
-    void asExercise
   }
 
   return (
     <div className="exercise-picker">
-      <input
-        className="field"
-        placeholder="운동 검색"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-      />
+      <div className="picker-topbar">
+        {onClose ? (
+          <button
+            type="button"
+            className="picker-icon-btn"
+            aria-label="뒤로"
+            onClick={onClose}
+          >
+            ←
+          </button>
+        ) : (
+          <span className="picker-icon-spacer" />
+        )}
+        <div className="picker-search">
+          <span className="picker-search-icon" aria-hidden>
+            ⌕
+          </span>
+          <input
+            className="picker-search-input"
+            placeholder="운동 검색"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+        </div>
+        <button
+          type="button"
+          className="picker-icon-btn picker-plus-btn"
+          aria-label="커스텀 운동 추가"
+          onClick={() => setShowCustomForm((v) => !v)}
+        >
+          +
+        </button>
+      </div>
 
       <div className="chip-row" role="tablist" aria-label="목록 필터">
         {(
           [
             ['all', '전체'],
+            ['favorite', '좋아하는'],
+            ['frequent', '자주하는'],
             ['recent', '최근'],
             ['custom', '커스텀'],
           ] as const
@@ -193,17 +281,18 @@ export function ExercisePicker({
 
       <button
         type="button"
-        className="btn btn-ghost interactive custom-add-btn"
+        className="custom-add-link interactive"
         onClick={() => setShowCustomForm((v) => !v)}
       >
-        + 커스텀 운동 추가
+        <span className="custom-add-dot">+</span>
+        커스텀 운동 추가
       </button>
 
       {showCustomForm && (
         <div className="card stack custom-form">
           <input
             className="field"
-            placeholder="운동 이름 (예: 스미스 머신 스쿼트)"
+            placeholder="운동 이름"
             value={customName}
             onChange={(e) => setCustomName(e.target.value)}
           />
@@ -249,7 +338,11 @@ export function ExercisePicker({
           </select>
           {customError && <p className="error-text">{customError}</p>}
           <div className="row">
-            <button type="button" className="btn btn-primary interactive" onClick={() => void saveCustom()}>
+            <button
+              type="button"
+              className="btn btn-primary interactive"
+              onClick={() => void saveCustom()}
+            >
               저장하고 담기
             </button>
             <button
@@ -263,38 +356,106 @@ export function ExercisePicker({
         </div>
       )}
 
-      <div className="exercise-picker-list">
+      <div
+        className="exercise-picker-list"
+        ref={listRef}
+        onScroll={(e) => setShowTop(e.currentTarget.scrollTop > 240)}
+      >
         {results.length === 0 && (
           <p className="muted" style={{ padding: '12px 4px' }}>
-            {status === 'recent'
-              ? '최근 수행한 운동이 아직 없어요.'
-              : status === 'custom'
-                ? '커스텀 운동이 없어요. 위에서 추가해 보세요.'
-                : '검색 결과가 없어요.'}
+            {status === 'favorite'
+              ? '좋아하는 운동이 없어요. 하트를 눌러 추가하세요.'
+              : status === 'frequent'
+                ? '자주 한 운동이 아직 없어요.'
+                : status === 'recent'
+                  ? '최근 수행한 운동이 아직 없어요.'
+                  : status === 'custom'
+                    ? '커스텀 운동이 없어요.'
+                    : '검색 결과가 없어요.'}
           </p>
         )}
-        {results.slice(0, 60).map((ex) => (
-          <button
-            key={ex.id}
-            type="button"
-            className="card row"
-            style={{ width: '100%', textAlign: 'left', cursor: 'pointer' }}
-            onClick={() => onPick(ex)}
-          >
-            <ExercisePreview exercise={ex} media="image" />
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div>{tKo(ex.name)}</div>
-              <div className="muted">
-                {targetKo(ex.target)}
-                {ex.secondaryMuscles?.[0] ? ` · ${targetKo(ex.secondaryMuscles[0])}` : ''}
-                {' · '}
-                {equipmentKo(ex.equipment)}
-                {ex.source === 'custom' ? ' · 커스텀' : ''}
+        {results.slice(0, 80).map((ex) => {
+          const liked = favoriteSet.has(ex.id)
+          return (
+            <div key={ex.id} className="picker-row">
+              <button
+                type="button"
+                className={`picker-heart ${liked ? 'is-on' : ''}`}
+                aria-label={liked ? '즐겨찾기 해제' : '즐겨찾기'}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  void toggleFavorite(ex.id)
+                }}
+              >
+                {liked ? '♥' : '♡'}
+              </button>
+              <button
+                type="button"
+                className="picker-row-main"
+                onClick={() => onPick(ex)}
+              >
+                <ExercisePreview exercise={ex} media="image" />
+                <div className="picker-row-text">
+                  <div className="picker-row-title">{tKo(ex.name)}</div>
+                  <div className="picker-row-sub muted">{muscleLine(ex)}</div>
+                </div>
+              </button>
+              <div className="picker-more-wrap">
+                <button
+                  type="button"
+                  className="picker-more"
+                  aria-label="더보기"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setMenuId((id) => (id === ex.id ? null : ex.id))
+                  }}
+                >
+                  ⋯
+                </button>
+                {menuId === ex.id && (
+                  <div className="picker-menu card stack">
+                    <button
+                      type="button"
+                      className="btn btn-ghost"
+                      style={{ justifyContent: 'flex-start' }}
+                      onClick={() => {
+                        setMenuId(null)
+                        onPick(ex)
+                      }}
+                    >
+                      담기
+                    </button>
+                    {ex.source === 'custom' && (
+                      <button
+                        type="button"
+                        className="btn btn-ghost"
+                        style={{ justifyContent: 'flex-start', color: 'var(--danger)' }}
+                        onClick={() => {
+                          setMenuId(null)
+                          void removeCustomExercise(ex.id)
+                        }}
+                      >
+                        커스텀 삭제
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
-          </button>
-        ))}
+          )
+        })}
       </div>
+
+      {showTop && (
+        <button
+          type="button"
+          className="picker-scroll-top"
+          aria-label="맨 위로"
+          onClick={() => listRef.current?.scrollTo({ top: 0, behavior: 'smooth' })}
+        >
+          ↑
+        </button>
+      )}
     </div>
   )
 }

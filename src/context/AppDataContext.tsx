@@ -18,15 +18,16 @@ import { DEFAULT_SETTINGS } from '../types/models'
 interface AppDataValue {
   ready: boolean
   store: WorkoutStore
-  /** Bundled + supplement + custom */
   catalog: Exercise[]
   customExercises: CustomExercise[]
   recentExerciseIds: string[]
+  frequentExerciseIds: string[]
   settings: AppSettings
   routines: Routine[]
   inProgress: Session | undefined
   refresh: () => Promise<void>
   setSettings: (settings: AppSettings) => Promise<void>
+  toggleFavorite: (exerciseId: string) => Promise<void>
   saveCustomExercise: (exercise: CustomExercise) => Promise<void>
   removeCustomExercise: (id: string) => Promise<void>
 }
@@ -42,6 +43,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   const [inProgress, setInProgress] = useState<Session | undefined>()
   const [customExercises, setCustomExercises] = useState<CustomExercise[]>([])
   const [recentExerciseIds, setRecentExerciseIds] = useState<string[]>([])
+  const [frequentExerciseIds, setFrequentExerciseIds] = useState<string[]>([])
 
   const refresh = useCallback(async () => {
     const [nextSettings, nextRoutines, nextInProgress, nextCustom, completed] =
@@ -52,23 +54,34 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
         store.listCustomExercises(),
         store.listSessions({ status: 'completed' }),
       ])
-    setSettingsState(nextSettings)
+    setSettingsState({
+      ...DEFAULT_SETTINGS,
+      ...nextSettings,
+      favoriteExerciseIds: nextSettings.favoriteExerciseIds ?? [],
+    })
     setRoutines(nextRoutines)
     setInProgress(nextInProgress)
     setCustomExercises(nextCustom)
 
     const recent: string[] = []
     const seen = new Set<string>()
+    const counts = new Map<string, number>()
     for (const session of completed) {
       for (const item of session.items) {
-        if (seen.has(item.exerciseId)) continue
-        seen.add(item.exerciseId)
-        recent.push(item.exerciseId)
-        if (recent.length >= 40) break
+        counts.set(item.exerciseId, (counts.get(item.exerciseId) ?? 0) + 1)
+        if (!seen.has(item.exerciseId)) {
+          seen.add(item.exerciseId)
+          recent.push(item.exerciseId)
+        }
       }
-      if (recent.length >= 40) break
     }
-    setRecentExerciseIds(recent)
+    setRecentExerciseIds(recent.slice(0, 40))
+    setFrequentExerciseIds(
+      [...counts.entries()]
+        .sort((a, b) => b[1] - a[1])
+        .map(([id]) => id)
+        .slice(0, 40),
+    )
     setReady(true)
   }, [store])
 
@@ -82,6 +95,19 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
       setSettingsState(next)
     },
     [store],
+  )
+
+  const toggleFavorite = useCallback(
+    async (exerciseId: string) => {
+      const ids = settings.favoriteExerciseIds ?? []
+      const nextIds = ids.includes(exerciseId)
+        ? ids.filter((id) => id !== exerciseId)
+        : [...ids, exerciseId]
+      const next = { ...settings, favoriteExerciseIds: nextIds }
+      await store.saveSettings(next)
+      setSettingsState(next)
+    },
+    [settings, store],
   )
 
   const saveCustomExercise = useCallback(
@@ -113,11 +139,13 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
       catalog,
       customExercises,
       recentExerciseIds,
+      frequentExerciseIds,
       settings,
       routines,
       inProgress,
       refresh,
       setSettings,
+      toggleFavorite,
       saveCustomExercise,
       removeCustomExercise,
     }),
@@ -127,11 +155,13 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
       catalog,
       customExercises,
       recentExerciseIds,
+      frequentExerciseIds,
       settings,
       routines,
       inProgress,
       refresh,
       setSettings,
+      toggleFavorite,
       saveCustomExercise,
       removeCustomExercise,
     ],

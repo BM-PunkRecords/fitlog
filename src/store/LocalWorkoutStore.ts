@@ -57,7 +57,7 @@ export class LocalWorkoutStore implements WorkoutStore {
   async getSettings(): Promise<AppSettings> {
     const db = await this.dbPromise
     const saved = await db.get('settings', 'default')
-    return saved ?? { ...DEFAULT_SETTINGS }
+    return { ...DEFAULT_SETTINGS, ...saved, favoriteExerciseIds: saved?.favoriteExerciseIds ?? [] }
   }
 
   async saveSettings(settings: AppSettings): Promise<void> {

@@ -439,11 +439,13 @@ export function SessionPage() {
         <Sheet
           title={pickerMode === 'replace' ? '운동 대체' : '운동 추가'}
           fill
+          hideHeader
           onClose={() => setPickerMode(null)}
         >
           <ExercisePicker
             key={`${pickerMode}-${exercise?.bodyPart ?? 'all'}`}
             catalog={catalog}
+            onClose={() => setPickerMode(null)}
             preferBodyPart={pickerMode === 'replace' ? exercise?.bodyPart : undefined}
             excludeIds={pickerMode === 'replace' && current ? [current.exerciseId] : []}
             onPick={(ex) => {

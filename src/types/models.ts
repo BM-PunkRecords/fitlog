@@ -35,6 +35,8 @@ export interface Routine {
 export interface AppSettings {
   defaultRestSeconds: number
   weightUnit: 'kg'
+  /** Favorited catalog / custom exercise ids */
+  favoriteExerciseIds: string[]
 }
 
 /** User-defined exercise stored in IndexedDB */
@@ -50,6 +52,7 @@ export interface CustomExercise {
 export const DEFAULT_SETTINGS: AppSettings = {
   defaultRestSeconds: Number(import.meta.env.VITE_DEFAULT_REST_SECONDS) || 90,
   weightUnit: 'kg',
+  favoriteExerciseIds: [],
 }
 
 export const APP_NAME = String(import.meta.env.VITE_APP_NAME || 'FitLog')

@@ -102,10 +102,11 @@ export function RoutineEditPage() {
       </button>
 
       {showPicker && (
-        <Sheet title="운동 담기" fill onClose={() => setShowPicker(false)}>
+        <Sheet title="운동 담기" fill hideHeader onClose={() => setShowPicker(false)}>
           <ExercisePicker
             catalog={catalog}
             excludeIds={exerciseIds}
+            onClose={() => setShowPicker(false)}
             onPick={(ex) => {
               setExerciseIds((ids) => [...ids, ex.id])
               setShowPicker(false)
