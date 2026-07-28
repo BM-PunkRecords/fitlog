@@ -1,28 +1,43 @@
 import { useMemo, useState } from 'react'
 import { searchExercises } from '../catalog/searchExercises'
 import type { Exercise } from '../catalog/types'
+import { bodyPartKo, equipmentKo, targetKo } from '../lib/labelsKo'
+import { ExercisePreview } from './ExercisePreview'
 
 interface Props {
   catalog: Exercise[]
   onPick: (exercise: Exercise) => void
   excludeIds?: string[]
+  /** Prefer same body part first when replacing */
+  preferBodyPart?: string
 }
 
-export function ExercisePicker({ catalog, onPick, excludeIds = [] }: Props) {
+export function ExercisePicker({
+  catalog,
+  onPick,
+  excludeIds = [],
+  preferBodyPart,
+}: Props) {
   const [query, setQuery] = useState('')
-  const [bodyPart, setBodyPart] = useState('')
+  const [bodyPart, setBodyPart] = useState(preferBodyPart ?? '')
+  const [equipment, setEquipment] = useState('')
 
   const bodyParts = useMemo(
     () => [...new Set(catalog.map((e) => e.bodyPart))].sort(),
     [catalog],
   )
+  const equipments = useMemo(
+    () => [...new Set(catalog.map((e) => e.equipment))].sort(),
+    [catalog],
+  )
 
   const results = useMemo(() => {
     const excluded = new Set(excludeIds)
-    return searchExercises(catalog, query, bodyPart ? { bodyPart } : {}).filter(
-      (e) => !excluded.has(e.id),
-    )
-  }, [catalog, query, bodyPart, excludeIds])
+    return searchExercises(catalog, query, {
+      bodyPart: bodyPart || undefined,
+      equipment: equipment || undefined,
+    }).filter((e) => !excluded.has(e.id))
+  }, [catalog, query, bodyPart, equipment, excludeIds])
 
   return (
     <div className="stack">
@@ -32,19 +47,36 @@ export function ExercisePicker({ catalog, onPick, excludeIds = [] }: Props) {
         value={query}
         onChange={(e) => setQuery(e.target.value)}
       />
-      <select
-        className="field"
-        value={bodyPart}
-        onChange={(e) => setBodyPart(e.target.value)}
-        aria-label="부위 필터"
-      >
-        <option value="">전체 부위</option>
-        {bodyParts.map((part) => (
-          <option key={part} value={part}>
-            {part}
-          </option>
-        ))}
-      </select>
+      <div className="row">
+        <select
+          className="field"
+          value={bodyPart}
+          onChange={(e) => setBodyPart(e.target.value)}
+          aria-label="부위 필터"
+          style={{ flex: 1 }}
+        >
+          <option value="">전체 부위</option>
+          {bodyParts.map((part) => (
+            <option key={part} value={part}>
+              {bodyPartKo(part)}
+            </option>
+          ))}
+        </select>
+        <select
+          className="field"
+          value={equipment}
+          onChange={(e) => setEquipment(e.target.value)}
+          aria-label="장비 필터"
+          style={{ flex: 1 }}
+        >
+          <option value="">전체 장비</option>
+          {equipments.map((eq) => (
+            <option key={eq} value={eq}>
+              {equipmentKo(eq)}
+            </option>
+          ))}
+        </select>
+      </div>
       <div className="stack" style={{ maxHeight: 320, overflow: 'auto' }}>
         {results.slice(0, 40).map((ex) => (
           <button
@@ -54,16 +86,11 @@ export function ExercisePicker({ catalog, onPick, excludeIds = [] }: Props) {
             style={{ width: '100%', textAlign: 'left', cursor: 'pointer' }}
             onClick={() => onPick(ex)}
           >
-            <img
-              className="thumb"
-              src={ex.thumbnails.male ?? ex.thumbnails.female}
-              alt=""
-              loading="lazy"
-            />
+            <ExercisePreview exercise={ex} />
             <div>
               <div>{ex.name}</div>
               <div className="muted">
-                {ex.target} · {ex.equipment}
+                {targetKo(ex.target)} · {equipmentKo(ex.equipment)}
               </div>
             </div>
           </button>

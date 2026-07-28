@@ -2,11 +2,15 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { ExerciseInfoSheet } from '../components/ExerciseInfoSheet'
 import { ExercisePicker } from '../components/ExercisePicker'
+import { ExercisePreview } from '../components/ExercisePreview'
 import { RestTimer } from '../components/RestTimer'
 import { useAppData } from '../context/AppDataContext'
 import { sessionItemFromExercise } from '../lib/format'
+import { targetKo } from '../lib/labelsKo'
 import { sessionVolume } from '../store/volume'
 import type { Session, SessionSet } from '../types/models'
+
+type PickerMode = 'add' | 'replace' | null
 
 export function SessionPage() {
   const { id } = useParams()
@@ -16,7 +20,7 @@ export function SessionPage() {
   const [index, setIndex] = useState(0)
   const [error, setError] = useState('')
   const [showInfo, setShowInfo] = useState(false)
-  const [showPicker, setShowPicker] = useState(false)
+  const [pickerMode, setPickerMode] = useState<PickerMode>(null)
   const [restToken, setRestToken] = useState(0)
   const byId = useMemo(() => new Map(catalog.map((e) => [e.id, e])), [catalog])
 
@@ -127,6 +131,20 @@ export function SessionPage() {
     void persist({ ...session, items })
   }
 
+  const replaceExercise = (exerciseId: string) => {
+    if (!current) return
+    const items = session.items.map((item, i) =>
+      i === index
+        ? {
+            ...item,
+            exerciseId,
+            sets: item.sets.map((s) => ({ ...s, completed: false })),
+          }
+        : item,
+    )
+    void persist({ ...session, items }).then(() => setPickerMode(null))
+  }
+
   const finish = async () => {
     const incomplete = session.items.some((item) => item.sets.some((s) => !s.completed))
     if (incomplete && !confirm('완료되지 않은 세트가 있어요. 그래도 종료할까요?')) return
@@ -161,7 +179,7 @@ export function SessionPage() {
       {session.items.length === 0 ? (
         <div className="card stack">
           <p className="muted">운동을 추가해서 기록을 시작하세요.</p>
-          <button type="button" className="btn btn-primary" onClick={() => setShowPicker(true)}>
+          <button type="button" className="btn btn-primary" onClick={() => setPickerMode('add')}>
             운동 추가
           </button>
         </div>
@@ -169,17 +187,22 @@ export function SessionPage() {
         <>
           <div className="card stack">
             <div className="row">
-              <img
-                className="thumb"
-                src={exercise?.thumbnails.male ?? exercise?.thumbnails.female}
-                alt=""
-              />
-              <div style={{ flex: 1 }}>
-                <h2>{exercise?.name ?? current.exerciseId}</h2>
-                <div className="muted">{exercise?.target}</div>
+              {exercise && <ExercisePreview exercise={exercise} size="hero" />}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <h2 style={{ fontSize: '1.15rem' }}>{exercise?.name ?? current.exerciseId}</h2>
+                <div className="muted">{exercise ? targetKo(exercise.target) : ''}</div>
               </div>
+            </div>
+            <div className="row" style={{ flexWrap: 'wrap' }}>
               <button type="button" className="btn btn-ghost" onClick={() => setShowInfo(true)}>
                 정보
+              </button>
+              <button
+                type="button"
+                className="btn btn-ghost"
+                onClick={() => setPickerMode('replace')}
+              >
+                운동 대체
               </button>
             </div>
           </div>
@@ -255,7 +278,7 @@ export function SessionPage() {
             <button type="button" className="btn btn-ghost" onClick={skip}>
               스킵
             </button>
-            <button type="button" className="btn btn-ghost" onClick={() => setShowPicker(true)}>
+            <button type="button" className="btn btn-ghost" onClick={() => setPickerMode('add')}>
               운동 추가
             </button>
           </div>
@@ -269,18 +292,29 @@ export function SessionPage() {
         폐기
       </button>
 
-      {showPicker && (
-        <div className="sheet-backdrop" onClick={() => setShowPicker(false)} role="presentation">
+      {pickerMode && (
+        <div className="sheet-backdrop" onClick={() => setPickerMode(null)} role="presentation">
           <div className="sheet stack" onClick={(e) => e.stopPropagation()} role="dialog">
             <div className="row" style={{ justifyContent: 'space-between' }}>
-              <h2>운동 추가</h2>
-              <button type="button" className="btn btn-ghost" onClick={() => setShowPicker(false)}>
+              <h2>{pickerMode === 'replace' ? '운동 대체' : '운동 추가'}</h2>
+              <button type="button" className="btn btn-ghost" onClick={() => setPickerMode(null)}>
                 닫기
               </button>
             </div>
             <ExercisePicker
+              key={`${pickerMode}-${exercise?.bodyPart ?? 'all'}`}
               catalog={catalog}
+              preferBodyPart={
+                pickerMode === 'replace' ? exercise?.bodyPart : undefined
+              }
+              excludeIds={
+                pickerMode === 'replace' && current ? [current.exerciseId] : []
+              }
               onPick={(ex) => {
+                if (pickerMode === 'replace') {
+                  replaceExercise(ex.id)
+                  return
+                }
                 const item = sessionItemFromExercise(
                   ex.id,
                   session.items.length,
@@ -288,7 +322,7 @@ export function SessionPage() {
                 )
                 void persist({ ...session, items: [...session.items, item] }).then(() => {
                   setIndex(session.items.length)
-                  setShowPicker(false)
+                  setPickerMode(null)
                 })
               }}
             />

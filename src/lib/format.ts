@@ -1,5 +1,6 @@
 import type { Exercise } from '../catalog/types'
 import type { SessionExercise, SessionSet } from '../types/models'
+import { targetKo } from './labelsKo'
 
 export function emptySets(count = 3): SessionSet[] {
   return Array.from({ length: count }, (_, i) => ({
@@ -43,7 +44,8 @@ export function routineTargets(
     ...new Set(
       exerciseIds
         .map((id) => byId.get(id)?.target)
-        .filter((t): t is string => Boolean(t)),
+        .filter((t): t is string => Boolean(t))
+        .map((t) => targetKo(t)),
     ),
   ]
   return targets.slice(0, 3).join(', ') || '운동 구성'

@@ -180,6 +180,11 @@ h3 {
   flex-shrink: 0;
 }
 
+.exercise-preview {
+  display: block;
+  background: #000;
+}
+
 .set-grid {
   display: grid;
   grid-template-columns: 40px 1fr 1fr 48px;

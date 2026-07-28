@@ -4,6 +4,7 @@ import { ExercisePicker } from '../components/ExercisePicker'
 import { useAppData } from '../context/AppDataContext'
 import { sessionItemFromExercise } from '../lib/format'
 import { createId } from '../store/createId'
+import { targetKo } from '../lib/labelsKo'
 import type { Routine, Session } from '../types/models'
 
 export function RoutineEditPage() {
@@ -87,7 +88,7 @@ export function RoutineEditPage() {
               />
               <div style={{ flex: 1 }}>
                 <div>{ex?.name ?? eid}</div>
-                <div className="muted">{ex?.target}</div>
+                <div className="muted">{ex ? targetKo(ex.target) : ''}</div>
               </div>
               <button
                 type="button"
@@ -170,8 +171,10 @@ export function RoutineDetailPage() {
             <div>
               <strong>{ex?.name ?? eid}</strong>
               <div className="muted">
-                {ex?.target}
-                {ex?.secondaryMuscles?.length ? `, ${ex.secondaryMuscles.slice(0, 2).join(', ')}` : ''}
+                {ex ? targetKo(ex.target) : ''}
+                {ex?.secondaryMuscles?.length
+                  ? `, ${ex.secondaryMuscles.slice(0, 2).map((m) => targetKo(m)).join(', ')}`
+                  : ''}
               </div>
             </div>
           </div>
