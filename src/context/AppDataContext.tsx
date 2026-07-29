@@ -53,14 +53,25 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   const [frequentExerciseIds, setFrequentExerciseIds] = useState<string[]>([])
 
   const refresh = useCallback(async () => {
+    const settle = <T,>(p: Promise<T>, fallback: T, label: string) =>
+      Promise.race([
+        p,
+        new Promise<T>((_, reject) => {
+          window.setTimeout(() => reject(new Error(`${label} timeout`)), 3500)
+        }),
+      ]).catch((err: unknown) => {
+        console.warn('FitLog refresh partial failure', label, err)
+        return fallback
+      })
+
     try {
       const [nextSettings, nextRoutines, nextInProgress, nextCustom, completed] =
         await Promise.all([
-          store.getSettings(),
-          store.listRoutines(),
-          store.getInProgressSession(),
-          store.listCustomExercises().catch(() => [] as CustomExercise[]),
-          store.listSessions({ status: 'completed' }),
+          settle(store.getSettings(), { ...DEFAULT_SETTINGS }, 'settings'),
+          settle(store.listRoutines(), [], 'routines'),
+          settle(store.getInProgressSession(), undefined, 'inProgress'),
+          settle(store.listCustomExercises(), [] as CustomExercise[], 'custom'),
+          settle(store.listSessions({ status: 'completed' }), [] as Session[], 'sessions'),
         ])
       setSettingsState({
         ...DEFAULT_SETTINGS,
@@ -98,7 +109,23 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   }, [store])
 
   useEffect(() => {
-    void refresh()
+    let cancelled = false
+    // IndexedDB can hang on blocked upgrades — never leave Home stuck loading
+    const watchdog = window.setTimeout(() => {
+      if (!cancelled) {
+        console.warn('FitLog boot watchdog: forcing ready')
+        setReady(true)
+      }
+    }, 2500)
+
+    void refresh().finally(() => {
+      window.clearTimeout(watchdog)
+    })
+
+    return () => {
+      cancelled = true
+      window.clearTimeout(watchdog)
+    }
   }, [refresh])
 
   const setSettings = useCallback(
