@@ -1,11 +1,15 @@
 /// <reference types="vitest/config" />
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import { seedDesignPlugin } from '@seed-design/vite-plugin'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
   plugins: [
     react(),
+    // Dark-only app: inject SEED's theming script (data-seed-color-mode="dark-only")
+    // and a matching `color-scheme: dark` meta so SEED tokens resolve to dark.
+    seedDesignPlugin({ colorMode: 'dark-only' }),
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'icons/*.png'],
@@ -34,5 +38,12 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: './src/test/setup.ts',
     globals: true,
+    // SEED recipe `.mjs` modules side-effect-import their `.css`; inline the
+    // packages so Vite (not Node) resolves those imports under Vitest.
+    server: {
+      deps: {
+        inline: [/@seed-design\//],
+      },
+    },
   },
 })

@@ -1,0 +1,26 @@
+/* FitLog × SEED Design — phase 1 brand mapping.
+ *
+ * FitLog keeps its dark slate + lime identity. SEED components read role-based
+ * color tokens, so instead of copying Karrot's carrot we re-map the `brand`
+ * role to FitLog's lime. This is the documented "role token" way to theme SEED
+ * (see foundations/color-role) — no palette hardcoding inside components.
+ *
+ * Must load AFTER `@seed-design/css/base.css`; the selectors match base.css's
+ * dark blocks so the override wins on specificity + source order. */
+:root,
+:root[data-seed-color-mode="dark-only"],
+:root[data-seed-color-mode="system"][data-seed-user-color-scheme="dark"] {
+  --seed-color-bg-brand-solid: var(--accent);
+  --seed-color-bg-brand-solid-pressed: color-mix(in srgb, var(--accent) 84%, #000);
+  --seed-color-fg-brand: var(--accent);
+}
+
+/* The `brandSolid` recipe hard-codes a static-white label, which fails contrast
+ * on bright lime. Lime is a light surface, so the label + icons need FitLog's
+ * dark ink for WCAG AA. Scoped to the recipe class; nothing else is touched. */
+.seed-action-button--variant_brandSolid:not(:disabled):not([data-disabled]) {
+  color: var(--accent-ink);
+  --seed-prefix-icon-color: var(--accent-ink);
+  --seed-suffix-icon-color: var(--accent-ink);
+  --seed-icon-color: var(--accent-ink);
+}

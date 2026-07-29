@@ -11,12 +11,14 @@
     "test": "vitest"
   },
   "dependencies": {
+    "@seed-design/css": "^2.3.0",
     "idb": "^8.0.3",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "react-router-dom": "^7.18.1"
   },
   "devDependencies": {
+    "@seed-design/vite-plugin": "^2.1.0",
     "@testing-library/jest-dom": "^7.0.0",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",

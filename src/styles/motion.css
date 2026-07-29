@@ -56,6 +56,18 @@
   }
 }
 
+@keyframes splash-dot {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.25);
+  }
+}
+
 @keyframes timer-urgent {
   0%,
   100% {

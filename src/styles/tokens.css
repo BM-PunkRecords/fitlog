@@ -9,6 +9,9 @@
   --danger: #ff6b6b;
   --ok: #5ddea0;
   --radius: 14px;
+  /* Shared soft strokes so surfaces read via subtle contrast, not heavy borders. */
+  --stroke: color-mix(in srgb, var(--text) 10%, transparent);
+  --stroke-subtle: color-mix(in srgb, var(--text) 7%, transparent);
   --font-display: "Syne", system-ui, sans-serif;
   --font-body: "DM Sans", system-ui, sans-serif;
   --nav-h: 64px;

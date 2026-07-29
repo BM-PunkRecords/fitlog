@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { EmptyState, NavCard, PageHeader, SectionHeader, Stat } from '../components/primitives'
 import { useAppData } from '../context/AppDataContext'
 import { formatDateKey } from '../lib/format'
 import { formatMetricSet, metricTypeOf } from '../lib/metrics'
@@ -29,31 +30,45 @@ export function HistoryPage() {
   }, [sessions])
 
   return (
-    <div className="stack">
-      <h1 className="page-title">기록</h1>
-      {sessions.length === 0 && <p className="muted">완료된 세션이 아직 없어요.</p>}
-      {groups.map(([date, list]) => (
-        <section key={date} className="stack">
-          <h2>{date}</h2>
-          {list.map((s) => (
-            <Link key={s.id} to={`/history/${s.id}`} className="card row">
-              <div style={{ flex: 1 }}>
-                <strong>{s.routineId ? '루틴 세션' : '자유운동'}</strong>
-                <div className="muted">
-                  {s.items.length}개 운동 · 볼륨 {sessionVolume(s)}kg
-                </div>
-                <div className="muted" style={{ fontSize: 12 }}>
-                  {s.items
-                    .slice(0, 3)
-                    .map((i) => tKo(byId.get(i.exerciseId)?.name ?? i.exerciseId))
-                    .join(', ')}
-                </div>
-              </div>
-              <span className="muted">›</span>
+    <div className="stack page-enter">
+      <PageHeader title="기록" description="완료한 운동 세션을 날짜별로 모아 봐요" />
+      {sessions.length === 0 ? (
+        <EmptyState
+          title="완료된 세션이 아직 없어요"
+          description="운동을 마치면 여기에서 날짜별로 기록을 다시 볼 수 있어요."
+          action={
+            <Link to="/" className="btn btn-ghost interactive">
+              운동 시작하러 가기
             </Link>
-          ))}
-        </section>
-      ))}
+          }
+        />
+      ) : (
+        groups.map(([date, list]) => (
+          <section key={date} className="stack">
+            <SectionHeader title={date} aside={`${list.length}회`} />
+            {list.map((s) => (
+              <NavCard
+                key={s.id}
+                to={`/history/${s.id}`}
+                ariaLabel={`${date} ${s.routineId ? '루틴 세션' : '자유운동'} 상세 보기`}
+              >
+                <span className="card-title">{s.routineId ? '루틴 세션' : '자유운동'}</span>
+                <span className="card-meta">
+                  {s.items.length}개 운동 · 볼륨 {sessionVolume(s)}kg
+                </span>
+                {s.items.length > 0 && (
+                  <span className="card-meta">
+                    {s.items
+                      .slice(0, 3)
+                      .map((i) => tKo(byId.get(i.exerciseId)?.name ?? i.exerciseId))
+                      .join(', ')}
+                  </span>
+                )}
+              </NavCard>
+            ))}
+          </section>
+        ))
+      )}
     </div>
   )
 }
@@ -88,22 +103,32 @@ export function SessionDetailPage() {
 
   if (!session) {
     return (
-      <div className="stack">
-        <p>기록을 찾을 수 없어요.</p>
-        <Link to="/history">기록으로</Link>
+      <div className="stack page-enter">
+        <Link to="/history" className="muted interactive">
+          ← 기록
+        </Link>
+        <EmptyState
+          title="기록을 찾을 수 없어요"
+          description="이미 삭제되었거나 잘못된 주소일 수 있어요."
+          action={
+            <Link to="/history" className="btn btn-ghost interactive">
+              기록으로 돌아가기
+            </Link>
+          }
+        />
       </div>
     )
   }
 
   return (
-    <div className="stack">
-      <Link to="/history" className="muted">
+    <div className="stack page-enter">
+      <Link to="/history" className="muted interactive">
         ← 기록
       </Link>
-      <h1 className="page-title">세션 상세</h1>
-      <div className="card">
-        <div className="muted">{formatDateKey(session.endedAt ?? session.startedAt)}</div>
-        <strong>총 볼륨 {sessionVolume(session)} kg</strong>
+      <PageHeader title="세션 상세" description={formatDateKey(session.endedAt ?? session.startedAt)} />
+      <div className="stat">
+        <span className="stat-label muted">총 볼륨</span>
+        <span className="stat-number stat-number-brand">{sessionVolume(session)} kg</span>
       </div>
       {session.items.map((item) => {
         const ex = byId.get(item.exerciseId)
@@ -113,7 +138,7 @@ export function SessionDetailPage() {
         const delta = prev === undefined ? null : vol - prev
         return (
           <div key={`${item.exerciseId}-${item.order}`} className="card stack">
-            <strong>{ex ? tKo(ex.name) : item.exerciseId}</strong>
+            <strong className="card-title">{ex ? tKo(ex.name) : item.exerciseId}</strong>
             {type === 'weight_reps' && (
               <div style={{ color: 'var(--accent)' }}>
                 볼륨 {vol} kg
@@ -149,22 +174,26 @@ export function StatsPage() {
     })
   }, [store])
 
+  const hasData = stats.sessionCount > 0
+
   return (
-    <div className="stack">
-      <h1 className="page-title">통계</h1>
-      <p className="muted">최근 7일</p>
-      <div className="card stack">
-        <div>
-          <div className="muted">세션</div>
-          <strong style={{ fontSize: '1.6rem' }}>{stats.sessionCount}</strong>
-        </div>
-        <div>
-          <div className="muted">총 볼륨</div>
-          <strong style={{ fontSize: '1.6rem', color: 'var(--accent)' }}>
-            {stats.totalVolume} kg
-          </strong>
-        </div>
+    <div className="stack page-enter">
+      <PageHeader title="통계" description="최근 7일 동안의 운동 요약" />
+      <div className="stat-grid">
+        <Stat label="세션" value={stats.sessionCount} />
+        <Stat label="총 볼륨" value={`${stats.totalVolume} kg`} tone="brand" />
       </div>
+      {!hasData && (
+        <EmptyState
+          title="이번 주 기록이 아직 없어요"
+          description="운동을 완료하면 최근 7일 세션 수와 총 볼륨이 여기에 쌓여요."
+          action={
+            <Link to="/" className="btn btn-ghost interactive">
+              운동 시작하러 가기
+            </Link>
+          }
+        />
+      )}
     </div>
   )
 }
