@@ -1,10 +1,21 @@
 export type SessionStatus = 'in_progress' | 'completed' | 'discarded'
 
+/**
+ * How a session exercise is logged. Absence of the field on a persisted
+ * `SessionExercise` is treated exactly as `'weight_reps'` for backward
+ * compatibility — see `metricTypeOf` in `lib/metrics`.
+ */
+export type MetricType = 'weight_reps' | 'duration_distance' | 'duration' | 'reps'
+
 export interface SessionSet {
   setNumber: number
   weightKg: number
   reps: number
   completed: boolean
+  /** Elapsed time for time-based metrics, in seconds. */
+  durationSec?: number
+  /** Distance for distance-based metrics, in kilometres. */
+  distanceKm?: number
 }
 
 export interface SessionExercise {
@@ -12,6 +23,8 @@ export interface SessionExercise {
   order: number
   sets: SessionSet[]
   restSecondsDefault?: number
+  /** Optional; missing means legacy `'weight_reps'`. */
+  metricType?: MetricType
 }
 
 export interface Session {
@@ -27,6 +40,12 @@ export interface Routine {
   id: string
   name: string
   exerciseIds: string[]
+  /**
+   * Optional per-exercise rest overrides, keyed by exercise id (seconds).
+   * Absence of an entry (or the whole field, for legacy routines) means the
+   * exercise uses the app-wide `AppSettings.defaultRestSeconds`.
+   */
+  restByExerciseId?: Record<string, number>
   createdAt: string
   updatedAt: string
   lastPerformedAt?: string

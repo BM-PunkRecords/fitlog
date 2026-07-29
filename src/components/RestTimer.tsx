@@ -3,10 +3,9 @@ import { useEffect, useRef, useState } from 'react'
 interface Props {
   initialSeconds: number
   restartToken: number
-  onAdjustDefault?: (seconds: number) => void
 }
 
-export function RestTimer({ initialSeconds, restartToken, onAdjustDefault }: Props) {
+export function RestTimer({ initialSeconds, restartToken }: Props) {
   const [remaining, setRemaining] = useState(initialSeconds)
   const [paused, setPaused] = useState(false)
   const remainingRef = useRef(remaining)
@@ -28,9 +27,10 @@ export function RestTimer({ initialSeconds, restartToken, onAdjustDefault }: Pro
     return () => window.clearInterval(id)
   }, [paused, restartToken])
 
+  // Nudge only the live countdown; the persistent per-exercise rest is set via
+  // the RestField, and the app-wide default via Settings.
   const bump = (delta: number) => {
     setRemaining((s) => Math.max(0, s + delta))
-    onAdjustDefault?.(Math.max(15, initialSeconds + delta))
   }
 
   return (

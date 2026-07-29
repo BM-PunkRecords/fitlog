@@ -1,63 +1,27 @@
-import { useEffect, useRef, type ReactNode } from 'react'
+import { type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 
 /**
- * Pin tab+ad chrome to the visible viewport bottom.
+ * Pin the tab + ad chrome to the bottom of the *dynamic* viewport.
  *
- * Important: update position via DOM (ref), never React setState — fast scroll
- * was re-rendering the AdSense tree and blanking the banner.
+ * Architecture (why this shape):
+ * - A full-height fixed anchor sized with `100dvh` (CSS dynamic viewport)
+ *   tracks the visible viewport bottom natively, so the chrome stays pinned
+ *   as the mobile address bar shows/hides — no JS at all.
+ * - The previous approach listened to visualViewport/window scroll and mutated
+ *   `style.bottom` on every animation frame. During momentum scrolling that
+ *   repeatedly moved/recomposited the AdSense iframe ancestor and blanked the
+ *   creative. We deliberately register NO scroll/resize/visualViewport
+ *   listeners and never touch inline styles here.
+ * - The anchor is `pointer-events: none`; only the nav/ad inside it opt back
+ *   into `pointer-events: auto`, so the app content behind stays clickable.
+ * - Mounted once at the app root (outside <Routes>), so the <ins> and its
+ *   iframe keep stable DOM identity across route changes and scrolling.
  */
 export function BottomChrome({ children }: { children: ReactNode }) {
-  const ref = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return
-
-    const vv = window.visualViewport
-    let raf = 0
-
-    const apply = () => {
-      raf = 0
-      if (!vv) {
-        el.style.bottom = '0px'
-        return
-      }
-      // Gap between visual viewport bottom and layout viewport bottom
-      const gap = Math.max(0, window.innerHeight - vv.offsetTop - vv.height)
-      // Ignore single-frame spikes during momentum (iOS can report wild values)
-      const next = Number.isFinite(gap) && gap < window.innerHeight ? gap : 0
-      el.style.bottom = `${next}px`
-    }
-
-    const schedule = () => {
-      if (raf) return
-      raf = window.requestAnimationFrame(apply)
-    }
-
-    apply()
-    vv?.addEventListener('resize', schedule)
-    vv?.addEventListener('scroll', schedule)
-    window.addEventListener('resize', schedule)
-    window.addEventListener('orientationchange', schedule)
-    // Re-sync when document momentum scroll settles
-    window.addEventListener('scroll', schedule, { passive: true })
-    document.addEventListener('touchend', schedule, { passive: true })
-
-    return () => {
-      if (raf) window.cancelAnimationFrame(raf)
-      vv?.removeEventListener('resize', schedule)
-      vv?.removeEventListener('scroll', schedule)
-      window.removeEventListener('resize', schedule)
-      window.removeEventListener('orientationchange', schedule)
-      window.removeEventListener('scroll', schedule)
-      document.removeEventListener('touchend', schedule)
-    }
-  }, [])
-
   return createPortal(
-    <div className="bottom-chrome" ref={ref}>
-      {children}
+    <div className="bottom-anchor">
+      <div className="bottom-chrome">{children}</div>
     </div>,
     document.body,
   )

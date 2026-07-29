@@ -2,14 +2,35 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { AnimatedStat } from '../components/AnimatedStat'
 import { CompleteBurst } from '../components/CompleteBurst'
+import { DurationField } from '../components/DurationField'
 import { ExerciseInfoSheet } from '../components/ExerciseInfoSheet'
 import { ExercisePicker } from '../components/ExercisePicker'
 import { ExercisePreview } from '../components/ExercisePreview'
+import { NumericField } from '../components/NumericField'
+import { PreviousRecordDisclosure } from '../components/PreviousRecord'
+import { RestField } from '../components/RestField'
 import { RestTimer } from '../components/RestTimer'
 import { Sheet } from '../components/Sheet'
 import { useAppData } from '../context/AppDataContext'
-import { applyWeightKgToSets, formatElapsed, sessionItemFromExercise } from '../lib/format'
+import {
+  type EditableSetFields,
+  type EntryMode,
+  applyRowEdit,
+  formatElapsed,
+  sessionItemFromExercise,
+  setSessionExerciseRest,
+} from '../lib/format'
 import { targetKo } from '../lib/labelsKo'
+import { clampRest, resolveRest } from '../lib/rest'
+import {
+  METRIC_LABELS,
+  METRIC_TYPES,
+  completeHint,
+  isSetComplete,
+  metricFields,
+  metricTypeOf,
+} from '../lib/metrics'
+import { findPreviousRecord } from '../lib/previousRecord'
 import { tKo } from '../lib/tKo'
 import {
   exerciseRepsEntered,
@@ -17,13 +38,13 @@ import {
   sessionRepsEntered,
   sessionVolume,
 } from '../store/volume'
-import type { Session, SessionSet } from '../types/models'
+import type { MetricType, Session, SessionSet } from '../types/models'
 
 type PickerMode = 'add' | 'replace' | null
 
 export function SessionPage() {
   const { id } = useParams()
-  const { store, catalog, settings, setSettings, refresh } = useAppData()
+  const { store, catalog, settings, refresh } = useAppData()
   const navigate = useNavigate()
   const [session, setSession] = useState<Session | null>(null)
   const [index, setIndex] = useState(0)
@@ -34,7 +55,11 @@ export function SessionPage() {
   const [burstSet, setBurstSet] = useState<number | null>(null)
   const [flashSet, setFlashSet] = useState<number | null>(null)
   const [now, setNow] = useState(() => Date.now())
-  const [bulkKg, setBulkKg] = useState('')
+  const [entryMode, setEntryMode] = useState<EntryMode>('individual')
+  const [cascadeStart, setCascadeStart] = useState<number | null>(null)
+  const [completedSessions, setCompletedSessions] = useState<Session[]>([])
+  const [prevLoading, setPrevLoading] = useState(true)
+  const [prevError, setPrevError] = useState(false)
   const byId = useMemo(() => new Map(catalog.map((e) => [e.id, e])), [catalog])
 
   useEffect(() => {
@@ -59,12 +84,41 @@ export function SessionPage() {
     return () => window.clearInterval(timer)
   }, [session?.id, session?.status])
 
+  // Switching exercises restarts cascade selection so a stale highlight never
+  // lingers on the next exercise's rows.
   useEffect(() => {
-    if (!session) return
+    setCascadeStart(null)
+  }, [session?.id, index])
+
+  // Completed history is read once per session load and reused across
+  // exercises/renders so previous records never hit IndexedDB per set entry.
+  useEffect(() => {
+    let cancelled = false
+    setPrevLoading(true)
+    setPrevError(false)
+    store
+      .listSessions({ status: 'completed' })
+      .then((list) => {
+        if (!cancelled) setCompletedSessions(list)
+      })
+      .catch((err: unknown) => {
+        console.warn('FitLog previous-record load failed', err)
+        if (!cancelled) setPrevError(true)
+      })
+      .finally(() => {
+        if (!cancelled) setPrevLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [store])
+
+  const previousRecord = useMemo(() => {
+    if (!session) return null
     const item = session.items[index]
-    const seed = item?.sets.find((s) => s.weightKg > 0)?.weightKg ?? item?.sets[0]?.weightKg ?? 0
-    setBulkKg(seed > 0 ? String(seed) : '')
-  }, [session?.id, index, session?.items[index]?.exerciseId])
+    if (!item) return null
+    return findPreviousRecord(completedSessions, session, item.exerciseId)
+  }, [completedSessions, session, index])
 
   const persist = async (next: Session) => {
     setSession(next)
@@ -81,6 +135,12 @@ export function SessionPage() {
   }
 
   const current = session.items[index]
+  const metricType: MetricType = current ? metricTypeOf(current) : 'weight_reps'
+  const fields = metricFields(metricType)
+  const middleCount = [fields.weight, fields.reps, fields.duration, fields.distance].filter(
+    Boolean,
+  ).length
+  const setGridClass = middleCount <= 1 ? 'set-grid cols-3' : 'set-grid'
   const exercise = current ? byId.get(current.exerciseId) : undefined
   const volume = sessionVolume(session)
   const sessionReps = sessionRepsEntered(session)
@@ -107,8 +167,8 @@ export function SessionPage() {
     const set = current.sets.find((s) => s.setNumber === setNumber)
     if (!set) return
     if (!set.completed) {
-      if (set.weightKg <= 0 || set.reps <= 0) {
-        setError('완료하려면 중량(kg)과 횟수를 0보다 크게 입력하세요')
+      if (!isSetComplete(set, metricType)) {
+        setError(completeHint(metricType))
         return
       }
       setError('')
@@ -156,18 +216,35 @@ export function SessionPage() {
     void persist({ ...session, items })
   }
 
-  const applyBulkKg = (onlyIncomplete: boolean) => {
-    if (!current) return
-    const kg = Number(bulkKg)
-    if (!Number.isFinite(kg) || kg < 0) {
-      setError('KG는 0 이상 숫자를 입력하세요')
-      return
-    }
-    setError('')
+  const setMetricType = (next: MetricType) => {
+    if (!current || metricTypeOf(current) === next) return
     const items = session.items.map((item, i) =>
-      i === index ? applyWeightKgToSets(item, kg, { onlyIncomplete }) : item,
+      i === index ? { ...item, metricType: next } : item,
+    )
+    setError('')
+    void persist({ ...session, items })
+  }
+
+  // A single field edit. In `bulk` mode the value cascades to the edited row
+  // and every row below it (same field only); completion flags stay untouched.
+  const editField = (setNumber: number, patch: EditableSetFields) => {
+    if (!current) return
+    const items = session.items.map((item, i) =>
+      i === index ? applyRowEdit(item, setNumber, patch, entryMode) : item,
     )
     void persist({ ...session, items })
+  }
+
+  const changeEntryMode = (mode: EntryMode) => {
+    setEntryMode(mode)
+    if (mode === 'individual') setCascadeStart(null)
+  }
+
+  // Per-exercise rest control: updates only the current session exercise. It
+  // never touches other exercises or the app-wide default.
+  const setCurrentRest = (seconds: number) => {
+    if (!current) return
+    void persist(setSessionExerciseRest(session, index, clampRest(seconds)))
   }
 
   const goNext = () => {
@@ -274,20 +351,24 @@ export function SessionPage() {
                 <h2 style={{ fontSize: '1.15rem' }}>{exerciseName}</h2>
                 <div className="muted">{exercise ? targetKo(exercise.target) : ''}</div>
                 <div className="row" style={{ marginTop: 8, gap: 16, flexWrap: 'wrap' }}>
-                  <div>
-                    <span className="muted" style={{ fontSize: 12 }}>
-                      횟수 합{' '}
-                    </span>
-                    <AnimatedStat value={currentReps}>
-                      <span style={{ color: 'var(--accent)' }}>{currentReps} 회</span>
-                    </AnimatedStat>
-                  </div>
-                  <div>
-                    <span className="muted" style={{ fontSize: 12 }}>
-                      이 운동 볼륨{' '}
-                    </span>
-                    <AnimatedStat value={currentVolumeLive}>{currentVolumeLive} kg</AnimatedStat>
-                  </div>
+                  {fields.reps && (
+                    <div>
+                      <span className="muted" style={{ fontSize: 12 }}>
+                        횟수 합{' '}
+                      </span>
+                      <AnimatedStat value={currentReps}>
+                        <span style={{ color: 'var(--accent)' }}>{currentReps} 회</span>
+                      </AnimatedStat>
+                    </div>
+                  )}
+                  {metricType === 'weight_reps' && (
+                    <div>
+                      <span className="muted" style={{ fontSize: 12 }}>
+                        이 운동 볼륨{' '}
+                      </span>
+                      <AnimatedStat value={currentVolumeLive}>{currentVolumeLive} kg</AnimatedStat>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -307,89 +388,132 @@ export function SessionPage() {
                 운동 대체
               </button>
             </div>
+            <label className="metric-select">
+              <span className="muted" style={{ fontSize: 12 }}>
+                기록 방식
+              </span>
+              <select
+                className="field metric-select-input"
+                value={metricType}
+                aria-label="기록 방식 선택"
+                onChange={(e) => setMetricType(e.target.value as MetricType)}
+              >
+                {METRIC_TYPES.map((type) => (
+                  <option key={type} value={type}>
+                    {METRIC_LABELS[type]}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <PreviousRecordDisclosure
+              record={previousRecord}
+              loading={prevLoading}
+              error={prevError}
+            />
           </div>
 
           <div className="stack">
-            <div className="row bulk-kg-bar">
-              <span className="muted" style={{ fontSize: 12, flexShrink: 0 }}>
-                KG 일괄
-              </span>
-              <input
-                className="field"
-                type="number"
-                min={0}
-                step="any"
-                inputMode="decimal"
-                aria-label="일괄 적용할 중량(kg)"
-                placeholder="kg"
-                value={bulkKg}
-                onChange={(e) => setBulkKg(e.target.value)}
-                style={{ flex: 1, minWidth: 0 }}
-              />
+            <div className="entry-mode" role="group" aria-label="세트 입력 방식">
               <button
                 type="button"
-                className="btn btn-ghost interactive"
-                style={{ padding: '10px 12px', flexShrink: 0 }}
-                onClick={() => applyBulkKg(false)}
+                className={`entry-mode-btn interactive ${
+                  entryMode === 'individual' ? 'is-active' : ''
+                }`}
+                aria-pressed={entryMode === 'individual'}
+                onClick={() => changeEntryMode('individual')}
               >
-                전체
+                개별 입력
               </button>
               <button
                 type="button"
-                className="btn btn-ghost interactive"
-                style={{ padding: '10px 12px', flexShrink: 0 }}
-                onClick={() => applyBulkKg(true)}
+                className={`entry-mode-btn interactive ${entryMode === 'bulk' ? 'is-active' : ''}`}
+                aria-pressed={entryMode === 'bulk'}
+                onClick={() => changeEntryMode('bulk')}
               >
-                미완료
+                일괄 입력
               </button>
             </div>
-            <div className="set-grid muted" style={{ fontSize: 12 }}>
+            {entryMode === 'bulk' && (
+              <p className="muted entry-mode-hint">선택한 세트부터 아래 세트에 함께 적용돼요.</p>
+            )}
+            <div className={`${setGridClass} muted`} style={{ fontSize: 12 }}>
               <span>세트</span>
-              <span>KG</span>
-              <span>회</span>
+              {fields.weight && <span>KG</span>}
+              {fields.duration && <span>시간</span>}
+              {fields.distance && <span>km</span>}
+              {fields.reps && <span>회</span>}
               <span>완료</span>
             </div>
-            {current.sets.map((set) => (
-              <div
-                key={set.setNumber}
-                className={`set-grid ${flashSet === set.setNumber ? 'set-row-flash' : ''}`}
-              >
-                <span>{set.setNumber}</span>
-                <input
-                  className="field"
-                  type="number"
-                  min={0}
-                  value={set.weightKg || ''}
-                  onChange={(e) =>
-                    updateSet(set.setNumber, { weightKg: Number(e.target.value) || 0 })
-                  }
-                />
-                <input
-                  className="field"
-                  type="number"
-                  min={0}
-                  value={set.reps || ''}
-                  onChange={(e) =>
-                    updateSet(set.setNumber, { reps: Number(e.target.value) || 0 })
-                  }
-                />
-                <button
-                  type="button"
-                  className={`btn set-done-btn interactive ${set.completed ? 'is-complete' : ''}`}
-                  style={{
-                    background: set.completed ? 'var(--accent)' : 'var(--bg-input)',
-                    color: set.completed ? 'var(--accent-ink)' : 'var(--text)',
-                    borderRadius: 10,
-                    padding: 10,
-                  }}
-                  onClick={() => toggleComplete(set.setNumber)}
-                  aria-label={`세트 ${set.setNumber} 완료`}
+            {current.sets.map((set) => {
+              const cascaded =
+                entryMode === 'bulk' && cascadeStart !== null && set.setNumber >= cascadeStart
+              const cascadeFocus = () => {
+                if (entryMode === 'bulk') setCascadeStart(set.setNumber)
+              }
+              return (
+                <div
+                  key={set.setNumber}
+                  className={`${setGridClass} ${
+                    flashSet === set.setNumber ? 'set-row-flash' : ''
+                  } ${cascaded ? 'set-row-cascade' : ''} ${
+                    cascadeStart === set.setNumber && entryMode === 'bulk'
+                      ? 'set-row-cascade-start'
+                      : ''
+                  }`}
                 >
-                  {set.completed ? '✓' : '○'}
-                  <CompleteBurst active={burstSet === set.setNumber} />
-                </button>
-              </div>
-            ))}
+                  <span>{set.setNumber}</span>
+                  {fields.weight && (
+                    <NumericField
+                      value={set.weightKg}
+                      onValueChange={(n) => editField(set.setNumber, { weightKg: n })}
+                      onFocus={cascadeFocus}
+                      ariaLabel={`세트 ${set.setNumber} 중량(kg)`}
+                      decimal
+                    />
+                  )}
+                  {fields.duration && (
+                    <DurationField
+                      seconds={set.durationSec ?? 0}
+                      onSecondsChange={(s) => editField(set.setNumber, { durationSec: s })}
+                      onFocus={cascadeFocus}
+                      ariaLabel={`세트 ${set.setNumber} 시간(분:초)`}
+                    />
+                  )}
+                  {fields.distance && (
+                    <NumericField
+                      value={set.distanceKm ?? 0}
+                      onValueChange={(n) => editField(set.setNumber, { distanceKm: n })}
+                      onFocus={cascadeFocus}
+                      ariaLabel={`세트 ${set.setNumber} 거리(km)`}
+                      decimal
+                    />
+                  )}
+                  {fields.reps && (
+                    <NumericField
+                      value={set.reps}
+                      onValueChange={(n) => editField(set.setNumber, { reps: n })}
+                      onFocus={cascadeFocus}
+                      ariaLabel={`세트 ${set.setNumber} 횟수`}
+                    />
+                  )}
+                  <button
+                    type="button"
+                    className={`btn set-done-btn interactive ${set.completed ? 'is-complete' : ''}`}
+                    style={{
+                      background: set.completed ? 'var(--accent)' : 'var(--bg-input)',
+                      color: set.completed ? 'var(--accent-ink)' : 'var(--text)',
+                      borderRadius: 10,
+                      padding: 10,
+                    }}
+                    onClick={() => toggleComplete(set.setNumber)}
+                    aria-label={`세트 ${set.setNumber} 완료`}
+                  >
+                    {set.completed ? '✓' : '○'}
+                    <CompleteBurst active={burstSet === set.setNumber} />
+                  </button>
+                </div>
+              )
+            })}
             {error && <p className="error-text">{error}</p>}
           </div>
 
@@ -402,12 +526,17 @@ export function SessionPage() {
             </button>
           </div>
 
+          <div className="card stack">
+            <RestField
+              label="이 운동 휴식 시간"
+              seconds={resolveRest(current.restSecondsDefault, settings.defaultRestSeconds)}
+              onChange={setCurrentRest}
+            />
+          </div>
+
           <RestTimer
-            initialSeconds={current.restSecondsDefault ?? settings.defaultRestSeconds}
+            initialSeconds={resolveRest(current.restSecondsDefault, settings.defaultRestSeconds)}
             restartToken={restToken}
-            onAdjustDefault={(seconds) => {
-              void setSettings({ ...settings, defaultRestSeconds: seconds })
-            }}
           />
 
           <div className="row" style={{ flexWrap: 'wrap' }}>

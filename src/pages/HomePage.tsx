@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { ResumeBanner } from '../components/ResumeBanner'
 import { useAppData } from '../context/AppDataContext'
 import { relativeTime, routineTargets } from '../lib/format'
+import { formatRest } from '../lib/rest'
 import { createId } from '../store/createId'
 import { APP_NAME } from '../types/models'
 import type { Session } from '../types/models'
@@ -87,9 +88,14 @@ export function HomePage() {
           추가
         </Link>
       </div>
-      <p className="muted" style={{ fontSize: 12 }}>
-        기본 휴식 {settings.defaultRestSeconds}초
-      </p>
+      <Link
+        to="/settings"
+        className="muted interactive"
+        style={{ fontSize: 12 }}
+        aria-label={`설정 열기, 기본 휴식 ${formatRest(settings.defaultRestSeconds)}`}
+      >
+        설정 · 기본 휴식 {formatRest(settings.defaultRestSeconds)} ›
+      </Link>
     </div>
   )
 }

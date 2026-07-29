@@ -1,6 +1,7 @@
 import type { Exercise } from '../catalog/types'
-import type { SessionExercise, SessionSet } from '../types/models'
+import type { Routine, Session, SessionExercise, SessionSet } from '../types/models'
 import { targetKo } from './labelsKo'
+import { routineRestFor } from './rest'
 
 export function emptySets(count = 3): SessionSet[] {
   return Array.from({ length: count }, (_, i) => ({
@@ -21,6 +22,42 @@ export function sessionItemFromExercise(
     order,
     sets: emptySets(3),
     restSecondsDefault,
+  }
+}
+
+/**
+ * Build the session items for a routine, copying each exercise's *effective*
+ * rest (per-exercise override when set, else the app default) into
+ * `SessionExercise.restSecondsDefault`. Legacy routines without per-exercise
+ * config simply get the app default on every item.
+ */
+export function buildRoutineSessionItems(
+  routine: Pick<Routine, 'exerciseIds' | 'restByExerciseId'>,
+  defaultRestSeconds: number,
+): SessionExercise[] {
+  return routine.exerciseIds.map((exerciseId, order) =>
+    sessionItemFromExercise(
+      exerciseId,
+      order,
+      routineRestFor(routine, exerciseId, defaultRestSeconds),
+    ),
+  )
+}
+
+/**
+ * Return a new session with the rest duration of a single exercise (by index)
+ * changed. Pure: other exercises and the original session are untouched.
+ */
+export function setSessionExerciseRest(
+  session: Session,
+  index: number,
+  seconds: number,
+): Session {
+  return {
+    ...session,
+    items: session.items.map((item, i) =>
+      i === index ? { ...item, restSecondsDefault: seconds } : item,
+    ),
   }
 }
 
@@ -72,18 +109,36 @@ export function formatElapsed(ms: number): string {
   return `${mm}:${ss}`
 }
 
-/** Apply the same kg to every set (optionally skip completed). */
-export function applyWeightKgToSets(
+/** Numeric set fields a single row edit can write. */
+export type EditableSetFields = Partial<
+  Pick<SessionSet, 'weightKg' | 'reps' | 'durationSec' | 'distanceKm'>
+>
+
+/** Set-entry mode: edit one row, or cascade the edit to rows below. */
+export type EntryMode = 'individual' | 'bulk'
+
+/**
+ * Apply a field edit made on the set `fromSetNumber`.
+ *
+ * - `individual`: only that row changes (default per-row editing).
+ * - `bulk`: the edited value cascades to that row and every row below it
+ *   (higher `setNumber`).
+ *
+ * Only the provided keys are written, so completion flags and other fields on
+ * the affected rows are left untouched.
+ */
+export function applyRowEdit(
   item: SessionExercise,
-  weightKg: number,
-  options: { onlyIncomplete?: boolean } = {},
+  fromSetNumber: number,
+  fields: EditableSetFields,
+  mode: EntryMode,
 ): SessionExercise {
-  const kg = Number.isFinite(weightKg) && weightKg >= 0 ? weightKg : 0
   return {
     ...item,
     sets: item.sets.map((set) => {
-      if (options.onlyIncomplete && set.completed) return set
-      return { ...set, weightKg: kg }
+      const inRange =
+        mode === 'bulk' ? set.setNumber >= fromSetNumber : set.setNumber === fromSetNumber
+      return inRange ? { ...set, ...fields } : set
     }),
   }
 }

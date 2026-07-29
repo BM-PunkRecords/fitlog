@@ -7,6 +7,7 @@ import { HomePage } from './pages/HomePage'
 import { HistoryPage, SessionDetailPage, StatsPage } from './pages/HistoryStatsPages'
 import { RoutineDetailPage, RoutineEditPage } from './pages/RoutinePages'
 import { SessionPage } from './pages/SessionPage'
+import { SettingsPage } from './pages/SettingsPage'
 import './styles/global.css'
 import './styles/motion.css'
 
@@ -24,6 +25,7 @@ export default function App() {
             <Route path="/history" element={<HistoryPage />} />
             <Route path="/history/:id" element={<SessionDetailPage />} />
             <Route path="/stats" element={<StatsPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </div>

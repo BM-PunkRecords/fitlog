@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { applyWeightKgToSets, formatElapsed } from './format'
-import type { SessionExercise } from '../types/models'
+import {
+  applyRowEdit,
+  buildRoutineSessionItems,
+  formatElapsed,
+  setSessionExerciseRest,
+} from './format'
+import type { Session, SessionExercise } from '../types/models'
 
 describe('formatElapsed', () => {
   it('formats under an hour as MM:SS', () => {
@@ -15,24 +20,108 @@ describe('formatElapsed', () => {
   })
 })
 
-describe('applyWeightKgToSets', () => {
-  const item: SessionExercise = {
+describe('applyRowEdit', () => {
+  const weightItem: SessionExercise = {
     exerciseId: 'x',
     order: 0,
+    metricType: 'weight_reps',
     sets: [
       { setNumber: 1, weightKg: 20, reps: 10, completed: true },
-      { setNumber: 2, weightKg: 0, reps: 0, completed: false },
-      { setNumber: 3, weightKg: 0, reps: 0, completed: false },
+      { setNumber: 2, weightKg: 30, reps: 8, completed: false },
+      { setNumber: 3, weightKg: 30, reps: 8, completed: true },
+      { setNumber: 4, weightKg: 30, reps: 8, completed: false },
+      { setNumber: 5, weightKg: 30, reps: 8, completed: false },
     ],
   }
 
-  it('applies kg to all sets', () => {
-    const next = applyWeightKgToSets(item, 40)
-    expect(next.sets.map((s) => s.weightKg)).toEqual([40, 40, 40])
+  it('individual mode changes only the selected row', () => {
+    const next = applyRowEdit(weightItem, 2, { weightKg: 40 }, 'individual')
+    expect(next.sets.map((s) => s.weightKg)).toEqual([20, 40, 30, 30, 30])
   })
 
-  it('can skip completed sets', () => {
-    const next = applyWeightKgToSets(item, 40, { onlyIncomplete: true })
-    expect(next.sets.map((s) => s.weightKg)).toEqual([20, 40, 40])
+  it('bulk mode changes the selected row and every row below it', () => {
+    const next = applyRowEdit(weightItem, 2, { weightKg: 40 }, 'bulk')
+    expect(next.sets.map((s) => s.weightKg)).toEqual([20, 40, 40, 40, 40])
+  })
+
+  it('leaves rows above the selected row unchanged in bulk mode', () => {
+    const next = applyRowEdit(weightItem, 3, { weightKg: 50 }, 'bulk')
+    expect(next.sets[0].weightKg).toBe(20)
+    expect(next.sets[1].weightKg).toBe(30)
+  })
+
+  it('changes only the edited field, not siblings', () => {
+    const next = applyRowEdit(weightItem, 2, { weightKg: 40 }, 'bulk')
+    expect(next.sets.map((s) => s.reps)).toEqual([10, 8, 8, 8, 8])
+  })
+
+  it('preserves completed flags for every affected row', () => {
+    const next = applyRowEdit(weightItem, 2, { weightKg: 40 }, 'bulk')
+    expect(next.sets.map((s) => s.completed)).toEqual([true, false, true, false, false])
+  })
+
+  it('cascades reps for bodyweight/reps metrics', () => {
+    const next = applyRowEdit(weightItem, 3, { reps: 12 }, 'bulk')
+    expect(next.sets.map((s) => s.reps)).toEqual([10, 8, 12, 12, 12])
+  })
+
+  it('cascades duration and distance for cardio metrics', () => {
+    const cardioItem: SessionExercise = {
+      exerciseId: 'row',
+      order: 0,
+      metricType: 'duration_distance',
+      sets: [
+        { setNumber: 1, weightKg: 0, reps: 0, durationSec: 600, distanceKm: 2, completed: true },
+        { setNumber: 2, weightKg: 0, reps: 0, durationSec: 0, distanceKm: 0, completed: false },
+        { setNumber: 3, weightKg: 0, reps: 0, durationSec: 0, distanceKm: 0, completed: false },
+      ],
+    }
+    const withTime = applyRowEdit(cardioItem, 2, { durationSec: 1200 }, 'bulk')
+    expect(withTime.sets.map((s) => s.durationSec)).toEqual([600, 1200, 1200])
+    expect(withTime.sets.map((s) => s.distanceKm)).toEqual([2, 0, 0])
+
+    const withDistance = applyRowEdit(cardioItem, 1, { distanceKm: 5 }, 'bulk')
+    expect(withDistance.sets.map((s) => s.distanceKm)).toEqual([5, 5, 5])
+    expect(withDistance.sets.map((s) => s.durationSec)).toEqual([600, 0, 0])
+  })
+})
+
+describe('buildRoutineSessionItems', () => {
+  it('copies the app default into every item for a legacy routine', () => {
+    const items = buildRoutineSessionItems({ exerciseIds: ['a', 'b'] }, 90)
+    expect(items.map((i) => i.restSecondsDefault)).toEqual([90, 90])
+    expect(items.map((i) => i.order)).toEqual([0, 1])
+    expect(items.map((i) => i.exerciseId)).toEqual(['a', 'b'])
+  })
+
+  it('copies the per-exercise override where present and the default otherwise', () => {
+    const items = buildRoutineSessionItems(
+      { exerciseIds: ['a', 'b', 'c'], restByExerciseId: { b: 45 } },
+      90,
+    )
+    expect(items.map((i) => i.restSecondsDefault)).toEqual([90, 45, 90])
+  })
+})
+
+describe('setSessionExerciseRest', () => {
+  const session: Session = {
+    id: 's',
+    routineId: null,
+    startedAt: '2026-07-29T00:00:00.000Z',
+    status: 'in_progress',
+    items: [
+      { exerciseId: 'a', order: 0, restSecondsDefault: 90, sets: [] },
+      { exerciseId: 'b', order: 1, restSecondsDefault: 90, sets: [] },
+    ],
+  }
+
+  it('changes only the targeted exercise rest', () => {
+    const next = setSessionExerciseRest(session, 1, 30)
+    expect(next.items.map((i) => i.restSecondsDefault)).toEqual([90, 30])
+  })
+
+  it('does not mutate the original session', () => {
+    setSessionExerciseRest(session, 0, 15)
+    expect(session.items[0].restSecondsDefault).toBe(90)
   })
 })

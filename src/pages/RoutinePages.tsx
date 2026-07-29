@@ -1,22 +1,25 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { ExercisePicker } from '../components/ExercisePicker'
+import { RestField } from '../components/RestField'
 import { Sheet } from '../components/Sheet'
 import { useAppData } from '../context/AppDataContext'
-import { sessionItemFromExercise } from '../lib/format'
+import { buildRoutineSessionItems } from '../lib/format'
 import { createId } from '../store/createId'
 import { targetKo } from '../lib/labelsKo'
+import { formatRest, hasRoutineRestOverride, routineRestFor } from '../lib/rest'
 import { tKo } from '../lib/tKo'
 import type { Routine, Session } from '../types/models'
 
 export function RoutineEditPage() {
   const { id } = useParams()
   const isNew = !id || id === 'new'
-  const { catalog, store, refresh, routines } = useAppData()
+  const { catalog, store, refresh, routines, settings } = useAppData()
   const existing = routines.find((r) => r.id === id)
   const navigate = useNavigate()
   const [name, setName] = useState('')
   const [exerciseIds, setExerciseIds] = useState<string[]>([])
+  const [restById, setRestById] = useState<Record<string, number>>({})
   const [showPicker, setShowPicker] = useState(false)
   const byId = useMemo(() => new Map(catalog.map((e) => [e.id, e])), [catalog])
 
@@ -24,11 +27,25 @@ export function RoutineEditPage() {
     if (existing) {
       setName(existing.name)
       setExerciseIds(existing.exerciseIds)
+      setRestById(existing.restByExerciseId ?? {})
     } else if (isNew) {
       setName('')
       setExerciseIds([])
+      setRestById({})
     }
   }, [existing, isNew])
+
+  const clearRest = (eid: string) =>
+    setRestById((m) => {
+      const next = { ...m }
+      delete next[eid]
+      return next
+    })
+
+  const removeExercise = (index: number, eid: string) => {
+    setExerciseIds((ids) => ids.filter((_, i) => i !== index))
+    clearRest(eid)
+  }
 
   const save = async () => {
     const trimmed = name.trim()
@@ -37,6 +54,10 @@ export function RoutineEditPage() {
       return
     }
     const now = new Date().toISOString()
+    const restByExerciseId: Record<string, number> = {}
+    for (const eid of exerciseIds) {
+      if (restById[eid] !== undefined) restByExerciseId[eid] = restById[eid]
+    }
     const routine: Routine = {
       id: isNew ? createId() : (existing?.id ?? createId()),
       name: trimmed,
@@ -44,6 +65,11 @@ export function RoutineEditPage() {
       createdAt: existing?.createdAt ?? now,
       updatedAt: now,
       lastPerformedAt: existing?.lastPerformedAt,
+    }
+    // Only persist the field when there is at least one override, keeping legacy
+    // routines free of the key.
+    if (Object.keys(restByExerciseId).length > 0) {
+      routine.restByExerciseId = restByExerciseId
     }
     await store.upsertRoutine(routine)
     await refresh()
@@ -75,24 +101,36 @@ export function RoutineEditPage() {
         </div>
         {exerciseIds.map((eid, index) => {
           const ex = byId.get(eid)
+          const override = restById[eid]
+          const isDefault = override === undefined
+          const effective = override ?? settings.defaultRestSeconds
           return (
-            <div key={`${eid}-${index}`} className="card row">
-              <img
-                className="thumb"
-                src={ex?.thumbnails.male ?? ex?.thumbnails.female}
-                alt=""
-              />
-              <div style={{ flex: 1 }}>
-                <div>{ex ? tKo(ex.name) : eid}</div>
-                <div className="muted">{ex ? targetKo(ex.target) : ''}</div>
+            <div key={`${eid}-${index}`} className="card stack">
+              <div className="row">
+                <img
+                  className="thumb"
+                  src={ex?.thumbnails.male ?? ex?.thumbnails.female}
+                  alt=""
+                />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div>{ex ? tKo(ex.name) : eid}</div>
+                  <div className="muted">{ex ? targetKo(ex.target) : ''}</div>
+                </div>
+                <button
+                  type="button"
+                  className="btn btn-ghost interactive"
+                  onClick={() => removeExercise(index, eid)}
+                >
+                  삭제
+                </button>
               </div>
-              <button
-                type="button"
-                className="btn btn-ghost interactive"
-                onClick={() => setExerciseIds((ids) => ids.filter((_, i) => i !== index))}
-              >
-                삭제
-              </button>
+              <RestField
+                label="휴식 시간"
+                seconds={effective}
+                isDefault={isDefault}
+                onUseDefault={() => clearRest(eid)}
+                onChange={(s) => setRestById((m) => ({ ...m, [eid]: s }))}
+              />
             </div>
           )
         })}
@@ -146,9 +184,7 @@ export function RoutineDetailPage() {
       routineId: routine.id,
       startedAt: new Date().toISOString(),
       status: 'in_progress',
-      items: routine.exerciseIds.map((eid, order) =>
-        sessionItemFromExercise(eid, order, settings.defaultRestSeconds),
-      ),
+      items: buildRoutineSessionItems(routine, settings.defaultRestSeconds),
     }
     await store.saveSession(session)
     await refresh()
@@ -175,16 +211,22 @@ export function RoutineDetailPage() {
       </header>
       {routine.exerciseIds.map((eid) => {
         const ex = byId.get(eid)
+        const rest = routineRestFor(routine, eid, settings.defaultRestSeconds)
+        const isDefault = !hasRoutineRestOverride(routine, eid)
         return (
           <div key={eid} className="card row">
             <img className="thumb" src={ex?.thumbnails.male ?? ex?.thumbnails.female} alt="" />
-            <div>
+            <div style={{ flex: 1, minWidth: 0 }}>
               <strong>{ex ? tKo(ex.name) : eid}</strong>
               <div className="muted">
                 {ex ? targetKo(ex.target) : ''}
                 {ex?.secondaryMuscles?.length
                   ? `, ${ex.secondaryMuscles.slice(0, 2).map((m) => targetKo(m)).join(', ')}`
                   : ''}
+              </div>
+              <div className="muted" style={{ fontSize: 12, marginTop: 4 }}>
+                휴식 {formatRest(rest)}
+                {isDefault ? ' · 기본값' : ''}
               </div>
             </div>
           </div>

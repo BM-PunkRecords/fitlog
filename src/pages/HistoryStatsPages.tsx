@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useAppData } from '../context/AppDataContext'
 import { formatDateKey } from '../lib/format'
+import { formatMetricSet, metricTypeOf } from '../lib/metrics'
 import { tKo } from '../lib/tKo'
 import { exerciseVolume, sessionVolume } from '../store/volume'
 import { weeklyStats } from '../store/stats'
@@ -106,23 +107,28 @@ export function SessionDetailPage() {
       </div>
       {session.items.map((item) => {
         const ex = byId.get(item.exerciseId)
+        const type = metricTypeOf(item)
         const vol = exerciseVolume(item)
         const prev = previousByExercise.get(item.exerciseId)
         const delta = prev === undefined ? null : vol - prev
         return (
           <div key={`${item.exerciseId}-${item.order}`} className="card stack">
             <strong>{ex ? tKo(ex.name) : item.exerciseId}</strong>
-            <div style={{ color: 'var(--accent)' }}>
-              볼륨 {vol} kg
-              {delta !== null && (
-                <span style={{ color: delta >= 0 ? 'var(--ok)' : 'var(--danger)', marginLeft: 8 }}>
-                  {delta >= 0 ? '▲' : '▼'} {Math.abs(delta)}kg
-                </span>
-              )}
-            </div>
+            {type === 'weight_reps' && (
+              <div style={{ color: 'var(--accent)' }}>
+                볼륨 {vol} kg
+                {delta !== null && (
+                  <span
+                    style={{ color: delta >= 0 ? 'var(--ok)' : 'var(--danger)', marginLeft: 8 }}
+                  >
+                    {delta >= 0 ? '▲' : '▼'} {Math.abs(delta)}kg
+                  </span>
+                )}
+              </div>
+            )}
             {item.sets.map((s) => (
               <div key={s.setNumber} className="muted">
-                {s.setNumber} · {s.weightKg} kg × {s.reps}회
+                {s.setNumber} · {formatMetricSet(s, type)}
                 {s.completed ? '' : ' (미완료)'}
               </div>
             ))}

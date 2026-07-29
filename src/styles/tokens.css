@@ -14,4 +14,8 @@
   --nav-h: 64px;
   --ad-h: 50px;
   --safe-bottom: env(safe-area-inset-bottom, 0px);
+  /* Total height occluded by the fixed bottom chrome (nav + ad + safe area).
+     Content padding, sticky offsets and scroll margins all derive from this so
+     interactive controls can always be brought clear of the chrome. */
+  --chrome-clear: calc(var(--nav-h) + var(--ad-h) + var(--safe-bottom));
 }
