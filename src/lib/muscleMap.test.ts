@@ -14,17 +14,31 @@ describe('toMuscleGroup', () => {
     expect(toMuscleGroup('abdominals')).toBe('abs')
     expect(toMuscleGroup('rectus abdominis')).toBe('abs')
 
-    expect(toMuscleGroup('delts')).toBe('shoulders')
-    expect(toMuscleGroup('deltoids')).toBe('shoulders')
-    expect(toMuscleGroup('anterior deltoids')).toBe('shoulders')
-    expect(toMuscleGroup('rear deltoids')).toBe('shoulders')
+    expect(toMuscleGroup('quads')).toBe('quadriceps')
+    expect(toMuscleGroup('quadriceps')).toBe('quadriceps')
+    expect(toMuscleGroup('hip flexors')).toBe('quadriceps')
 
-    expect(toMuscleGroup('quads')).toBe('quads')
-    expect(toMuscleGroup('quadriceps')).toBe('quads')
+    expect(toMuscleGroup('glutes')).toBe('gluteal')
+    expect(toMuscleGroup('gluteus maximus')).toBe('gluteal')
+  })
+
+  // The figure draws front and back deltoids separately, so a spelling that
+  // names the side has to keep it.
+  it('keeps the side when a deltoid name says which one', () => {
+    expect(toMuscleGroup('anterior deltoids')).toBe('front-deltoids')
+    expect(toMuscleGroup('rear deltoids')).toBe('back-deltoids')
+    expect(toMuscleGroup('posterior deltoid')).toBe('back-deltoids')
+  })
+
+  // The catalog has no lat region in the figure, so lats fold into upper back.
+  it('folds lats into the upper back region the figure can draw', () => {
+    expect(toMuscleGroup('lats')).toBe('upper-back')
+    expect(toMuscleGroup('latissimus dorsi')).toBe('upper-back')
+    expect(toMuscleGroup('rhomboids')).toBe('upper-back')
   })
 
   it('is case and whitespace tolerant', () => {
-    expect(toMuscleGroup('  Latissimus Dorsi ')).toBe('lats')
+    expect(toMuscleGroup('  Latissimus Dorsi ')).toBe('upper-back')
   })
 
   it('returns null for names it does not know', () => {
@@ -42,8 +56,16 @@ describe('activationFor', () => {
     expect(result).toEqual({
       chest: 'primary',
       triceps: 'secondary',
-      shoulders: 'secondary',
+      'front-deltoids': 'secondary',
     })
+  })
+
+  // "delts" alone does not say which side, so both get lit rather than guessing
+  // one and under-reporting the work.
+  it('lights both deltoids when the name has no side', () => {
+    const result = activationFor([{ target: 'delts' }])
+    expect(result['front-deltoids']).toBe('primary')
+    expect(result['back-deltoids']).toBe('primary')
   })
 
   // Across a whole routine a muscle may be primary in one lift and assisting in
@@ -54,7 +76,7 @@ describe('activationFor', () => {
       { target: 'biceps', secondaryMuscles: [] },
     ])
     expect(result.biceps).toBe('primary')
-    expect(result.lats).toBe('primary')
+    expect(result['upper-back']).toBe('primary')
   })
 
   it('merges several exercises', () => {
@@ -63,9 +85,9 @@ describe('activationFor', () => {
       { target: 'hamstrings', secondaryMuscles: ['calves'] },
     ])
     expect(result).toEqual({
-      quads: 'primary',
-      hamstrings: 'primary',
-      glutes: 'secondary',
+      quadriceps: 'primary',
+      hamstring: 'primary',
+      gluteal: 'secondary',
       calves: 'secondary',
     })
   })
@@ -110,7 +132,8 @@ describe('summarizeActivation', () => {
 
 describe('muscleGroupKo', () => {
   it('gives a Korean label for every group', () => {
-    expect(muscleGroupKo('lats')).toBe('광배근')
-    expect(muscleGroupKo('lowerBack')).toBe('척추기립근')
+    expect(muscleGroupKo('upper-back')).toBe('등')
+    expect(muscleGroupKo('lower-back')).toBe('척추기립근')
+    expect(muscleGroupKo('back-deltoids')).toBe('후면 어깨')
   })
 })

@@ -9,25 +9,32 @@
  * 여기서는 이름만 다루고 좌표는 다루지 않는다(도형은 `MuscleMap` 컴포넌트).
  */
 
+/**
+ * 그룹 이름은 `react-body-highlighter`(MIT)의 `MuscleType` 값을 그대로 쓴다.
+ * 도해를 그 라이브러리가 그리므로, 중간 이름을 따로 두고 변환하면 매핑이 두 겹이
+ * 되어 어긋날 자리만 늘어난다.
+ */
 export const MUSCLE_GROUPS = [
+  'head',
   'neck',
-  'traps',
-  'shoulders',
+  'trapezius',
+  'front-deltoids',
+  'back-deltoids',
   'chest',
-  'lats',
-  'upperBack',
-  'lowerBack',
+  'upper-back',
+  'lower-back',
   'biceps',
   'triceps',
-  'forearms',
+  'forearm',
   'abs',
   'obliques',
-  'glutes',
-  'quads',
-  'hamstrings',
+  'gluteal',
+  'quadriceps',
+  'hamstring',
   'calves',
-  'adductors',
+  'adductor',
   'abductors',
+  'knees',
 ] as const
 
 export type MuscleGroup = (typeof MUSCLE_GROUPS)[number]
@@ -56,23 +63,24 @@ const MUSCLE_ALIASES: Record<string, MuscleGroup> = {
   scalenes: 'neck',
 
   // 승모근
-  traps: 'traps',
-  trapezius: 'traps',
-  'upper trapezius': 'traps',
-  'middle trapezius': 'traps',
-  'lower trapezius': 'traps',
+  traps: 'trapezius',
+  trapezius: 'trapezius',
+  'upper trapezius': 'trapezius',
+  'middle trapezius': 'trapezius',
+  'lower trapezius': 'trapezius',
 
-  // 어깨
-  delts: 'shoulders',
-  deltoids: 'shoulders',
-  shoulders: 'shoulders',
-  'anterior deltoid': 'shoulders',
-  'anterior deltoids': 'shoulders',
-  'posterior deltoid': 'shoulders',
-  'posterior deltoids': 'shoulders',
-  'rear deltoids': 'shoulders',
-  'rotator cuff': 'shoulders',
-  infraspinatus: 'shoulders',
+  // 어깨 — 도해가 전면/후면을 나눠 그리므로 표기에 방향이 있으면 살린다.
+  // 방향이 없는 `delts`류는 앞뒤 모두 칠하도록 뒤에서 확장한다.
+  delts: 'front-deltoids',
+  deltoids: 'front-deltoids',
+  shoulders: 'front-deltoids',
+  'anterior deltoid': 'front-deltoids',
+  'anterior deltoids': 'front-deltoids',
+  'posterior deltoid': 'back-deltoids',
+  'posterior deltoids': 'back-deltoids',
+  'rear deltoids': 'back-deltoids',
+  'rotator cuff': 'back-deltoids',
+  infraspinatus: 'back-deltoids',
 
   // 가슴
   pectorals: 'chest',
@@ -83,25 +91,23 @@ const MUSCLE_ALIASES: Record<string, MuscleGroup> = {
   'serratus anterior': 'chest',
   intercostals: 'chest',
 
-  // 광배근
-  lats: 'lats',
-  'latissimus dorsi': 'lats',
-
-  // 상부/중부 등
-  'upper back': 'upperBack',
-  'middle back': 'upperBack',
-  rhomboids: 'upperBack',
-  rhoboids: 'upperBack', // 카탈로그 원문의 오타
-  'teres major': 'upperBack',
+  // 등 — 도해에 광배근 영역이 따로 없어 상부 등에 함께 넣는다.
+  lats: 'upper-back',
+  'latissimus dorsi': 'upper-back',
+  'upper back': 'upper-back',
+  'middle back': 'upper-back',
+  rhomboids: 'upper-back',
+  rhoboids: 'upper-back', // 카탈로그 원문의 오타
+  'teres major': 'upper-back',
 
   // 하부 등
-  'lower back': 'lowerBack',
-  'erector spinae': 'lowerBack',
-  erectors: 'lowerBack',
-  'spinal erectors': 'lowerBack',
-  spine: 'lowerBack',
-  'thoracic spine': 'lowerBack',
-  'quadratus lumborum': 'lowerBack',
+  'lower back': 'lower-back',
+  'erector spinae': 'lower-back',
+  erectors: 'lower-back',
+  'spinal erectors': 'lower-back',
+  spine: 'lower-back',
+  'thoracic spine': 'lower-back',
+  'quadratus lumborum': 'lower-back',
 
   // 팔
   biceps: 'biceps',
@@ -110,11 +116,11 @@ const MUSCLE_ALIASES: Record<string, MuscleGroup> = {
   triceps: 'triceps',
   'triceps brachii': 'triceps',
   anconeus: 'triceps',
-  forearms: 'forearms',
-  'forearm extensors': 'forearms',
-  brachioradialis: 'forearms',
-  'flexor carpi radialis': 'forearms',
-  'flexor carpi ulnaris': 'forearms',
+  forearms: 'forearm',
+  'forearm extensors': 'forearm',
+  brachioradialis: 'forearm',
+  'flexor carpi radialis': 'forearm',
+  'flexor carpi ulnaris': 'forearm',
 
   // 코어
   abs: 'abs',
@@ -128,19 +134,19 @@ const MUSCLE_ALIASES: Record<string, MuscleGroup> = {
   obliques: 'obliques',
 
   // 엉덩이·다리
-  glutes: 'glutes',
-  'gluteus maximus': 'glutes',
-  'gluteus medius': 'glutes',
-  'gluteus minimus': 'glutes',
-  piriformis: 'glutes',
-  quads: 'quads',
-  quadriceps: 'quads',
-  'rectus femoris': 'quads',
-  'vastus medialis': 'quads',
-  'hip flexors': 'quads',
-  iliopsoas: 'quads',
-  'tensor fasciae latae': 'quads',
-  hamstrings: 'hamstrings',
+  glutes: 'gluteal',
+  'gluteus maximus': 'gluteal',
+  'gluteus medius': 'gluteal',
+  'gluteus minimus': 'gluteal',
+  piriformis: 'gluteal',
+  quads: 'quadriceps',
+  quadriceps: 'quadriceps',
+  'rectus femoris': 'quadriceps',
+  'vastus medialis': 'quadriceps',
+  'hip flexors': 'quadriceps',
+  iliopsoas: 'quadriceps',
+  'tensor fasciae latae': 'quadriceps',
+  hamstrings: 'hamstring',
   calves: 'calves',
   gastrocnemius: 'calves',
   soleus: 'calves',
@@ -148,11 +154,17 @@ const MUSCLE_ALIASES: Record<string, MuscleGroup> = {
   'tibialis anterior': 'calves',
   'tibialis posterior': 'calves',
   'achilles tendon': 'calves',
-  adductors: 'adductors',
-  groin: 'adductors',
+  adductors: 'adductor',
+  groin: 'adductor',
   abductors: 'abductors',
   'hip abductors': 'abductors',
 }
+
+/**
+ * 방향이 명시되지 않은 어깨 표기는 앞뒤 삼각근을 모두 칠한다 — `delts`만 적힌
+ * 운동에서 한쪽만 칠하면 실제보다 좁게 읽힌다.
+ */
+const BOTH_DELTOIDS = new Set(['delts', 'deltoids', 'shoulders'])
 
 /** 근육 이름 하나를 그룹으로. 모르는 이름이면 null. */
 export function toMuscleGroup(name: string): MuscleGroup | null {
@@ -177,43 +189,55 @@ export function isWholeBody(exercise: ExerciseLike): boolean {
  * 한 그룹이 어떤 운동에선 주동근, 다른 운동에선 보조근이면 **주동근이 이긴다** —
  * 루틴 전체를 한 장으로 볼 때 "오늘 주로 쓰는 부위"가 흐려지면 안 된다.
  */
+/** 이름 하나가 칠할 그룹들(어깨는 방향이 없으면 앞뒤 둘 다). */
+function groupsOf(name: string): MuscleGroup[] {
+  const g = toMuscleGroup(name)
+  if (!g) return []
+  if (BOTH_DELTOIDS.has(name.trim().toLowerCase())) return ['front-deltoids', 'back-deltoids']
+  return [g]
+}
+
 export function activationFor(exercises: ExerciseLike[]): MuscleActivation {
   const result: MuscleActivation = {}
 
   for (const ex of exercises) {
     for (const sec of ex.secondaryMuscles ?? []) {
-      const g = toMuscleGroup(sec)
-      if (g && !result[g]) result[g] = 'secondary'
+      for (const g of groupsOf(sec)) {
+        if (!result[g]) result[g] = 'secondary'
+      }
     }
   }
   // 주동근을 나중에 얹어 보조근 표시를 덮는다.
   for (const ex of exercises) {
-    const g = ex.target ? toMuscleGroup(ex.target) : null
-    if (g) result[g] = 'primary'
+    for (const g of groupsOf(ex.target ?? '')) {
+      result[g] = 'primary'
+    }
   }
 
   return result
 }
 
 const GROUP_KO: Record<MuscleGroup, string> = {
+  head: '머리',
   neck: '목',
-  traps: '승모근',
-  shoulders: '어깨',
+  trapezius: '승모근',
+  'front-deltoids': '전면 어깨',
+  'back-deltoids': '후면 어깨',
   chest: '가슴',
-  lats: '광배근',
-  upperBack: '상부 등',
-  lowerBack: '척추기립근',
+  'upper-back': '등',
+  'lower-back': '척추기립근',
   biceps: '이두',
   triceps: '삼두',
-  forearms: '전완',
+  forearm: '전완',
   abs: '복근',
   obliques: '복사근',
-  glutes: '둔근',
-  quads: '대퇴사두',
-  hamstrings: '햄스트링',
+  gluteal: '둔근',
+  quadriceps: '대퇴사두',
+  hamstring: '햄스트링',
   calves: '종아리',
-  adductors: '내전근',
+  adductor: '내전근',
   abductors: '외전근',
+  knees: '무릎',
 }
 
 export function muscleGroupKo(group: MuscleGroup): string {

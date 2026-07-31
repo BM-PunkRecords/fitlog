@@ -703,28 +703,15 @@ body.lock-pull-refresh {
   gap: 2px;
 }
 
-.muscle-svg {
+/* 도해는 react-body-highlighter가 그린다(`.rbh-wrapper` > `.rbh` svg). */
+.muscle-figure .rbh-wrapper {
+  width: 100%;
+}
+
+.muscle-figure .rbh {
   width: 100%;
   height: auto;
   display: block;
-}
-
-.muscle-body {
-  fill: var(--bg-input);
-  stroke: var(--stroke-subtle);
-  stroke-width: 0.8;
-}
-
-.muscle-part path {
-  stroke: none;
-}
-
-.muscle-part.is-primary path {
-  fill: var(--accent);
-}
-
-.muscle-part.is-secondary path {
-  fill: color-mix(in srgb, var(--accent) 38%, transparent);
 }
 
 .muscle-caption {
