@@ -6,6 +6,7 @@ import { DurationField } from '../components/DurationField'
 import { ExerciseInfoSheet } from '../components/ExerciseInfoSheet'
 import { ExercisePicker } from '../components/ExercisePicker'
 import { ExercisePreview } from '../components/ExercisePreview'
+import { ChevronLeftIcon, ChevronRightIcon, InfoIcon, ReplaceIcon } from '../components/icons'
 import { NumericField } from '../components/NumericField'
 import { PreviousRecordDisclosure } from '../components/PreviousRecord'
 import { RestField } from '../components/RestField'
@@ -82,6 +83,20 @@ export function SessionPage() {
     setNow(Date.now())
     const timer = window.setInterval(() => setNow(Date.now()), 1000)
     return () => window.clearInterval(timer)
+  }, [session?.id, session?.status])
+
+  // Pull-to-refresh would reload the app mid-workout and interrupt the rest
+  // timer, so it is disabled for the duration of an in-progress session only.
+  // The class sets `overscroll-behavior-y: contain` on the scrolling elements;
+  // it is removed on unmount/finish so other pages keep the native gesture.
+  useEffect(() => {
+    if (!session || session.status !== 'in_progress') return
+    document.body.classList.add('lock-pull-refresh')
+    document.documentElement.classList.add('lock-pull-refresh')
+    return () => {
+      document.body.classList.remove('lock-pull-refresh')
+      document.documentElement.classList.remove('lock-pull-refresh')
+    }
   }, [session?.id, session?.status])
 
   // Switching exercises restarts cascade selection so a stale highlight never
@@ -247,12 +262,27 @@ export function SessionPage() {
     void persist(setSessionExerciseRest(session, index, clampRest(seconds)))
   }
 
-  const goNext = () => {
-    if (index < session.items.length - 1) setIndex(index + 1)
+  // Navigation bounds drive both the handlers and the disabled state, so a
+  // button is never shown as available when there is nowhere to move.
+  const hasPrev = index > 0
+  const hasNext = index < session.items.length - 1
+
+  const goPrev = () => {
+    if (hasPrev) setIndex(index - 1)
   }
 
+  const goNext = () => {
+    if (hasNext) setIndex(index + 1)
+  }
+
+  // Skipping drops the exercise from the session, which loses any sets already
+  // entered for it — confirm when that would throw away real input.
   const skip = () => {
     if (session.items.length === 0) return
+    const entered = current?.sets.some(
+      (s) => s.completed || s.weightKg > 0 || s.reps > 0 || s.durationSec || s.distanceKm,
+    )
+    if (entered && !confirm('이 운동의 입력한 기록이 사라져요. 건너뛸까요?')) return
     if (index >= session.items.length - 1) {
       setIndex(Math.max(0, session.items.length - 2))
     }
@@ -344,9 +374,35 @@ export function SessionPage() {
         </div>
       ) : (
         <>
-          <div className="card stack">
+          <div className="card stack exercise-card">
+            {/* Replace lives at the card's top-right as a small icon action so the
+                media + name + stats keep the primary reading order. */}
+            <button
+              type="button"
+              className="icon-btn exercise-replace interactive"
+              onClick={() => setPickerMode('replace')}
+              aria-label="운동 대체"
+              title="운동 대체"
+            >
+              <ReplaceIcon />
+            </button>
             <div className="row">
-              {exercise && <ExercisePreview exercise={exercise} size="hero" />}
+              {exercise && (
+                // The media itself opens the info sheet — the separate 정보
+                // button was removed in favour of tapping the demo.
+                <button
+                  type="button"
+                  className="exercise-media-btn interactive"
+                  onClick={() => setShowInfo(true)}
+                  aria-label={`${exerciseName ?? '운동'} 정보 보기`}
+                  title="운동 정보"
+                >
+                  <ExercisePreview exercise={exercise} size="hero" />
+                  <span className="exercise-media-hint" aria-hidden>
+                    <InfoIcon size={14} />
+                  </span>
+                </button>
+              )}
               <div style={{ flex: 1, minWidth: 0 }}>
                 <h2 style={{ fontSize: '1.15rem' }}>{exerciseName}</h2>
                 <div className="muted">{exercise ? targetKo(exercise.target) : ''}</div>
@@ -371,22 +427,6 @@ export function SessionPage() {
                   )}
                 </div>
               </div>
-            </div>
-            <div className="row" style={{ flexWrap: 'wrap' }}>
-              <button
-                type="button"
-                className="btn btn-ghost interactive"
-                onClick={() => setShowInfo(true)}
-              >
-                정보
-              </button>
-              <button
-                type="button"
-                className="btn btn-ghost interactive"
-                onClick={() => setPickerMode('replace')}
-              >
-                운동 대체
-              </button>
             </div>
             <label className="metric-select">
               <span className="muted" style={{ fontSize: 12 }}>
@@ -539,19 +579,53 @@ export function SessionPage() {
             restartToken={restToken}
           />
 
-          <div className="row" style={{ flexWrap: 'wrap' }}>
-            <button type="button" className="btn btn-ghost interactive" onClick={goNext}>
-              다음 운동
+          {/* Exercise navigation: prev/next are a matched pair with the position
+              between them, so moving through the session reads as one control
+              instead of three same-weight buttons. */}
+          <nav className="exercise-nav" aria-label="운동 이동">
+            <button
+              type="button"
+              className="btn btn-ghost interactive exercise-nav-btn"
+              onClick={goPrev}
+              disabled={!hasPrev}
+              aria-label="이전 운동"
+            >
+              <ChevronLeftIcon />
+              <span>이전</span>
             </button>
-            <button type="button" className="btn btn-ghost interactive" onClick={skip}>
-              스킵
+            <span className="exercise-nav-pos" aria-hidden>
+              {index + 1} / {session.items.length}
+            </span>
+            <button
+              type="button"
+              className="btn btn-ghost interactive exercise-nav-btn"
+              onClick={goNext}
+              disabled={!hasNext}
+              aria-label="다음 운동"
+            >
+              <span>다음</span>
+              <ChevronRightIcon />
+            </button>
+          </nav>
+
+          {/* Adding is the constructive action and stays visually primary-ish;
+              skip removes the exercise from the session, so it is separated and
+              de-emphasised to avoid an accidental destructive tap. */}
+          <div className="session-actions">
+            <button
+              type="button"
+              className="btn btn-ghost interactive session-action-add"
+              onClick={() => setPickerMode('add')}
+            >
+＋ 운동 추가
             </button>
             <button
               type="button"
-              className="btn btn-ghost interactive"
-              onClick={() => setPickerMode('add')}
+              className="btn btn-quiet interactive session-action-skip"
+              onClick={skip}
+              aria-label="이 운동 건너뛰기"
             >
-              운동 추가
+              건너뛰기
             </button>
           </div>
         </>

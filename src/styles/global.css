@@ -609,6 +609,125 @@ a.btn {
   box-shadow: inset 3px 0 0 color-mix(in srgb, var(--accent) 60%, transparent);
 }
 
+/* ── 운동 세션 화면 ────────────────────────────────────────────────────────
+   진행 중 세션에서만 켜지는 클래스(SessionPage가 붙였다 뗀다). 당겨서 새로고침이
+   운동 도중 앱을 리로드해 휴식 타이머를 끊는 것을 막는다. 세로 스크롤 자체는
+   그대로 두고 경계에서의 오버스크롤 체이닝만 차단한다. */
+html.lock-pull-refresh,
+body.lock-pull-refresh {
+  overscroll-behavior-y: contain;
+}
+
+.exercise-card {
+  position: relative;
+}
+
+/* 카드 우측 상단의 작은 아이콘 액션. 44px 히트영역은 유지하되 시각적으로는
+   작게 남아 미디어·이름·수치의 읽기 순서를 흐리지 않는다. */
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.icon-btn:hover {
+  color: var(--text);
+  background: color-mix(in srgb, var(--text) 8%, transparent);
+}
+
+.exercise-replace {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 1;
+}
+
+/* 시연 미디어 자체가 정보 시트를 여는 버튼이다(별도 [정보] 버튼 제거). */
+.exercise-media-btn {
+  position: relative;
+  display: block;
+  padding: 0;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  cursor: pointer;
+  flex-shrink: 0;
+  line-height: 0;
+}
+
+.exercise-media-hint {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--bg) 78%, transparent);
+  color: var(--text);
+  line-height: 0;
+  pointer-events: none;
+}
+
+/* 이전/다음은 한 쌍의 이동 컨트롤로 읽히게 위치 표시를 사이에 둔다. */
+.exercise-nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.exercise-nav-btn {
+  flex: 1;
+  gap: 6px;
+}
+
+.exercise-nav-pos {
+  flex-shrink: 0;
+  min-width: 52px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 추가는 생성적 액션이라 넓게, 건너뛰기는 운동을 세션에서 제거하는 파괴적
+   액션이라 좁고 조용하게 둔다 — 실수로 누르는 것을 막는 위계. */
+.session-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.session-action-add {
+  flex: 1;
+}
+
+.btn-quiet {
+  background: transparent;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.btn-quiet:hover {
+  color: var(--text);
+  background: color-mix(in srgb, var(--text) 8%, transparent);
+}
+
+.session-action-skip {
+  flex-shrink: 0;
+  padding-inline: 14px;
+}
+
 .rest-field {
   display: flex;
   flex-direction: column;
