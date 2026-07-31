@@ -53,10 +53,17 @@ export function MuscleMap({ activation, wholeBody = false, className = '' }: Pro
   const secondaryNames = listed('secondary')
   const empty = primaryNames.length === 0 && secondaryNames.length === 0
 
-  // 라이브러리 색은 CSS 변수를 못 읽으므로(인라인 style/fill로 들어간다) 여기서
-  // 앱 팔레트와 같은 값을 직접 준다.
-  const bodyColor = '#222c26'
-  const highlightedColors = ['#4d7a24', '#8ee43f'] // [보조, 주동]
+  // 라이브러리 색은 CSS 변수를 못 읽으므로(인라인 fill로 들어간다) 앱 팔레트와
+  // 맞춘 값을 직접 준다. 세 단계가 서로, 그리고 카드 배경(#17302b)과 구분돼야
+  // 한다 — 비활성 몸이 배경에 묻히면 어디를 쓰는지가 아니라 사람 형태 자체가
+  // 안 보인다(초기값 #222c26은 배경 대비 1.03이라 사실상 투명했다).
+  //
+  // 비활성은 라임에서 채도를 뺀 슬레이트-그린이라 색상만으로도 활성과 갈린다.
+  const bodyColor = '#33544c' // 배경 대비 1.68 — 형태는 보이되 뒤로 물러난다
+  const highlightedColors = [
+    '#79b53a', // 보조: 비활성 대비 3.38
+    '#c6f57e', // 주동: 보조 대비 1.98, 비활성 대비 6.67
+  ]
 
   return (
     <div className={`muscle-map ${className}`.trim()}>

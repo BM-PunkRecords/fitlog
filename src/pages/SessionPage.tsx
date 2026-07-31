@@ -46,7 +46,7 @@ type PickerMode = 'add' | 'replace' | null
 
 export function SessionPage() {
   const { id } = useParams()
-  const { store, catalog, settings, refresh } = useAppData()
+  const { store, catalog, exerciseById: byId, settings, refresh } = useAppData()
   const navigate = useNavigate()
   const [session, setSession] = useState<Session | null>(null)
   const [index, setIndex] = useState(0)
@@ -66,7 +66,6 @@ export function SessionPage() {
   // Which direction the last move came from, so the incoming exercise slides in
   // from the side the finger travelled. Cleared once the animation is spent.
   const [swipeFrom, setSwipeFrom] = useState<'prev' | 'next' | null>(null)
-  const byId = useMemo(() => new Map(catalog.map((e) => [e.id, e])), [catalog])
 
   useEffect(() => {
     if (!id) return

@@ -16,14 +16,13 @@ import type { Routine, Session } from '../types/models'
 export function RoutineEditPage() {
   const { id } = useParams()
   const isNew = !id || id === 'new'
-  const { catalog, store, refresh, routines, settings } = useAppData()
+  const { catalog, exerciseById: byId, store, refresh, routines, settings } = useAppData()
   const existing = routines.find((r) => r.id === id)
   const navigate = useNavigate()
   const [name, setName] = useState('')
   const [exerciseIds, setExerciseIds] = useState<string[]>([])
   const [restById, setRestById] = useState<Record<string, number>>({})
   const [showPicker, setShowPicker] = useState(false)
-  const byId = useMemo(() => new Map(catalog.map((e) => [e.id, e])), [catalog])
 
   useEffect(() => {
     if (existing) {
@@ -160,10 +159,9 @@ export function RoutineEditPage() {
 
 export function RoutineDetailPage() {
   const { id } = useParams()
-  const { catalog, store, refresh, routines, inProgress, settings } = useAppData()
+  const { exerciseById: byId, store, refresh, routines, inProgress, settings } = useAppData()
   const navigate = useNavigate()
   const routine = routines.find((r) => r.id === id)
-  const byId = useMemo(() => new Map(catalog.map((e) => [e.id, e])), [catalog])
   // 이 루틴이 쓰는 부위를 한 장으로 — 시작 전에 오늘 뭘 하는지 보이게 한다.
   const routineExercises = useMemo(
     () => (routine?.exerciseIds ?? []).map((eid) => byId.get(eid)).filter((e) => e !== undefined),

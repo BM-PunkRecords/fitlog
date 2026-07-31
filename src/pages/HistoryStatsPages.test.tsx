@@ -11,6 +11,9 @@ const state: { sessions: Session[] } = { sessions: [] }
 vi.mock('../context/AppDataContext', () => ({
   useAppData: () => ({
     catalog: [],
+    // Pages look exercises up through the shared index (it also resolves ids
+    // that were merged away); empty here so names fall back to the raw id.
+    exerciseById: new Map(),
     store: {
       listSessions: vi.fn(async () => state.sessions),
       getSession: vi.fn(async (id: string) => state.sessions.find((s) => s.id === id) ?? null),

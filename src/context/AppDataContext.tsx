@@ -8,7 +8,8 @@ import {
   type ReactNode,
 } from 'react'
 import { customExerciseToCatalog } from '../catalog/customExercise'
-import { loadCatalog } from '../catalog/loadCatalog'
+import { buildExerciseIndex } from '../catalog/dedupe'
+import { loadCatalogWithAliases } from '../catalog/loadCatalog'
 import type { Exercise } from '../catalog/types'
 import { LocalWorkoutStore } from '../store/LocalWorkoutStore'
 import type { WorkoutStore } from '../store/WorkoutStore'
@@ -19,6 +20,8 @@ interface AppDataValue {
   ready: boolean
   store: WorkoutStore
   catalog: Exercise[]
+  /** id → 운동. 병합으로 사라진 옛 id도 포함한다. */
+  exerciseById: Map<string, Exercise>
   customExercises: CustomExercise[]
   recentExerciseIds: string[]
   frequentExerciseIds: string[]
@@ -36,14 +39,15 @@ const AppDataContext = createContext<AppDataValue | null>(null)
 
 export function AppDataProvider({ children }: { children: ReactNode }) {
   const store = useMemo(() => new LocalWorkoutStore(), [])
-  const baseCatalog = useMemo(() => {
+  const loaded = useMemo(() => {
     try {
-      return loadCatalog()
+      return loadCatalogWithAliases()
     } catch (err) {
       console.error('FitLog catalog load failed', err)
-      return [] as Exercise[]
+      return { catalog: [] as Exercise[], aliases: new Map<string, string>() }
     }
   }, [])
+  const baseCatalog = loaded.catalog
   const [ready, setReady] = useState(false)
   const [settings, setSettingsState] = useState<AppSettings>(DEFAULT_SETTINGS)
   const [routines, setRoutines] = useState<Routine[]>([])
@@ -171,11 +175,19 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     return [...baseCatalog, ...customs.filter((c) => !ids.has(c.id))]
   }, [baseCatalog, customExercises])
 
+  // 화면에서 id로 운동을 찾을 때 쓰는 단일 인덱스. 중복 병합으로 사라진 옛 id도
+  // 남은 운동을 가리키므로, 그 id로 저장된 루틴·기록이 계속 열린다.
+  const exerciseById = useMemo(
+    () => buildExerciseIndex(catalog, loaded.aliases),
+    [catalog, loaded.aliases],
+  )
+
   const value = useMemo(
     () => ({
       ready,
       store,
       catalog,
+      exerciseById,
       customExercises,
       recentExerciseIds,
       frequentExerciseIds,
@@ -192,6 +204,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
       ready,
       store,
       catalog,
+      exerciseById,
       customExercises,
       recentExerciseIds,
       frequentExerciseIds,

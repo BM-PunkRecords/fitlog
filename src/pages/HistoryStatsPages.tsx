@@ -10,9 +10,8 @@ import { weeklyStats } from '../store/stats'
 import type { Session } from '../types/models'
 
 export function HistoryPage() {
-  const { store, catalog } = useAppData()
+  const { store, exerciseById: byId } = useAppData()
   const [sessions, setSessions] = useState<Session[]>([])
-  const byId = useMemo(() => new Map(catalog.map((e) => [e.id, e])), [catalog])
 
   useEffect(() => {
     void store.listSessions({ status: 'completed' }).then(setSessions)
@@ -75,10 +74,9 @@ export function HistoryPage() {
 
 export function SessionDetailPage() {
   const { id } = useParams()
-  const { store, catalog } = useAppData()
+  const { store, exerciseById: byId } = useAppData()
   const [session, setSession] = useState<Session | null>(null)
   const [previousByExercise, setPreviousByExercise] = useState<Map<string, number>>(new Map())
-  const byId = useMemo(() => new Map(catalog.map((e) => [e.id, e])), [catalog])
 
   useEffect(() => {
     if (!id) return
