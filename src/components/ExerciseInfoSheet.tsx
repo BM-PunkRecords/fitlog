@@ -6,7 +6,9 @@ import {
   equipmentKo,
   targetKo,
 } from '../lib/labelsKo'
+import { activationFor, isWholeBody } from '../lib/muscleMap'
 import { tKo, tKoList } from '../lib/tKo'
+import { MuscleMap } from './MuscleMap'
 import { Sheet } from './Sheet'
 
 interface Props {
@@ -45,6 +47,11 @@ export function ExerciseInfoSheet({ exercise, onClose }: Props) {
           <img src={thumb} alt="" style={{ width: '100%', borderRadius: 12 }} />
         )
       )}
+
+      <MuscleMap
+        activation={activationFor([exercise])}
+        wholeBody={isWholeBody(exercise)}
+      />
 
       <div className="muted" style={{ fontSize: 13, lineHeight: 1.5 }}>
         {bodyPartKo(exercise.bodyPart)} · {targetKo(exercise.target)} ·{' '}

@@ -1,12 +1,14 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { ExercisePicker } from '../components/ExercisePicker'
+import { MuscleMap } from '../components/MuscleMap'
 import { RestField } from '../components/RestField'
 import { Sheet } from '../components/Sheet'
 import { useAppData } from '../context/AppDataContext'
 import { buildRoutineSessionItems } from '../lib/format'
 import { createId } from '../store/createId'
 import { targetKo } from '../lib/labelsKo'
+import { activationFor, isWholeBody } from '../lib/muscleMap'
 import { formatRest, hasRoutineRestOverride, routineRestFor } from '../lib/rest'
 import { tKo } from '../lib/tKo'
 import type { Routine, Session } from '../types/models'
@@ -162,6 +164,12 @@ export function RoutineDetailPage() {
   const navigate = useNavigate()
   const routine = routines.find((r) => r.id === id)
   const byId = useMemo(() => new Map(catalog.map((e) => [e.id, e])), [catalog])
+  // 이 루틴이 쓰는 부위를 한 장으로 — 시작 전에 오늘 뭘 하는지 보이게 한다.
+  const routineExercises = useMemo(
+    () => (routine?.exerciseIds ?? []).map((eid) => byId.get(eid)).filter((e) => e !== undefined),
+    [routine?.exerciseIds, byId],
+  )
+  const activation = useMemo(() => activationFor(routineExercises), [routineExercises])
 
   if (!routine) {
     return (
@@ -209,6 +217,14 @@ export function RoutineDetailPage() {
           편집
         </Link>
       </header>
+      {routineExercises.length > 0 && (
+        <div className="card">
+          <MuscleMap
+            activation={activation}
+            wholeBody={routineExercises.every((ex) => isWholeBody(ex))}
+          />
+        </div>
+      )}
       {routine.exerciseIds.map((eid) => {
         const ex = byId.get(eid)
         const rest = routineRestFor(routine, eid, settings.defaultRestSeconds)

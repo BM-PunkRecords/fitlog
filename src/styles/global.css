@@ -679,6 +679,85 @@ body.lock-pull-refresh {
   pointer-events: none;
 }
 
+/* 근육맵 — 앞/뒤 도해에 활성 부위를 칠한다. 주동근은 라임(브랜드 강조색),
+   보조근은 같은 색을 옅게 써서 하나의 세기 축으로 읽히게 한다. */
+.muscle-map {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.muscle-figures {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.muscle-figure {
+  margin: 0;
+  flex: 1;
+  max-width: 160px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.muscle-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.muscle-body {
+  fill: var(--bg-input);
+  stroke: var(--stroke-subtle);
+  stroke-width: 0.8;
+}
+
+.muscle-part path {
+  stroke: none;
+}
+
+.muscle-part.is-primary path {
+  fill: var(--accent);
+}
+
+.muscle-part.is-secondary path {
+  fill: color-mix(in srgb, var(--accent) 38%, transparent);
+}
+
+.muscle-caption {
+  font-size: 11px;
+}
+
+.muscle-summary {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* 색상만으로 주/보조를 구분하지 않도록 이름과 함께 놓이는 표식. */
+.muscle-legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.muscle-legend-dot.is-primary {
+  background: var(--accent);
+}
+
+.muscle-legend-dot.is-secondary {
+  background: color-mix(in srgb, var(--accent) 38%, transparent);
+  margin-left: 4px;
+}
+
 /* 좌우 스와이프로 운동을 넘기는 영역(카드 + 세트 목록).
    `touch-action: pan-y`로 세로 스크롤은 브라우저에 그대로 넘기고 가로 제스처만
    앱이 해석한다. 애니메이션은 자식(.swipe-page)에만 걸어 이 컨테이너 자체는
