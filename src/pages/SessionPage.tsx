@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { AnimatedStat } from '../components/AnimatedStat'
 import { CompleteBurst } from '../components/CompleteBurst'
@@ -32,6 +32,7 @@ import {
   metricTypeOf,
 } from '../lib/metrics'
 import { findPreviousRecord } from '../lib/previousRecord'
+import { type SwipePoint, detectSwipe, isSwipeExempt } from '../lib/swipe'
 import { tKo } from '../lib/tKo'
 import {
   exerciseRepsEntered,
@@ -61,6 +62,10 @@ export function SessionPage() {
   const [completedSessions, setCompletedSessions] = useState<Session[]>([])
   const [prevLoading, setPrevLoading] = useState(true)
   const [prevError, setPrevError] = useState(false)
+  const swipeStart = useRef<SwipePoint | null>(null)
+  // Which direction the last move came from, so the incoming exercise slides in
+  // from the side the finger travelled. Cleared once the animation is spent.
+  const [swipeFrom, setSwipeFrom] = useState<'prev' | 'next' | null>(null)
   const byId = useMemo(() => new Map(catalog.map((e) => [e.id, e])), [catalog])
 
   useEffect(() => {
@@ -275,6 +280,38 @@ export function SessionPage() {
     if (hasNext) setIndex(index + 1)
   }
 
+  // Swipe left/right moves between exercises. It is an addition to the
+  // prev/next buttons, never a replacement — the buttons stay the accessible
+  // path and the only one a screen reader or keyboard user needs.
+  const onTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length !== 1 || isSwipeExempt(e.target)) {
+      swipeStart.current = null
+      return
+    }
+    const t = e.touches[0]
+    swipeStart.current = { x: t.clientX, y: t.clientY, t: Date.now() }
+  }
+
+  const onTouchEnd = (e: React.TouchEvent) => {
+    const from = swipeStart.current
+    swipeStart.current = null
+    // A second finger landing mid-gesture means pinch/zoom, not a swipe.
+    if (!from || e.changedTouches.length !== 1 || e.touches.length > 0) return
+
+    const t = e.changedTouches[0]
+    const dir = detectSwipe(from, { x: t.clientX, y: t.clientY, t: Date.now() })
+    if (!dir) return
+
+    // At a boundary the gesture is simply inert, matching the disabled buttons.
+    if (dir === 'next' && hasNext) {
+      setSwipeFrom('next')
+      goNext()
+    } else if (dir === 'prev' && hasPrev) {
+      setSwipeFrom('prev')
+      goPrev()
+    }
+  }
+
   // Skipping drops the exercise from the session, which loses any sets already
   // entered for it — confirm when that would throw away real input.
   const skip = () => {
@@ -374,196 +411,215 @@ export function SessionPage() {
         </div>
       ) : (
         <>
-          <div className="card stack exercise-card">
-            {/* Replace lives at the card's top-right as a small icon action so the
-                media + name + stats keep the primary reading order. */}
-            <button
-              type="button"
-              className="icon-btn exercise-replace interactive"
-              onClick={() => setPickerMode('replace')}
-              aria-label="운동 대체"
-              title="운동 대체"
+          {/* Swipe zone: the exercise card and its set list move together. The
+              key restarts the slide-in so each move reads as a card change. */}
+          <div
+            className="swipe-zone"
+            onTouchStart={onTouchStart}
+            onTouchEnd={onTouchEnd}
+            onTouchCancel={() => {
+              swipeStart.current = null
+            }}
+          >
+            <div
+              key={index}
+              className={`stack swipe-page ${
+                swipeFrom ? `swipe-in-${swipeFrom}` : ''
+              }`}
+              onAnimationEnd={() => setSwipeFrom(null)}
             >
-              <ReplaceIcon />
-            </button>
-            <div className="row">
-              {exercise && (
-                // The media itself opens the info sheet — the separate 정보
-                // button was removed in favour of tapping the demo.
-                <button
-                  type="button"
-                  className="exercise-media-btn interactive"
-                  onClick={() => setShowInfo(true)}
-                  aria-label={`${exerciseName ?? '운동'} 정보 보기`}
-                  title="운동 정보"
-                >
-                  <ExercisePreview exercise={exercise} size="hero" />
-                  <span className="exercise-media-hint" aria-hidden>
-                    <InfoIcon size={14} />
-                  </span>
-                </button>
-              )}
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <h2 style={{ fontSize: '1.15rem' }}>{exerciseName}</h2>
-                <div className="muted">{exercise ? targetKo(exercise.target) : ''}</div>
-                <div className="row" style={{ marginTop: 8, gap: 16, flexWrap: 'wrap' }}>
-                  {fields.reps && (
-                    <div>
-                      <span className="muted" style={{ fontSize: 12 }}>
-                        횟수 합{' '}
-                      </span>
-                      <AnimatedStat value={currentReps}>
-                        <span style={{ color: 'var(--accent)' }}>{currentReps} 회</span>
-                      </AnimatedStat>
-                    </div>
-                  )}
-                  {metricType === 'weight_reps' && (
-                    <div>
-                      <span className="muted" style={{ fontSize: 12 }}>
-                        이 운동 볼륨{' '}
-                      </span>
-                      <AnimatedStat value={currentVolumeLive}>{currentVolumeLive} kg</AnimatedStat>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-            <label className="metric-select">
-              <span className="muted" style={{ fontSize: 12 }}>
-                기록 방식
-              </span>
-              <select
-                className="field metric-select-input"
-                value={metricType}
-                aria-label="기록 방식 선택"
-                onChange={(e) => setMetricType(e.target.value as MetricType)}
-              >
-                {METRIC_TYPES.map((type) => (
-                  <option key={type} value={type}>
-                    {METRIC_LABELS[type]}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <PreviousRecordDisclosure
-              record={previousRecord}
-              loading={prevLoading}
-              error={prevError}
-            />
-          </div>
-
-          <div className="stack">
-            <div className="entry-mode" role="group" aria-label="세트 입력 방식">
+            <div className="card stack exercise-card">
+              {/* Replace lives at the card's top-right as a small icon action so the
+                  media + name + stats keep the primary reading order. */}
               <button
                 type="button"
-                className={`entry-mode-btn interactive ${
-                  entryMode === 'individual' ? 'is-active' : ''
-                }`}
-                aria-pressed={entryMode === 'individual'}
-                onClick={() => changeEntryMode('individual')}
+                className="icon-btn exercise-replace interactive"
+                onClick={() => setPickerMode('replace')}
+                aria-label="운동 대체"
+                title="운동 대체"
               >
-                개별 입력
+                <ReplaceIcon />
               </button>
-              <button
-                type="button"
-                className={`entry-mode-btn interactive ${entryMode === 'bulk' ? 'is-active' : ''}`}
-                aria-pressed={entryMode === 'bulk'}
-                onClick={() => changeEntryMode('bulk')}
-              >
-                일괄 입력
-              </button>
-            </div>
-            {entryMode === 'bulk' && (
-              <p className="muted entry-mode-hint">선택한 세트부터 아래 세트에 함께 적용돼요.</p>
-            )}
-            <div className={`${setGridClass} muted`} style={{ fontSize: 12 }}>
-              <span>세트</span>
-              {fields.weight && <span>KG</span>}
-              {fields.duration && <span>시간</span>}
-              {fields.distance && <span>km</span>}
-              {fields.reps && <span>회</span>}
-              <span>완료</span>
-            </div>
-            {current.sets.map((set) => {
-              const cascaded =
-                entryMode === 'bulk' && cascadeStart !== null && set.setNumber >= cascadeStart
-              const cascadeFocus = () => {
-                if (entryMode === 'bulk') setCascadeStart(set.setNumber)
-              }
-              return (
-                <div
-                  key={set.setNumber}
-                  className={`${setGridClass} ${
-                    flashSet === set.setNumber ? 'set-row-flash' : ''
-                  } ${cascaded ? 'set-row-cascade' : ''} ${
-                    cascadeStart === set.setNumber && entryMode === 'bulk'
-                      ? 'set-row-cascade-start'
-                      : ''
-                  }`}
-                >
-                  <span>{set.setNumber}</span>
-                  {fields.weight && (
-                    <NumericField
-                      value={set.weightKg}
-                      onValueChange={(n) => editField(set.setNumber, { weightKg: n })}
-                      onFocus={cascadeFocus}
-                      ariaLabel={`세트 ${set.setNumber} 중량(kg)`}
-                      decimal
-                    />
-                  )}
-                  {fields.duration && (
-                    <DurationField
-                      seconds={set.durationSec ?? 0}
-                      onSecondsChange={(s) => editField(set.setNumber, { durationSec: s })}
-                      onFocus={cascadeFocus}
-                      ariaLabel={`세트 ${set.setNumber} 시간(분:초)`}
-                    />
-                  )}
-                  {fields.distance && (
-                    <NumericField
-                      value={set.distanceKm ?? 0}
-                      onValueChange={(n) => editField(set.setNumber, { distanceKm: n })}
-                      onFocus={cascadeFocus}
-                      ariaLabel={`세트 ${set.setNumber} 거리(km)`}
-                      decimal
-                    />
-                  )}
-                  {fields.reps && (
-                    <NumericField
-                      value={set.reps}
-                      onValueChange={(n) => editField(set.setNumber, { reps: n })}
-                      onFocus={cascadeFocus}
-                      ariaLabel={`세트 ${set.setNumber} 횟수`}
-                    />
-                  )}
+              <div className="row">
+                {exercise && (
+                  // The media itself opens the info sheet — the separate 정보
+                  // button was removed in favour of tapping the demo.
                   <button
                     type="button"
-                    className={`btn set-done-btn interactive ${set.completed ? 'is-complete' : ''}`}
-                    style={{
-                      background: set.completed ? 'var(--accent)' : 'var(--bg-input)',
-                      color: set.completed ? 'var(--accent-ink)' : 'var(--text)',
-                      borderRadius: 10,
-                      padding: 10,
-                    }}
-                    onClick={() => toggleComplete(set.setNumber)}
-                    aria-label={`세트 ${set.setNumber} 완료`}
+                    className="exercise-media-btn interactive"
+                    onClick={() => setShowInfo(true)}
+                    aria-label={`${exerciseName ?? '운동'} 정보 보기`}
+                    title="운동 정보"
                   >
-                    {set.completed ? '✓' : '○'}
-                    <CompleteBurst active={burstSet === set.setNumber} />
+                    <ExercisePreview exercise={exercise} size="hero" />
+                    <span className="exercise-media-hint" aria-hidden>
+                      <InfoIcon size={14} />
+                    </span>
                   </button>
+                )}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <h2 style={{ fontSize: '1.15rem' }}>{exerciseName}</h2>
+                  <div className="muted">{exercise ? targetKo(exercise.target) : ''}</div>
+                  <div className="row" style={{ marginTop: 8, gap: 16, flexWrap: 'wrap' }}>
+                    {fields.reps && (
+                      <div>
+                        <span className="muted" style={{ fontSize: 12 }}>
+                          횟수 합{' '}
+                        </span>
+                        <AnimatedStat value={currentReps}>
+                          <span style={{ color: 'var(--accent)' }}>{currentReps} 회</span>
+                        </AnimatedStat>
+                      </div>
+                    )}
+                    {metricType === 'weight_reps' && (
+                      <div>
+                        <span className="muted" style={{ fontSize: 12 }}>
+                          이 운동 볼륨{' '}
+                        </span>
+                        <AnimatedStat value={currentVolumeLive}>{currentVolumeLive} kg</AnimatedStat>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              )
-            })}
-            {error && <p className="error-text">{error}</p>}
-          </div>
+              </div>
+              <label className="metric-select">
+                <span className="muted" style={{ fontSize: 12 }}>
+                  기록 방식
+                </span>
+                <select
+                  className="field metric-select-input"
+                  value={metricType}
+                  aria-label="기록 방식 선택"
+                  onChange={(e) => setMetricType(e.target.value as MetricType)}
+                >
+                  {METRIC_TYPES.map((type) => (
+                    <option key={type} value={type}>
+                      {METRIC_LABELS[type]}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <PreviousRecordDisclosure
+                record={previousRecord}
+                loading={prevLoading}
+                error={prevError}
+              />
+            </div>
 
-          <div className="row">
-            <button type="button" className="btn btn-ghost interactive" onClick={addSet}>
-              + 세트
-            </button>
-            <button type="button" className="btn btn-ghost interactive" onClick={removeSet}>
-              − 세트
-            </button>
+            <div className="stack">
+              <div className="entry-mode" role="group" aria-label="세트 입력 방식">
+                <button
+                  type="button"
+                  className={`entry-mode-btn interactive ${
+                    entryMode === 'individual' ? 'is-active' : ''
+                  }`}
+                  aria-pressed={entryMode === 'individual'}
+                  onClick={() => changeEntryMode('individual')}
+                >
+                  개별 입력
+                </button>
+                <button
+                  type="button"
+                  className={`entry-mode-btn interactive ${entryMode === 'bulk' ? 'is-active' : ''}`}
+                  aria-pressed={entryMode === 'bulk'}
+                  onClick={() => changeEntryMode('bulk')}
+                >
+                  일괄 입력
+                </button>
+              </div>
+              {entryMode === 'bulk' && (
+                <p className="muted entry-mode-hint">선택한 세트부터 아래 세트에 함께 적용돼요.</p>
+              )}
+              <div className={`${setGridClass} muted`} style={{ fontSize: 12 }}>
+                <span>세트</span>
+                {fields.weight && <span>KG</span>}
+                {fields.duration && <span>시간</span>}
+                {fields.distance && <span>km</span>}
+                {fields.reps && <span>회</span>}
+                <span>완료</span>
+              </div>
+              {current.sets.map((set) => {
+                const cascaded =
+                  entryMode === 'bulk' && cascadeStart !== null && set.setNumber >= cascadeStart
+                const cascadeFocus = () => {
+                  if (entryMode === 'bulk') setCascadeStart(set.setNumber)
+                }
+                return (
+                  <div
+                    key={set.setNumber}
+                    className={`${setGridClass} ${
+                      flashSet === set.setNumber ? 'set-row-flash' : ''
+                    } ${cascaded ? 'set-row-cascade' : ''} ${
+                      cascadeStart === set.setNumber && entryMode === 'bulk'
+                        ? 'set-row-cascade-start'
+                        : ''
+                    }`}
+                  >
+                    <span>{set.setNumber}</span>
+                    {fields.weight && (
+                      <NumericField
+                        value={set.weightKg}
+                        onValueChange={(n) => editField(set.setNumber, { weightKg: n })}
+                        onFocus={cascadeFocus}
+                        ariaLabel={`세트 ${set.setNumber} 중량(kg)`}
+                        decimal
+                      />
+                    )}
+                    {fields.duration && (
+                      <DurationField
+                        seconds={set.durationSec ?? 0}
+                        onSecondsChange={(s) => editField(set.setNumber, { durationSec: s })}
+                        onFocus={cascadeFocus}
+                        ariaLabel={`세트 ${set.setNumber} 시간(분:초)`}
+                      />
+                    )}
+                    {fields.distance && (
+                      <NumericField
+                        value={set.distanceKm ?? 0}
+                        onValueChange={(n) => editField(set.setNumber, { distanceKm: n })}
+                        onFocus={cascadeFocus}
+                        ariaLabel={`세트 ${set.setNumber} 거리(km)`}
+                        decimal
+                      />
+                    )}
+                    {fields.reps && (
+                      <NumericField
+                        value={set.reps}
+                        onValueChange={(n) => editField(set.setNumber, { reps: n })}
+                        onFocus={cascadeFocus}
+                        ariaLabel={`세트 ${set.setNumber} 횟수`}
+                      />
+                    )}
+                    <button
+                      type="button"
+                      className={`btn set-done-btn interactive ${set.completed ? 'is-complete' : ''}`}
+                      style={{
+                        background: set.completed ? 'var(--accent)' : 'var(--bg-input)',
+                        color: set.completed ? 'var(--accent-ink)' : 'var(--text)',
+                        borderRadius: 10,
+                        padding: 10,
+                      }}
+                      onClick={() => toggleComplete(set.setNumber)}
+                      aria-label={`세트 ${set.setNumber} 완료`}
+                    >
+                      {set.completed ? '✓' : '○'}
+                      <CompleteBurst active={burstSet === set.setNumber} />
+                    </button>
+                  </div>
+                )
+              })}
+              {error && <p className="error-text">{error}</p>}
+            </div>
+
+            <div className="row">
+              <button type="button" className="btn btn-ghost interactive" onClick={addSet}>
+                + 세트
+              </button>
+              <button type="button" className="btn btn-ghost interactive" onClick={removeSet}>
+                − 세트
+              </button>
+            </div>
+          </div>
           </div>
 
           <div className="card stack">

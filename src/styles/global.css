@@ -679,6 +679,19 @@ body.lock-pull-refresh {
   pointer-events: none;
 }
 
+/* 좌우 스와이프로 운동을 넘기는 영역(카드 + 세트 목록).
+   `touch-action: pan-y`로 세로 스크롤은 브라우저에 그대로 넘기고 가로 제스처만
+   앱이 해석한다. 애니메이션은 자식(.swipe-page)에만 걸어 이 컨테이너 자체는
+   변형이 없는 상태로 둔다. */
+.swipe-zone {
+  touch-action: pan-y;
+}
+
+.swipe-page {
+  /* .stack과 같은 간격 — 감싸기 전과 시각적으로 동일해야 한다. */
+  gap: 12px;
+}
+
 /* 이전/다음은 한 쌍의 이동 컨트롤로 읽히게 위치 표시를 사이에 둔다. */
 .exercise-nav {
   display: flex;

@@ -1,6 +1,6 @@
 import 'fake-indexeddb/auto'
 import { IDBFactory } from 'fake-indexeddb'
-import { cleanup, render, screen, waitFor } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from '../App'
@@ -116,6 +116,56 @@ describe('SessionPage session UI', () => {
     await user.click(prev)
     await waitFor(() => expect(prev).toBeDisabled())
     expect(next).toBeEnabled()
+  })
+
+  it('moves between exercises by swiping, and ignores vertical scrolling', async () => {
+    render(<App />)
+
+    await screen.findByRole('button', { name: '운동 대체' })
+    const zone = document.querySelector('.swipe-zone') as HTMLElement
+    const heading = () => document.querySelector('.exercise-card h2')?.textContent
+    const first = heading()
+
+    const swipe = (dx: number, dy = 0) => {
+      const from = { clientX: 220, clientY: 400 }
+      const to = { clientX: 220 + dx, clientY: 400 + dy }
+      fireEvent.touchStart(zone, { touches: [from], targetTouches: [from] })
+      fireEvent.touchEnd(zone, { changedTouches: [to], touches: [] })
+    }
+
+    // A vertical drag is a scroll and must not change the exercise.
+    swipe(0, -300)
+    expect(heading()).toBe(first)
+
+    // Swiping left advances to the next exercise.
+    swipe(-140)
+    await waitFor(() => expect(heading()).not.toBe(first))
+    const second = heading()
+
+    // Swiping right goes back.
+    swipe(140)
+    await waitFor(() => expect(heading()).toBe(first))
+    expect(second).not.toBe(first)
+
+    // At the first exercise a further right swipe is inert.
+    swipe(140)
+    expect(heading()).toBe(first)
+  })
+
+  it('does not swipe when the gesture starts on a numeric input', async () => {
+    render(<App />)
+
+    await screen.findByRole('button', { name: '운동 대체' })
+    const zone = document.querySelector('.swipe-zone') as HTMLElement
+    const input = zone.querySelector('input') as HTMLElement
+    const before = document.querySelector('.exercise-card h2')?.textContent
+
+    // Dragging across a value field selects text; it must not change exercise.
+    const from = { clientX: 220, clientY: 400, target: input }
+    fireEvent.touchStart(input, { touches: [from], targetTouches: [from] })
+    fireEvent.touchEnd(zone, { changedTouches: [{ clientX: 80, clientY: 400 }], touches: [] })
+
+    expect(document.querySelector('.exercise-card h2')?.textContent).toBe(before)
   })
 
   it('confirms before skipping an exercise that already has entered sets', async () => {
