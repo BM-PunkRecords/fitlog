@@ -26,6 +26,13 @@ export interface Challenge {
   steps: ChallengeStep[]
   /** 출처 표시(영상 링크 등). */
   source?: string
+  /**
+   * 함께 재생할 유튜브 영상. 지정하면 그 영상의 **실제 재생 시작**에 타이머를
+   * 맞춘다(앞광고가 붙어도 어긋나지 않게). 없으면 신호음만으로 진행한다.
+   */
+  youtubeId?: string
+  /** 영상에서 운동이 시작되는 지점(초). 앞의 인사말을 건너뛴다. */
+  youtubeStart?: number
 }
 
 /** 챌린지 총 길이(초). */

@@ -151,6 +151,49 @@ describe('ChallengePlayPage', () => {
   })
 })
 
+describe('ChallengePlayPage with a video', () => {
+  // The bundled challenges have no video yet, so the behaviour is exercised
+  // against a challenge that does.
+  const withVideo = { ...challenge, id: 'video-challenge', youtubeId: 'abc123' }
+
+  beforeEach(() => {
+    CHALLENGES.push(withVideo)
+    window.history.pushState({}, '', `/challenges/${withVideo.id}`)
+  })
+
+  afterEach(() => {
+    const i = CHALLENGES.indexOf(withVideo)
+    if (i >= 0) CHALLENGES.splice(i, 1)
+  })
+
+  it('renders the embed in a visible slot rather than hiding it', async () => {
+    render(<App />)
+    await screen.findByRole('button', { name: '시작' })
+
+    const slot = document.querySelector('.challenge-video')
+    expect(slot).not.toBeNull()
+    // Hiding the player and using only its audio breaks the embed terms.
+    expect(slot?.closest('[hidden]')).toBeNull()
+  })
+
+  // A pre-roll ad means the tap and the first note are seconds apart, so the
+  // clock must not start until the video reports it is actually playing.
+  it('waits for playback before starting the clock', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+    await user.click(await screen.findByRole('button', { name: '시작' }))
+
+    // The YouTube API never loads in jsdom, so no handle arrives and the
+    // challenge falls back to starting immediately rather than hanging.
+    await waitFor(() =>
+      expect(
+        screen.queryByRole('button', { name: '일시정지' }) ??
+          screen.queryByRole('button', { name: '영상 준비 중…' }),
+      ).not.toBeNull(),
+    )
+  })
+})
+
 describe('ChallengeListPage', () => {
   it('lists the bundled challenges with their length', async () => {
     window.history.pushState({}, '', '/challenges')

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
+import { ChallengeVideo, type ChallengeVideoHandle } from '../components/ChallengeVideo'
 import { ExercisePreview } from '../components/ExercisePreview'
 import { EmptyState, PageHeader, SectionHeader } from '../components/primitives'
 import { useAppData } from '../context/AppDataContext'
@@ -49,6 +50,10 @@ export function ChallengePlayPage() {
 
   const [phase, setPhase] = useState<Phase>('ready')
   const [elapsed, setElapsed] = useState(0)
+  // 영상이 붙은 챌린지는 버튼을 누른 순간이 아니라 **실제 재생이 시작된 순간**
+  // 타이머를 켠다. 앞광고가 붙으면 그만큼 어긋나기 때문.
+  const [waitingVideo, setWaitingVideo] = useState(false)
+  const videoRef = useRef<ChallengeVideoHandle | null>(null)
   // 같은 초에 신호가 두 번 울리지 않도록 마지막으로 울린 초를 기억한다.
   const lastCueSec = useRef<number>(-1)
   // 일시정지를 빼고 실제로 흐른 시간만 세기 위한 기준점.
@@ -130,29 +135,45 @@ export function ChallengePlayPage() {
     )
   }
 
-  const start = () => {
-    unlockCueSound() // 반드시 실제 탭 안에서 — 그래야 이후 소리가 난다.
+  /** 타이머를 0부터 돌린다. 영상이 없거나, 영상이 실제로 재생되기 시작하면 호출. */
+  const beginTimer = () => {
     accumulated.current = 0
     startedAt.current = performance.now()
     lastCueSec.current = -1
     setElapsed(0)
+    setWaitingVideo(false)
     setPhase('running')
+  }
+
+  const start = () => {
+    unlockCueSound() // 반드시 실제 탭 안에서 — 그래야 이후 소리가 난다.
+    if (challenge.youtubeId && videoRef.current) {
+      // 재생을 요청만 하고, 타이머는 onPlaying 신호를 받고 켠다.
+      setWaitingVideo(true)
+      videoRef.current.restart()
+      return
+    }
+    beginTimer()
   }
 
   const pause = () => {
     accumulated.current += performance.now() - startedAt.current
+    videoRef.current?.pause()
     setPhase('paused')
   }
 
   const resume = () => {
     startedAt.current = performance.now()
+    videoRef.current?.play()
     setPhase('running')
   }
 
   const reset = () => {
     accumulated.current = 0
     lastCueSec.current = -1
+    videoRef.current?.pause()
     setElapsed(0)
+    setWaitingVideo(false)
     setPhase('ready')
   }
 
@@ -171,6 +192,25 @@ export function ChallengePlayPage() {
       </div>
 
       <h1 className="page-title">{challenge.name}</h1>
+
+      {/* 영상은 늘 보이는 자리에 둔다 — 숨기고 소리만 쓰는 것은 임베드 약관 위반이고,
+          보이는 편이 동작을 따라 하기에도 낫다. */}
+      {challenge.youtubeId && (
+        <ChallengeVideo
+          youtubeId={challenge.youtubeId}
+          startSeconds={challenge.youtubeStart}
+          onReady={(handle) => {
+            videoRef.current = handle
+          }}
+          onPlaying={() => {
+            // 앞광고가 끝나고 본편이 시작된 순간에 맞춰 센다.
+            if (phase === 'ready' || waitingVideo) beginTimer()
+          }}
+          onPaused={() => {
+            if (phase === 'running') pause()
+          }}
+        />
+      )}
 
       <div className="challenge-stage card stack">
         {phase === 'ready' && (
@@ -227,8 +267,13 @@ export function ChallengePlayPage() {
 
       <div className="row challenge-actions">
         {phase === 'ready' && (
-          <button type="button" className="btn btn-primary interactive" onClick={start}>
-            시작
+          <button
+            type="button"
+            className="btn btn-primary interactive"
+            onClick={start}
+            disabled={waitingVideo}
+          >
+            {waitingVideo ? '영상 준비 중…' : '시작'}
           </button>
         )}
         {phase === 'running' && (
