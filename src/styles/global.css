@@ -679,6 +679,75 @@ body.lock-pull-refresh {
   pointer-events: none;
 }
 
+/* 챌린지 — 시간에 맞춰 동작이 넘어가는 화면.
+   운동 중에는 멀리서도 읽혀야 하므로 남은 초를 화면에서 가장 큰 요소로 둔다. */
+.challenge-stage {
+  min-height: 260px;
+  justify-content: center;
+}
+
+.challenge-count {
+  font-family: var(--font-display);
+  font-size: clamp(64px, 22vw, 120px);
+  line-height: 1;
+  text-align: center;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.challenge-now {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: center;
+}
+
+.challenge-name {
+  font-size: 1.35rem;
+  line-height: 1.25;
+}
+
+.challenge-bar {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--bg-input);
+  overflow: hidden;
+}
+
+.challenge-bar span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.2s linear;
+}
+
+.challenge-next {
+  text-align: center;
+  font-size: 13px;
+}
+
+.challenge-plan {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.challenge-plan li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.challenge-actions .btn {
+  flex: 1;
+}
+
+.challenge-card {
+  text-decoration: none;
+}
+
 /* 근육맵 — 앞/뒤 도해에 활성 부위를 칠한다. 주동근은 라임(브랜드 강조색),
    보조근은 같은 색을 옅게 써서 하나의 세기 축으로 읽히게 한다. */
 .muscle-map {

@@ -4,6 +4,8 @@ import { ActionButton } from '../components/ActionButton'
 import { EmptyState, NavCard, PageHeader, SectionHeader } from '../components/primitives'
 import { ResumeBanner } from '../components/ResumeBanner'
 import { useAppData } from '../context/AppDataContext'
+import { CHALLENGES } from '../data/challenges'
+import { formatClock, totalSeconds } from '../lib/challenge'
 import { relativeTime, routineTargets } from '../lib/format'
 import { formatRest } from '../lib/rest'
 import { createId } from '../store/createId'
@@ -70,6 +72,23 @@ export function HomePage() {
             </NavCard>
           ))
         )}
+      </section>
+
+      <section className="stack">
+        <SectionHeader title="챌린지" aside={`${CHALLENGES.length}개`} />
+        {CHALLENGES.map((c) => (
+          <NavCard
+            key={c.id}
+            to={`/challenges/${c.id}`}
+            ariaLabel={`${c.name} 챌린지 열기`}
+          >
+            <span className="card-title">{c.name}</span>
+            <span className="card-targets">{c.steps.map((s) => s.name).join(' · ')}</span>
+            <span className="card-meta">
+              {formatClock(totalSeconds(c))} · 동작 {c.steps.length}개
+            </span>
+          </NavCard>
+        ))}
       </section>
 
       <div className="fab-bar">

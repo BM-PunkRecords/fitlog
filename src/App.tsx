@@ -4,6 +4,7 @@ import { BottomChrome } from './components/BottomChrome'
 import { BottomNav } from './components/BottomNav'
 import { StartupSplash } from './components/StartupSplash'
 import { AppDataProvider, useAppData } from './context/AppDataContext'
+import { ChallengeListPage, ChallengePlayPage } from './pages/ChallengePages'
 import { HomePage } from './pages/HomePage'
 import { HistoryPage, SessionDetailPage, StatsPage } from './pages/HistoryStatsPages'
 import { RoutineDetailPage, RoutineEditPage } from './pages/RoutinePages'
@@ -31,6 +32,8 @@ function AppShell() {
           <Route path="/routines/:id" element={<RoutineDetailPage />} />
           <Route path="/routines/:id/edit" element={<RoutineEditPage />} />
           <Route path="/session/:id" element={<SessionPage />} />
+          <Route path="/challenges" element={<ChallengeListPage />} />
+          <Route path="/challenges/:id" element={<ChallengePlayPage />} />
           <Route path="/history" element={<HistoryPage />} />
           <Route path="/history/:id" element={<SessionDetailPage />} />
           <Route path="/stats" element={<StatsPage />} />
