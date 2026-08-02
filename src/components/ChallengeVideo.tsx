@@ -76,6 +76,8 @@ interface Props {
   onEnded?: () => void
   /** 플레이어 제어 핸들을 부모에게 넘긴다. */
   onReady?: (handle: ChallengeVideoHandle) => void
+  /** 세로 영상(숏츠)이면 9:16으로 잡고 높이를 제한한다. */
+  portrait?: boolean
 }
 
 export function ChallengeVideo({
@@ -85,6 +87,7 @@ export function ChallengeVideo({
   onPaused,
   onEnded,
   onReady,
+  portrait = false,
 }: Props) {
   const hostRef = useRef<HTMLDivElement | null>(null)
   const playerRef = useRef<YTPlayer | null>(null)
@@ -140,7 +143,7 @@ export function ChallengeVideo({
   }, [youtubeId, startSeconds])
 
   return (
-    <div className="challenge-video">
+    <div className={`challenge-video ${portrait ? 'is-portrait' : ''}`.trim()}>
       <div ref={hostRef} />
     </div>
   )

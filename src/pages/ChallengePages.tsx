@@ -199,6 +199,7 @@ export function ChallengePlayPage() {
         <ChallengeVideo
           youtubeId={challenge.youtubeId}
           startSeconds={challenge.youtubeStart}
+          portrait={challenge.portrait}
           onReady={(handle) => {
             videoRef.current = handle
           }}
@@ -227,8 +228,21 @@ export function ChallengePlayPage() {
               ))}
             </ol>
             <p className="muted" style={{ fontSize: 12 }}>
-              음악은 원하는 걸 따로 틀어 두세요. 동작이 바뀔 때 소리와 진동으로 알려줘요.
+              {challenge.youtubeId
+                ? '시작하면 영상이 함께 재생돼요. 동작이 바뀔 때 소리와 진동으로도 알려줘요.'
+                : '음악은 원하는 걸 따로 틀어 두세요. 동작이 바뀔 때 소리와 진동으로 알려줘요.'}
             </p>
+            {challenge.source && (
+              <a
+                className="muted interactive"
+                style={{ fontSize: 12 }}
+                href={challenge.source}
+                target="_blank"
+                rel="noreferrer noopener"
+              >
+                원본 영상 보기 ↗
+              </a>
+            )}
           </>
         )}
 

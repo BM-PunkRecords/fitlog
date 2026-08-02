@@ -194,6 +194,17 @@ describe('ChallengePlayPage with a video', () => {
   })
 })
 
+describe('bundled challenge video wiring', () => {
+  it('plays the 1-minute abs challenge from its source short', () => {
+    const abs = CHALLENGES.find((c) => c.id === 'abs-1min')
+    expect(abs?.youtubeId).toBe('wJoOk3WCBGc')
+    // Shorts are vertical; the player has to know or it letterboxes badly.
+    expect(abs?.portrait).toBe(true)
+    // Embedding someone's video means crediting it.
+    expect(abs?.source).toContain('wJoOk3WCBGc')
+  })
+})
+
 describe('ChallengeListPage', () => {
   it('lists the bundled challenges with their length', async () => {
     window.history.pushState({}, '', '/challenges')

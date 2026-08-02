@@ -15,6 +15,10 @@ export const CHALLENGES: Challenge[] = [
     id: 'abs-1min',
     name: '1분 복근 챌린지',
     description: '쉬는 구간 없이 1분. 동작이 12초마다 바뀐다.',
+    // "1 min Abs challenge at home" — fitnessfreak67
+    youtubeId: 'wJoOk3WCBGc',
+    portrait: true, // 숏츠(세로)
+    source: 'https://youtube.com/shorts/wJoOk3WCBGc',
     // ⚠️ 임시 구성 — 영상에서 확인한 순서·시간으로 교체할 것.
     steps: [
       { name: '마운틴 클라이머', seconds: 12, hint: '무릎을 가슴으로 빠르게 번갈아' },

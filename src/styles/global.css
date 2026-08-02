@@ -692,6 +692,16 @@ body.lock-pull-refresh {
   background: #000;
 }
 
+/* 숏츠·릴스는 세로다. 비율만 9:16으로 두면 화면을 다 잡아먹어 정작 카운트다운이
+   접히므로, 높이를 뷰포트의 절반으로 묶고 가운데 정렬한다. */
+.challenge-video.is-portrait {
+  aspect-ratio: 9 / 16;
+  max-height: 46dvh;
+  width: auto;
+  max-width: 100%;
+  margin-inline: auto;
+}
+
 .challenge-video iframe,
 .challenge-video > div {
   position: absolute;

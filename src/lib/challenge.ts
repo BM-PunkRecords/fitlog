@@ -33,6 +33,8 @@ export interface Challenge {
   youtubeId?: string
   /** 영상에서 운동이 시작되는 지점(초). 앞의 인사말을 건너뛴다. */
   youtubeStart?: number
+  /** 세로 영상(숏츠·릴스)이면 true — 화면 비율을 9:16으로 잡는다. */
+  portrait?: boolean
 }
 
 /** 챌린지 총 길이(초). */
