@@ -20,12 +20,24 @@ export const CHALLENGES: Challenge[] = [
     portrait: true, // 숏츠(세로)
     source: 'https://youtube.com/shorts/wJoOk3WCBGc',
     // ⚠️ 임시 구성 — 영상에서 확인한 순서·시간으로 교체할 것.
+    // `exerciseId`가 있으면 그 운동의 자세 이미지가 함께 뜬다. 카탈로그에 없는
+    // 동작(플랭크 잭·사이드 탭 등)은 비워 두면 이름과 힌트만 보여준다.
     steps: [
-      { name: '마운틴 클라이머', seconds: 12, hint: '무릎을 가슴으로 빠르게 번갈아' },
+      {
+        name: '마운틴 클라이머',
+        seconds: 12,
+        hint: '무릎을 가슴으로 빠르게 번갈아',
+        exerciseId: 'yo-mountain-climbers',
+      },
       { name: '플랭크 잭', seconds: 12, hint: '플랭크 자세로 두 발을 벌렸다 모으기' },
       { name: '사이드 탭', seconds: 12, hint: '무릎을 옆구리 쪽으로 번갈아' },
       { name: '크로스 탭', seconds: 12, hint: '무릎을 대각선으로 교차' },
-      { name: '마운틴 클라이머', seconds: 12, hint: '마지막은 더 빠르게' },
+      {
+        name: '마운틴 클라이머',
+        seconds: 12,
+        hint: '마지막은 더 빠르게',
+        exerciseId: 'yo-mountain-climbers',
+      },
     ],
   },
   {
@@ -34,9 +46,24 @@ export const CHALLENGES: Challenge[] = [
     description: '동작을 외워서 따라가는 플랭크 시퀀스.',
     // ⚠️ 자리만 잡아 둔 상태 — 영상의 동작 순서·시간을 받아 채울 것.
     steps: [
-      { name: '기본 플랭크', seconds: 20, hint: '팔꿈치는 어깨 아래, 허리는 일직선' },
-      { name: '사이드 플랭크(좌)', seconds: 20, hint: '골반을 아래로 떨어뜨리지 않기' },
-      { name: '사이드 플랭크(우)', seconds: 20, hint: '반대쪽도 같은 자세로' },
+      {
+        name: '기본 플랭크',
+        seconds: 20,
+        hint: '팔꿈치는 어깨 아래, 허리는 일직선',
+        exerciseId: '0464', // Front Plank
+      },
+      {
+        name: '사이드 플랭크(좌)',
+        seconds: 20,
+        hint: '골반을 아래로 떨어뜨리지 않기',
+        exerciseId: '0705', // Side Plank
+      },
+      {
+        name: '사이드 플랭크(우)',
+        seconds: 20,
+        hint: '반대쪽도 같은 자세로',
+        exerciseId: '0705',
+      },
     ],
   },
 ]

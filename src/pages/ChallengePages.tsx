@@ -53,6 +53,9 @@ export function ChallengePlayPage() {
   // 영상이 붙은 챌린지는 버튼을 누른 순간이 아니라 **실제 재생이 시작된 순간**
   // 타이머를 켠다. 앞광고가 붙으면 그만큼 어긋나기 때문.
   const [waitingVideo, setWaitingVideo] = useState(false)
+  // 플레이어가 준비되기 전에 시작하면 영상 없이 타이머만 돌아 버린다 —
+  // 준비될 때까지 시작 버튼을 잠근다.
+  const [videoReady, setVideoReady] = useState(false)
   const videoRef = useRef<ChallengeVideoHandle | null>(null)
   // 같은 초에 신호가 두 번 울리지 않도록 마지막으로 울린 초를 기억한다.
   const lastCueSec = useRef<number>(-1)
@@ -103,6 +106,15 @@ export function ChallengePlayPage() {
     raf = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(raf)
   }, [phase, challenge, total])
+
+  // 영상은 있으면 좋은 것이지 필수가 아니다. 유튜브가 막혔거나 오프라인이면
+  // 플레이어 준비 신호가 영영 오지 않는데, 그렇다고 챌린지 자체를 시작조차 못
+  // 하게 두면 안 된다 — 잠깐만 기다렸다가 신호음 모드로 풀어준다.
+  useEffect(() => {
+    if (!challenge?.youtubeId || videoReady) return
+    const t = window.setTimeout(() => setVideoReady(true), 4000)
+    return () => window.clearTimeout(t)
+  }, [challenge?.youtubeId, videoReady])
 
   // 챌린지도 운동이다 — 끝내면 기록으로 남겨 통계에 잡히게 한다.
   useEffect(() => {
@@ -202,6 +214,7 @@ export function ChallengePlayPage() {
           portrait={challenge.portrait}
           onReady={(handle) => {
             videoRef.current = handle
+            setVideoReady(true)
           }}
           onPlaying={() => {
             // 앞광고가 끝나고 본편이 시작된 순간에 맞춰 센다.
@@ -285,9 +298,9 @@ export function ChallengePlayPage() {
             type="button"
             className="btn btn-primary interactive"
             onClick={start}
-            disabled={waitingVideo}
+            disabled={waitingVideo || (Boolean(challenge.youtubeId) && !videoReady)}
           >
-            {waitingVideo ? '영상 준비 중…' : '시작'}
+            {waitingVideo || (challenge.youtubeId && !videoReady) ? '영상 준비 중…' : '시작'}
           </button>
         )}
         {phase === 'running' && (

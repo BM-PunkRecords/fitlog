@@ -692,13 +692,13 @@ body.lock-pull-refresh {
   background: #000;
 }
 
-/* 숏츠·릴스는 세로다. 비율만 9:16으로 두면 화면을 다 잡아먹어 정작 카운트다운이
-   접히므로, 높이를 뷰포트의 절반으로 묶고 가운데 정렬한다. */
+/* 숏츠·릴스는 세로다. 폭을 그대로 채우면 높이가 폭의 1.8배가 되어 화면을 다
+   잡아먹고, 운동 중 유일하게 꼭 보여야 할 카운트다운이 아래로 밀린다.
+   **높이에서 폭을 거꾸로 계산**한다 — `width:auto` + `max-height`로는 폭이 먼저
+   정해져 버려서 세로로 늘어난 뒤 잘린다(overflow:hidden). */
 .challenge-video.is-portrait {
   aspect-ratio: 9 / 16;
-  max-height: 46dvh;
-  width: auto;
-  max-width: 100%;
+  width: min(100%, calc(42dvh * 9 / 16));
   margin-inline: auto;
 }
 
@@ -730,6 +730,22 @@ body.lock-pull-refresh {
   align-items: center;
   gap: 12px;
   justify-content: center;
+}
+
+/* 자세 이미지는 힐끗 봐도 알아볼 크기여야 한다 — hero(120px)보다 키운다. */
+.challenge-now .thumb {
+  width: 96px;
+  height: 96px;
+  flex-shrink: 0;
+}
+
+/* 영상이 함께 있으면 화면이 빠듯하니 무대 높이를 줄인다. */
+.challenge-play:has(.challenge-video) .challenge-stage {
+  min-height: 0;
+}
+
+.challenge-play:has(.challenge-video) .challenge-count {
+  font-size: clamp(44px, 14vw, 72px);
 }
 
 .challenge-name {

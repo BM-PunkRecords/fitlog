@@ -10,10 +10,19 @@ import { LocalWorkoutStore } from '../store/LocalWorkoutStore'
 const AD_SCRIPT_SRC =
   'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7426857657290789'
 
-const challenge = CHALLENGES[0]
+// Timer behaviour is independent of the video, and a challenge with an embed
+// holds its start button until the player is ready — which never happens in
+// jsdom. These tests therefore run against a video-less challenge.
+const challenge = {
+  ...CHALLENGES[0],
+  id: 'test-no-video',
+  youtubeId: undefined,
+  portrait: undefined,
+}
 
 beforeEach(() => {
   indexedDB = new IDBFactory()
+  CHALLENGES.push(challenge)
   window.history.pushState({}, '', `/challenges/${challenge.id}`)
   const script = document.createElement('script')
   script.src = AD_SCRIPT_SRC
@@ -24,6 +33,8 @@ beforeEach(() => {
 
 afterEach(() => {
   cleanup()
+  const i = CHALLENGES.indexOf(challenge)
+  if (i >= 0) CHALLENGES.splice(i, 1)
   document.querySelectorAll('script[src*="adsbygoogle.js"]').forEach((el) => el.remove())
   delete window.adsbygoogle
   vi.restoreAllMocks()
@@ -168,7 +179,7 @@ describe('ChallengePlayPage with a video', () => {
 
   it('renders the embed in a visible slot rather than hiding it', async () => {
     render(<App />)
-    await screen.findByRole('button', { name: '시작' })
+    await screen.findByRole('heading', { name: withVideo.name })
 
     const slot = document.querySelector('.challenge-video')
     expect(slot).not.toBeNull()
@@ -176,25 +187,52 @@ describe('ChallengePlayPage with a video', () => {
     expect(slot?.closest('[hidden]')).toBeNull()
   })
 
-  // A pre-roll ad means the tap and the first note are seconds apart, so the
-  // clock must not start until the video reports it is actually playing.
-  it('waits for playback before starting the clock', async () => {
-    const user = userEvent.setup()
+  it('holds the start button until the player is ready', async () => {
     render(<App />)
-    await user.click(await screen.findByRole('button', { name: '시작' }))
+    // Starting before the player exists would run the clock with no video.
+    const btn = await screen.findByRole('button', { name: '영상 준비 중…' })
+    expect(btn).toBeDisabled()
+  })
 
-    // The YouTube API never loads in jsdom, so no handle arrives and the
-    // challenge falls back to starting immediately rather than hanging.
-    await waitFor(() =>
-      expect(
-        screen.queryByRole('button', { name: '일시정지' }) ??
-          screen.queryByRole('button', { name: '영상 준비 중…' }),
-      ).not.toBeNull(),
-    )
+  // YouTube being blocked or offline must not make the challenge unusable —
+  // it falls back to beeps rather than leaving the button locked forever.
+  it('falls back to a beeps-only start when the player never arrives', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+    render(<App />)
+    await screen.findByRole('button', { name: '영상 준비 중…' })
+
+    await vi.advanceTimersByTimeAsync(4100)
+
+    const btn = await screen.findByRole('button', { name: '시작' })
+    expect(btn).toBeEnabled()
   })
 })
 
 describe('bundled challenge video wiring', () => {
+  // Steps that map to a catalog exercise can show its form image; the ones the
+  // catalog has no entry for stay text-only rather than showing a wrong image.
+  it('links steps to catalog exercises where one exists', () => {
+    const abs = CHALLENGES.find((c) => c.id === 'abs-1min')
+    expect(abs?.steps[0].exerciseId).toBe('yo-mountain-climbers')
+
+    const plank = CHALLENGES.find((c) => c.id === 'plank-challenge')
+    expect(plank?.steps.every((s) => s.exerciseId)).toBe(true)
+  })
+
+  it('keeps every linked exercise resolvable in the catalog', async () => {
+    const { loadCatalogWithAliases } = await import('../catalog/loadCatalog')
+    const { buildExerciseIndex } = await import('../catalog/dedupe')
+    const { catalog, aliases } = loadCatalogWithAliases()
+    const index = buildExerciseIndex(catalog, aliases)
+
+    for (const c of CHALLENGES) {
+      for (const step of c.steps) {
+        if (!step.exerciseId) continue
+        expect(index.get(step.exerciseId), `${c.id} / ${step.name}`).toBeDefined()
+      }
+    }
+  })
+
   it('plays the 1-minute abs challenge from its source short', () => {
     const abs = CHALLENGES.find((c) => c.id === 'abs-1min')
     expect(abs?.youtubeId).toBe('wJoOk3WCBGc')
