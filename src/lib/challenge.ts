@@ -31,8 +31,10 @@ export interface Challenge {
    * 맞춘다(앞광고가 붙어도 어긋나지 않게). 없으면 신호음만으로 진행한다.
    */
   youtubeId?: string
-  /** 영상에서 운동이 시작되는 지점(초). 앞의 인사말을 건너뛴다. */
+  /** 영상을 이 지점(초)부터 튼다. 없으면 처음부터. */
   youtubeStart?: number
+  /** 이 챌린지만 준비 시간을 다르게 줄 때(초). */
+  countInSeconds?: number
   /** 세로 영상(숏츠·릴스)이면 true — 화면 비율을 9:16으로 잡는다. */
   portrait?: boolean
 }
@@ -48,18 +50,18 @@ export const COUNT_IN_SECONDS = 3
 /**
  * 이 챌린지의 준비 시간.
  *
- * 영상이 붙어 있으면 **영상의 인트로 구간을 그대로 준비 시간으로 쓴다**. 영상을
- * 처음부터 틀고 `youtubeStart` 지점에 첫 동작이 시작되므로, 카운트가 끝나는
- * 순간과 영상 속 동작 시작이 저절로 맞는다. 인트로가 5초보다 짧으면 그만큼만.
+ * 영상 시작점과 **엮지 않는다.** 한때 영상 인트로를 준비 시간으로 겸용하려고
+ * 재생 지점을 앞당겼는데, 인트로 길이를 잘못 잡으면 카운트가 끝나기도 전에
+ * 영상 속 운동이 시작돼 버렸다. 준비 시간은 준비 시간이고, 영상은 지정한
+ * 지점에서 그대로 튼다 — 둘이 독립적이라 어긋날 구석이 없다.
  */
 export function countInFor(challenge: Challenge): number {
-  if (!challenge.youtubeId) return COUNT_IN_SECONDS
-  return Math.min(COUNT_IN_SECONDS, Math.max(0, challenge.youtubeStart ?? 0))
+  return challenge.countInSeconds ?? COUNT_IN_SECONDS
 }
 
-/** 준비 시간을 포함해 영상을 어디서부터 틀지(초). */
+/** 영상을 어디서부터 틀지(초). 지정이 없으면 처음부터. */
 export function videoStartFor(challenge: Challenge): number {
-  return Math.max(0, (challenge.youtubeStart ?? 0) - countInFor(challenge))
+  return Math.max(0, challenge.youtubeStart ?? 0)
 }
 
 export interface ChallengePosition {

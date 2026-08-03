@@ -17,8 +17,6 @@ export const CHALLENGES: Challenge[] = [
     description: '쉬는 구간 없이 1분. 동작이 12초마다 바뀐다.',
     // "1 min Abs challenge at home" — fitnessfreak67
     youtubeId: 'wJoOk3WCBGc',
-    // 영상 앞 5초는 인트로다. 여기서부터 재생해야 첫 동작과 타이머가 맞는다.
-    youtubeStart: 5,
     portrait: true, // 숏츠(세로)
     source: 'https://youtube.com/shorts/wJoOk3WCBGc',
     // ⚠️ 임시 구성 — 영상에서 확인한 순서·시간으로 교체할 것.

@@ -129,39 +129,27 @@ describe('formatClock', () => {
 })
 
 describe('countInFor / videoStartFor', () => {
-  const noVideo = { id: 'a', name: 'a', steps: [{ name: 'x', seconds: 10 }] }
+  const base = { id: 'a', name: 'a', steps: [{ name: 'x', seconds: 10 }] }
 
-  it('gives a plain challenge the full count-in', () => {
-    expect(countInFor(noVideo)).toBe(COUNT_IN_SECONDS)
-    expect(videoStartFor(noVideo)).toBe(0)
+  it('gives every challenge the same count-in by default', () => {
+    expect(countInFor(base)).toBe(COUNT_IN_SECONDS)
+    expect(countInFor({ ...base, youtubeId: 'v' })).toBe(COUNT_IN_SECONDS)
   })
 
-  // The count-in lands inside the video's intro: the clip starts partway in so
-  // the count reaches zero exactly where the exercise begins.
-  it('lines the count-in up with the start of the exercise', () => {
-    const c = { ...noVideo, youtubeId: 'v', youtubeStart: 5 }
-    expect(countInFor(c)).toBe(COUNT_IN_SECONDS)
-    expect(videoStartFor(c)).toBe(5 - COUNT_IN_SECONDS)
+  it('lets a challenge override its count-in', () => {
+    expect(countInFor({ ...base, countInSeconds: 10 })).toBe(10)
+    expect(countInFor({ ...base, countInSeconds: 0 })).toBe(0)
   })
 
-  // Nothing to count against — a 2s intro cannot host a 3s count-in, so it
-  // shrinks rather than starting the video at a negative offset.
-  it('shortens the count-in when the intro is shorter', () => {
-    const c = { ...noVideo, youtubeId: 'v', youtubeStart: 2 }
-    expect(countInFor(c)).toBe(2)
-    expect(videoStartFor(c)).toBe(0)
+  // The count-in used to pull the video's start point earlier to "use up" its
+  // intro; misjudging the intro then let the exercise begin mid-count. The two
+  // are independent now — the video plays from exactly where it is told to.
+  it('does not shift the video start to make room for the count-in', () => {
+    expect(videoStartFor({ ...base, youtubeId: 'v' })).toBe(0)
+    expect(videoStartFor({ ...base, youtubeId: 'v', youtubeStart: 12 })).toBe(12)
   })
 
-  it('caps the count-in when the intro is long, starting mid-video', () => {
-    const c = { ...noVideo, youtubeId: 'v', youtubeStart: 30 }
-    expect(countInFor(c)).toBe(COUNT_IN_SECONDS)
-    // 30s in, minus the count-in shown before it.
-    expect(videoStartFor(c)).toBe(30 - COUNT_IN_SECONDS)
-  })
-
-  it('has no count-in when the video starts immediately', () => {
-    const c = { ...noVideo, youtubeId: 'v' }
-    expect(countInFor(c)).toBe(0)
-    expect(videoStartFor(c)).toBe(0)
+  it('clamps a negative start', () => {
+    expect(videoStartFor({ ...base, youtubeId: 'v', youtubeStart: -4 })).toBe(0)
   })
 })
