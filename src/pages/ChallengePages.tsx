@@ -5,7 +5,14 @@ import { ExercisePreview } from '../components/ExercisePreview'
 import { EmptyState, PageHeader, SectionHeader } from '../components/primitives'
 import { useAppData } from '../context/AppDataContext'
 import { CHALLENGES, findChallenge } from '../data/challenges'
-import { formatClock, positionAt, totalSeconds, type Challenge } from '../lib/challenge'
+import {
+  countInFor,
+  formatClock,
+  positionAt,
+  totalSeconds,
+  videoStartFor,
+  type Challenge,
+} from '../lib/challenge'
 import { playCount, playFinish, playSwitch, unlockCueSound, vibrate } from '../lib/cueSound'
 import { createId } from '../store/createId'
 import type { Session } from '../types/models'
@@ -64,9 +71,15 @@ export function ChallengePlayPage() {
   const accumulated = useRef<number>(0)
 
   const total = challenge ? totalSeconds(challenge) : 0
+  const countIn = challenge ? countInFor(challenge) : 0
+  // 시계는 하나만 돌린다. 앞 `countIn`초는 준비 구간이고, 운동 경과는 그만큼 뺀
+  // 값이다 — 두 개를 따로 세면 어긋날 자리가 생긴다.
+  const workElapsed = elapsed - countIn
+  const inCountIn = (phase === 'running' || phase === 'paused') && workElapsed < 0
+  const countInLeft = Math.max(0, Math.ceil(-workElapsed))
   const pos = useMemo(
-    () => (challenge ? positionAt(challenge, elapsed) : null),
-    [challenge, elapsed],
+    () => (challenge ? positionAt(challenge, Math.max(0, workElapsed)) : null),
+    [challenge, workElapsed],
   )
 
   useEffect(() => {
@@ -82,19 +95,31 @@ export function ChallengePlayPage() {
       const whole = Math.floor(secs)
       if (whole !== lastCueSec.current) {
         lastCueSec.current = whole
-        const p = positionAt(challenge, whole)
-        if (secs >= total) {
-          // 완료 신호는 아래 종료 처리에서 울린다.
-        } else if (p.remainingInStep === p.step?.seconds) {
-          playSwitch()
-          vibrate([0, 60, 40, 60])
-        } else if (p.remainingInStep <= 3) {
-          playCount()
-          vibrate(25)
+        const work = secs - countIn
+        if (work < 0) {
+          // 준비 구간 — 매 초 카운트, 시작 직전엔 전환음으로 알린다.
+          if (Math.ceil(-work) <= 1) {
+            playSwitch()
+            vibrate([0, 60, 40, 60])
+          } else {
+            playCount()
+            vibrate(25)
+          }
+        } else {
+          const p = positionAt(challenge, work)
+          if (work >= total) {
+            // 완료 신호는 아래 종료 처리에서 울린다.
+          } else if (p.remainingInStep === p.step?.seconds) {
+            playSwitch()
+            vibrate([0, 60, 40, 60])
+          } else if (p.remainingInStep <= 3) {
+            playCount()
+            vibrate(25)
+          }
         }
       }
 
-      if (secs >= total) {
+      if (secs - countIn >= total) {
         setPhase('done')
         playFinish()
         vibrate([0, 90, 60, 160])
@@ -105,7 +130,7 @@ export function ChallengePlayPage() {
 
     raf = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(raf)
-  }, [phase, challenge, total])
+  }, [phase, challenge, total, countIn])
 
   // 영상은 있으면 좋은 것이지 필수가 아니다. 유튜브가 막혔거나 오프라인이면
   // 플레이어 준비 신호가 영영 오지 않는데, 그렇다고 챌린지 자체를 시작조차 못
@@ -190,7 +215,7 @@ export function ChallengePlayPage() {
   }
 
   const exercise = pos?.step?.exerciseId ? exerciseById.get(pos.step.exerciseId) : undefined
-  const progress = total > 0 ? Math.min(1, elapsed / total) : 0
+  const progress = total > 0 ? Math.min(1, Math.max(0, workElapsed) / total) : 0
 
   return (
     <div className="stack page-enter challenge-play">
@@ -199,7 +224,7 @@ export function ChallengePlayPage() {
           ← 챌린지
         </Link>
         <span className="muted">
-          {phase === 'done' ? '완료' : formatClock(pos?.remainingTotal ?? total)}
+          {phase === 'done' ? '완료' : formatClock(inCountIn ? total : (pos?.remainingTotal ?? total))}
         </span>
       </div>
 
@@ -210,7 +235,7 @@ export function ChallengePlayPage() {
       {challenge.youtubeId && (
         <ChallengeVideo
           youtubeId={challenge.youtubeId}
-          startSeconds={challenge.youtubeStart}
+          startSeconds={videoStartFor(challenge)}
           portrait={challenge.portrait}
           onReady={(handle) => {
             videoRef.current = handle
@@ -218,7 +243,9 @@ export function ChallengePlayPage() {
           }}
           onPlaying={() => {
             // 앞광고가 끝나고 본편이 시작된 순간에 맞춰 센다.
-            if (phase === 'ready' || waitingVideo) beginTimer()
+            if (waitingVideo || phase === 'ready') beginTimer()
+            // 유튜브 컨트롤로 직접 재생한 경우 — 타이머도 같이 풀어야 어긋나지 않는다.
+            else if (phase === 'paused') resume()
           }}
           onPaused={() => {
             if (phase === 'running') pause()
@@ -259,7 +286,23 @@ export function ChallengePlayPage() {
           </>
         )}
 
-        {(phase === 'running' || phase === 'paused') && pos?.step && (
+        {inCountIn && (
+          <div className="stack challenge-countin" style={{ alignItems: 'center', gap: 8 }}>
+            <span className="muted">시작까지</span>
+            <div className="challenge-count is-countin" aria-hidden>
+              {countInLeft}
+            </div>
+            <strong className="challenge-name">{challenge.steps[0]?.name}</strong>
+            {challenge.steps[0]?.hint && (
+              <span className="muted">{challenge.steps[0].hint}</span>
+            )}
+            <span className="sr-only" role="status">
+              {countInLeft}초 뒤 시작합니다. 첫 동작 {challenge.steps[0]?.name}
+            </span>
+          </div>
+        )}
+
+        {!inCountIn && (phase === 'running' || phase === 'paused') && pos?.step && (
           <>
             <div className="challenge-count" aria-live="off">
               {pos.remainingInStep}

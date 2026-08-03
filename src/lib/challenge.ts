@@ -42,6 +42,26 @@ export function totalSeconds(challenge: Challenge): number {
   return challenge.steps.reduce((sum, s) => sum + s.seconds, 0)
 }
 
+/** 시작 버튼과 첫 동작 사이에 두는 준비 시간(초). */
+export const COUNT_IN_SECONDS = 5
+
+/**
+ * 이 챌린지의 준비 시간.
+ *
+ * 영상이 붙어 있으면 **영상의 인트로 구간을 그대로 준비 시간으로 쓴다**. 영상을
+ * 처음부터 틀고 `youtubeStart` 지점에 첫 동작이 시작되므로, 카운트가 끝나는
+ * 순간과 영상 속 동작 시작이 저절로 맞는다. 인트로가 5초보다 짧으면 그만큼만.
+ */
+export function countInFor(challenge: Challenge): number {
+  if (!challenge.youtubeId) return COUNT_IN_SECONDS
+  return Math.min(COUNT_IN_SECONDS, Math.max(0, challenge.youtubeStart ?? 0))
+}
+
+/** 준비 시간을 포함해 영상을 어디서부터 틀지(초). */
+export function videoStartFor(challenge: Challenge): number {
+  return Math.max(0, (challenge.youtubeStart ?? 0) - countInFor(challenge))
+}
+
 export interface ChallengePosition {
   /** 현재 동작 인덱스. 끝났으면 steps.length. */
   index: number

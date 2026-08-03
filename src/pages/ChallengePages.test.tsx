@@ -4,6 +4,7 @@ import { cleanup, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from '../App'
+import { COUNT_IN_SECONDS as COUNT_IN } from '../lib/challenge'
 import { CHALLENGES } from '../data/challenges'
 import { LocalWorkoutStore } from '../store/LocalWorkoutStore'
 
@@ -92,10 +93,27 @@ describe('ChallengePlayPage', () => {
     expect(resume).toHaveBeenCalled()
   })
 
-  it('shows the running step, its countdown and what comes next', async () => {
+  // Starting straight into the first move gives no time to get into position.
+  it('counts in before the first move', async () => {
     const user = userEvent.setup()
     render(<App />)
     await user.click(await screen.findByRole('button', { name: '시작' }))
+
+    await waitFor(() => expect(screen.getByText('시작까지')).toBeInTheDocument())
+    // The upcoming move is named during the count-in.
+    expect(document.querySelector('.challenge-name')?.textContent).toBe(challenge.steps[0].name)
+    // The work clock has not started yet.
+    expect(document.querySelector('.challenge-bar span')).toBeNull()
+  })
+
+  it('shows the running step, its countdown and what comes next', async () => {
+    const user = userEvent.setup()
+    let fakeNow = 0
+    vi.spyOn(performance, 'now').mockImplementation(() => fakeNow)
+    render(<App />)
+    await user.click(await screen.findByRole('button', { name: '시작' }))
+    // Skip past the count-in.
+    fakeNow = 5000
 
     // The first step is on screen with its full length showing.
     await waitFor(() =>
@@ -147,7 +165,7 @@ describe('ChallengePlayPage', () => {
 
     render(<App />)
     await user.click(await screen.findByRole('button', { name: '시작' }))
-    fakeNow = (total + 1) * 1000
+    fakeNow = (total + COUNT_IN + 1) * 1000
 
     await waitFor(() => expect(screen.getByRole('button', { name: '한 번 더' })).toBeInTheDocument())
     await waitFor(() => expect(saveSpy).toHaveBeenCalled())

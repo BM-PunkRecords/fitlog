@@ -767,6 +767,15 @@ body.lock-pull-refresh {
   transition: width 0.2s linear;
 }
 
+/* 준비 카운트는 운동 중 숫자와 구분되게 조금 더 차분한 색으로 둔다. */
+.challenge-count.is-countin {
+  color: var(--text);
+}
+
+.challenge-countin {
+  text-align: center;
+}
+
 .challenge-next {
   text-align: center;
   font-size: 13px;

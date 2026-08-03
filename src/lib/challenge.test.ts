@@ -1,5 +1,14 @@
 import { describe, expect, it } from 'vitest'
-import { type Challenge, cueAt, formatClock, positionAt, totalSeconds } from './challenge'
+import {
+  COUNT_IN_SECONDS,
+  type Challenge,
+  countInFor,
+  cueAt,
+  formatClock,
+  positionAt,
+  totalSeconds,
+  videoStartFor,
+} from './challenge'
 
 const challenge: Challenge = {
   id: 'c1',
@@ -116,5 +125,41 @@ describe('formatClock', () => {
   it('rounds up partial seconds and clamps negatives', () => {
     expect(formatClock(44.2)).toBe('0:45')
     expect(formatClock(-3)).toBe('0:00')
+  })
+})
+
+describe('countInFor / videoStartFor', () => {
+  const noVideo = { id: 'a', name: 'a', steps: [{ name: 'x', seconds: 10 }] }
+
+  it('gives a plain challenge the full count-in', () => {
+    expect(countInFor(noVideo)).toBe(COUNT_IN_SECONDS)
+    expect(videoStartFor(noVideo)).toBe(0)
+  })
+
+  // The intro before the first move doubles as the count-in: play from the very
+  // start and the count hits zero exactly where the exercise begins.
+  it('uses a video intro as the count-in', () => {
+    const c = { ...noVideo, youtubeId: 'v', youtubeStart: 5 }
+    expect(countInFor(c)).toBe(5)
+    expect(videoStartFor(c)).toBe(0)
+  })
+
+  it('shortens the count-in when the intro is shorter', () => {
+    const c = { ...noVideo, youtubeId: 'v', youtubeStart: 2 }
+    expect(countInFor(c)).toBe(2)
+    expect(videoStartFor(c)).toBe(0)
+  })
+
+  it('caps the count-in when the intro is long, starting mid-video', () => {
+    const c = { ...noVideo, youtubeId: 'v', youtubeStart: 30 }
+    expect(countInFor(c)).toBe(COUNT_IN_SECONDS)
+    // 30s in, minus the 5s of count-in shown before it.
+    expect(videoStartFor(c)).toBe(25)
+  })
+
+  it('has no count-in when the video starts immediately', () => {
+    const c = { ...noVideo, youtubeId: 'v' }
+    expect(countInFor(c)).toBe(0)
+    expect(videoStartFor(c)).toBe(0)
   })
 })
