@@ -576,5 +576,79 @@
       "female": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Mountain_Climbers/0.jpg"
     },
     "source": "supplement"
+  },
+  {
+    "id": "yo-bodyweight-walking-lunge",
+    "name": "Bodyweight Walking Lunge",
+    "aliases": [],
+    "bodyPart": "upper legs",
+    "target": "quadriceps",
+    "secondaryMuscles": [
+      "glutes",
+      "hamstrings",
+      "calves"
+    ],
+    "equipment": "body weight",
+    "muscleGroup": "upper legs",
+    "difficulty": "beginner",
+    "compound": true,
+    "unilateral": true,
+    "shortDescription": "",
+    "instructions": "Begin standing with your feet shoulder width apart and your hands on your hips. Step forward with one leg, flexing the knees to drop your hips. Descend until your rear knee nearly touches the ground. Your posture should remain upright, and your front knee should stay above the front foot. Drive through the heel of your lead foot and extend both knees to raise yourself back up. Step forward with your rear foot, repeating the lunge on the opposite leg.",
+    "steps": [
+      "Begin standing with your feet shoulder width apart and your hands on your hips.",
+      "Step forward with one leg, flexing the knees to drop your hips. Descend until your rear knee nearly touches the ground. Your posture should remain upright, and your front knee should stay above the front foot.",
+      "Drive through the heel of your lead foot and extend both knees to raise yourself back up.",
+      "Step forward with your rear foot, repeating the lunge on the opposite leg."
+    ],
+    "formCues": [],
+    "commonMistakes": [],
+    "breathing": "",
+    "videos": {},
+    "thumbnails": {
+      "male": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Bodyweight_Walking_Lunge/0.jpg",
+      "female": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Bodyweight_Walking_Lunge/0.jpg"
+    },
+    "source": "supplement"
+  },
+  {
+    "id": "fitlog-wall-sit",
+    "name": "Wall Sit",
+    "aliases": [
+      "월싯",
+      "벽 스쿼트"
+    ],
+    "bodyPart": "upper legs",
+    "target": "quadriceps",
+    "secondaryMuscles": [
+      "glutes",
+      "calves",
+      "abs"
+    ],
+    "equipment": "body weight",
+    "muscleGroup": "upper legs",
+    "difficulty": "beginner",
+    "compound": true,
+    "unilateral": false,
+    "shortDescription": "벽에 기대 앉은 자세를 버티는 등척성 하체 운동.",
+    "instructions": "벽에 등을 대고 발을 벽에서 한 걸음 앞으로 놓는다. 무릎이 90도가 되도록 벽을 타고 내려가 앉은 자세를 만든다. 무릎이 발끝을 넘지 않게 하고 등 전체를 벽에 붙인다. 정해진 시간 동안 자세를 유지한다.",
+    "steps": [
+      "벽에 등을 대고 발을 벽에서 한 걸음 앞으로 놓는다.",
+      "무릎이 90도가 되도록 벽을 타고 내려가 앉은 자세를 만든다.",
+      "무릎이 발끝을 넘지 않게 하고 등 전체를 벽에 붙인다.",
+      "정해진 시간 동안 자세를 유지한다."
+    ],
+    "formCues": [
+      "무릎 각도 90도 유지",
+      "등 전체를 벽에 밀착"
+    ],
+    "commonMistakes": [
+      "무릎이 발끝보다 앞으로 나감",
+      "엉덩이가 벽에서 뜸"
+    ],
+    "breathing": "자세를 유지하는 동안 숨을 참지 않는다.",
+    "videos": {},
+    "thumbnails": {},
+    "source": "supplement"
   }
 ]

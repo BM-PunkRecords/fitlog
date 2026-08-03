@@ -185,3 +185,49 @@ export function appendSet(item: SessionExercise): SessionExercise {
 export function isExerciseComplete(item: SessionExercise): boolean {
   return item.sets.length > 0 && item.sets.every((s) => s.completed)
 }
+
+/**
+ * 추천 루틴을 세션 항목으로 편다.
+ *
+ * 목표 횟수·시간은 **세트에 미리 채워 넣는다** — 화면에 "12회"라고 적어만 두면
+ * 사용자가 그 숫자를 다시 입력해야 한다. 채워두면 그대로 하고 체크만 하거나,
+ * 다르게 했으면 고치면 된다.
+ *
+ * 목표를 채운다고 완료로 표시하지는 않는다. 아직 하지 않은 운동이다.
+ */
+export function buildRecommendedSessionItems(
+  items: {
+    exerciseId: string
+    displayName?: string
+    sets?: number
+    reps?: number
+    durationSec?: number
+  }[],
+  defaultRestSeconds: number,
+): SessionExercise[] {
+  return items.map((item, order) => {
+    const count = Math.max(1, item.sets ?? 1)
+    const timed = item.durationSec !== undefined
+    const sets: SessionSet[] = Array.from({ length: count }, (_, i) => {
+      const set: SessionSet = {
+        setNumber: i + 1,
+        weightKg: 0,
+        reps: item.reps ?? 0,
+        completed: false,
+      }
+      if (timed) set.durationSec = item.durationSec
+      return set
+    })
+
+    const exercise: SessionExercise = {
+      exerciseId: item.exerciseId,
+      order,
+      sets,
+      restSecondsDefault: defaultRestSeconds,
+    }
+    if (item.displayName) exercise.displayName = item.displayName
+    // 시간으로 하는 운동은 기록 방식도 시간이어야 입력 칸이 맞는다.
+    if (timed) exercise.metricType = 'duration'
+    return exercise
+  })
+}

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { applyRowEdit,
   buildRoutineSessionItems,
   formatElapsed,
-  setSessionExerciseRest, sessionItemName, appendSet, isExerciseComplete } from './format'
+  setSessionExerciseRest, sessionItemName, appendSet, isExerciseComplete, buildRecommendedSessionItems } from './format'
 import type { Session, SessionExercise, SessionSet } from '../types/models'
 
 describe('formatElapsed', () => {
@@ -219,5 +219,49 @@ describe('isExerciseComplete', () => {
   // An exercise with no sets has not been done — it just has nothing to do.
   it('is false for an exercise with no sets', () => {
     expect(isExerciseComplete(item([]))).toBe(false)
+  })
+})
+
+describe('buildRecommendedSessionItems', () => {
+  // A target shown only as text would have to be typed in again by hand.
+  it('prefills the target reps into the set', () => {
+    const [item] = buildRecommendedSessionItems([{ exerciseId: 'a', reps: 12 }], 60)
+    expect(item.sets).toHaveLength(1)
+    expect(item.sets[0].reps).toBe(12)
+    expect(item.sets[0].completed).toBe(false)
+  })
+
+  it('prefills timed targets and switches the metric type to match', () => {
+    const [item] = buildRecommendedSessionItems([{ exerciseId: 'a', durationSec: 60 }], 60)
+    expect(item.metricType).toBe('duration')
+    expect(item.sets[0].durationSec).toBe(60)
+  })
+
+  it('creates the requested number of sets', () => {
+    const [item] = buildRecommendedSessionItems([{ exerciseId: 'a', reps: 10, sets: 3 }], 60)
+    expect(item.sets.map((s) => s.setNumber)).toEqual([1, 2, 3])
+    expect(item.sets.every((s) => s.reps === 10)).toBe(true)
+  })
+
+  it('defaults to a single set and carries the rest default', () => {
+    const [item] = buildRecommendedSessionItems([{ exerciseId: 'a' }], 90)
+    expect(item.sets).toHaveLength(1)
+    expect(item.restSecondsDefault).toBe(90)
+  })
+
+  it('keeps a display name for exercises outside the catalog', () => {
+    const [item] = buildRecommendedSessionItems(
+      [{ exerciseId: 'x', displayName: '월 싯' }],
+      60,
+    )
+    expect(item.displayName).toBe('월 싯')
+  })
+
+  it('numbers the exercises in order', () => {
+    const items = buildRecommendedSessionItems(
+      [{ exerciseId: 'a' }, { exerciseId: 'b' }],
+      60,
+    )
+    expect(items.map((i) => i.order)).toEqual([0, 1])
   })
 })

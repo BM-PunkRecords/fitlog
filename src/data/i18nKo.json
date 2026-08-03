@@ -715,7 +715,7 @@
   "Shrugging shoulders excessively": "어깨를 과도하게 으쓱함",
   "Using too much momentum": "추진력을 너무 많이 사용",
   "Hands too close": "손이 너무 가까워요",
-  "Battling Ropes": "밧줄과 싸우다",
+  "Battling Ropes": "배틀로프",
   "A rope conditioning exercise using alternating arm waves to train the shoulders, forearms, and core.": "어깨, 팔뚝, 코어를 단련하기 위해 교대로 팔을 휘두르는 로프 컨디셔닝 운동입니다.",
   "Stand with your feet shoulder-width apart and knees slightly bent. Hold one end of the rope in each hand, with your palms facing each other. Raise your arms to shoulder height, keeping your elbows slightly bent. Begin making alternating waves with the ropes by rapidly raising and lowering each arm. Continue for the desired duration or number of repetitions.": "발을 어깨 너비로 벌리고 무릎을 약간 구부린 채 서십시오. 손바닥이 서로 마주보게 하여 양손으로 로프의 한쪽 끝을 잡습니다. 팔꿈치를 약간 구부린 상태에서 팔을 어깨 높이까지 올리십시오. 각 팔을 빠르게 올리고 내리면서 로프를 사용하여 교대로 파도를 만들기 시작합니다. 원하는 기간 또는 반복 횟수 동안 계속하십시오.",
   "Breathe steadily throughout, exhaling with the arm drive and inhaling as the arms switch.": "팔 구동으로 숨을 내쉬고 팔을 바꾸면서 숨을 들이쉬면서 내내 꾸준히 호흡하십시오.",
@@ -2212,7 +2212,7 @@
   "Move only at elbows": "팔꿈치로만 움직인다",
   "Upper arms drift backward and forward during the rep.": "반복하는 동안 윗팔이 앞뒤로 움직입니다.",
   "The dumbbell drops too low with no control behind the head.": "덤벨이 머리 뒤로 너무 낮게 떨어지면 제어할 수 없습니다.",
-  "Dumbbell Shrug": "덤벨 어깨를 으쓱하다",
+  "Dumbbell Shrug": "덤벨 슈러그",
   "An isolation exercise where you hold dumbbells at your sides and lift your shoulders up to train the trapezius muscles.": "덤벨을 옆구리에 들고 어깨를 들어 올려 승모근을 단련하는 고립 운동입니다.",
   "Stand with your feet shoulder-width apart and hold a dumbbell in each hand with your palms facing your body. Keep your arms straight and let the dumbbells hang by your sides. Raise your shoulders as high as possible, as if you are trying to touch your ears with your shoulders. Hold the contraction for a second, then slowly lower your shoulders back down to the starting position. Repeat for the desired number of repetitions.": "발을 어깨 너비로 벌리고 서서 손바닥이 몸을 향하게 하여 양손에 덤벨을 잡습니다. 팔을 똑바로 유지하고 덤벨을 옆구리에 매달아 두십시오. 어깨로 귀를 만지려는 것처럼 어깨를 최대한 높이 올리십시오. 잠시 동안 수축을 유지한 후 천천히 어깨를 낮추어 시작 위치로 돌아갑니다. 원하는 반복 횟수만큼 반복합니다.",
   "Exhale as you shrug your shoulders up, and inhale as you lower them back down.": "어깨를 으쓱하면서 숨을 내쉬고, 어깨를 다시 내리면서 숨을 들이쉬세요.",
@@ -4105,7 +4105,7 @@
   "Reach with fingertips": "손끝으로 닿기",
   "Rounding shoulders excessively": "어깨를 과도하게 굽히는 행위",
   "Bending knees": "무릎을 굽히다",
-  "Squat": "쪼그리고 앉은",
+  "Squat": "스쿼트",
   "A foundational lower body movement that strengthens the quads, glutes, and hamstrings by bending and straightening the knees and hips.": "무릎과 엉덩이를 구부리고 펴서 대퇴사두근, 둔근, 햄스트링을 강화하는 기초적인 하체 운동입니다.",
   "Stand with feet shoulder-width apart and toes slightly turned out. Lower your hips back and down as if sitting into a chair, keeping your chest upright, then drive through your heels to stand back up.": "발을 어깨너비로 벌리고 발가락을 약간 바깥쪽으로 벌리고 서세요. 의자에 앉듯이 엉덩이를 아래로 내리고 가슴을 곧게 편 다음, 발뒤꿈치를 힘껏 움직여 다시 일어선다.",
   "Stand with feet shoulder-width apart and toes slightly outward.": "발을 어깨 너비로 벌리고 발가락이 약간 바깥쪽으로 향하게 서세요.",
@@ -4501,5 +4501,7 @@
   "Smith Machine Hip Raise": "스미스 머신 힙 레이즈",
   "Smith Machine Reverse Calf Raises": "스미스 머신 리버스 카프 레이즈",
   "Smith Machine Stiff-Legged Deadlift": "스미스 머신 스티프 레그 데드리프트",
-  "Mountain Climbers": "마운틴 클라이머"
+  "Mountain Climbers": "마운틴 클라이머",
+  "Bodyweight Walking Lunge": "워킹 런지",
+  "Wall Sit": "월 싯(벽 스쿼트)"
 }

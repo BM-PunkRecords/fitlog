@@ -618,6 +618,24 @@ body.lock-pull-refresh {
   overscroll-behavior-y: contain;
 }
 
+/* 추천 루틴 행 — 번호·썸네일·이름·목표를 한 줄로. */
+.recommended-row {
+  gap: 12px;
+}
+
+.recommended-index {
+  width: 18px;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.recommended-goal {
+  flex-shrink: 0;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
 /* 기록에 남은 메모 — 줄바꿈을 살리고 세트 목록과 구분되게 들여쓴다. */
 .session-note {
   margin: 4px 0 0;

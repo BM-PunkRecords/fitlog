@@ -5,6 +5,7 @@ import { EmptyState, NavCard, PageHeader, SectionHeader } from '../components/pr
 import { ResumeBanner } from '../components/ResumeBanner'
 import { useAppData } from '../context/AppDataContext'
 import { CHALLENGES } from '../data/challenges'
+import { RECOMMENDED_ROUTINES } from '../data/recommendedRoutines'
 import { formatClock, totalSeconds } from '../lib/challenge'
 import { relativeTime, routineTargets } from '../lib/format'
 import { formatRest } from '../lib/rest'
@@ -72,6 +73,17 @@ export function HomePage() {
             </NavCard>
           ))
         )}
+      </section>
+
+      <section className="stack">
+        <SectionHeader title="추천 루틴" aside={`${RECOMMENDED_ROUTINES.length}개`} />
+        {RECOMMENDED_ROUTINES.map((r) => (
+          <NavCard key={r.id} to={`/recommended/${r.id}`} ariaLabel={`${r.name} 열기`}>
+            <span className="card-title">{r.name}</span>
+            {r.description && <span className="card-meta">{r.description}</span>}
+            <span className="card-meta">운동 {r.items.length}개</span>
+          </NavCard>
+        ))}
       </section>
 
       <section className="stack">

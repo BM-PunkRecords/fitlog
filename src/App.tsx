@@ -6,6 +6,7 @@ import { StartupSplash } from './components/StartupSplash'
 import { AppDataProvider, useAppData } from './context/AppDataContext'
 import { ChallengeListPage, ChallengePlayPage } from './pages/ChallengePages'
 import { HomePage } from './pages/HomePage'
+import { RecommendedRoutinePage } from './pages/RecommendedRoutinePage'
 import { HistoryPage, SessionDetailPage, StatsPage } from './pages/HistoryStatsPages'
 import { RoutineDetailPage, RoutineEditPage } from './pages/RoutinePages'
 import { SessionPage } from './pages/SessionPage'
@@ -32,6 +33,7 @@ function AppShell() {
           <Route path="/routines/:id" element={<RoutineDetailPage />} />
           <Route path="/routines/:id/edit" element={<RoutineEditPage />} />
           <Route path="/session/:id" element={<SessionPage />} />
+          <Route path="/recommended/:id" element={<RecommendedRoutinePage />} />
           <Route path="/challenges" element={<ChallengeListPage />} />
           <Route path="/challenges/:id" element={<ChallengePlayPage />} />
           <Route path="/history" element={<HistoryPage />} />
