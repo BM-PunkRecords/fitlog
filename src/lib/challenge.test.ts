@@ -136,14 +136,16 @@ describe('countInFor / videoStartFor', () => {
     expect(videoStartFor(noVideo)).toBe(0)
   })
 
-  // The intro before the first move doubles as the count-in: play from the very
-  // start and the count hits zero exactly where the exercise begins.
-  it('uses a video intro as the count-in', () => {
+  // The count-in lands inside the video's intro: the clip starts partway in so
+  // the count reaches zero exactly where the exercise begins.
+  it('lines the count-in up with the start of the exercise', () => {
     const c = { ...noVideo, youtubeId: 'v', youtubeStart: 5 }
-    expect(countInFor(c)).toBe(5)
-    expect(videoStartFor(c)).toBe(0)
+    expect(countInFor(c)).toBe(COUNT_IN_SECONDS)
+    expect(videoStartFor(c)).toBe(5 - COUNT_IN_SECONDS)
   })
 
+  // Nothing to count against — a 2s intro cannot host a 3s count-in, so it
+  // shrinks rather than starting the video at a negative offset.
   it('shortens the count-in when the intro is shorter', () => {
     const c = { ...noVideo, youtubeId: 'v', youtubeStart: 2 }
     expect(countInFor(c)).toBe(2)
@@ -153,8 +155,8 @@ describe('countInFor / videoStartFor', () => {
   it('caps the count-in when the intro is long, starting mid-video', () => {
     const c = { ...noVideo, youtubeId: 'v', youtubeStart: 30 }
     expect(countInFor(c)).toBe(COUNT_IN_SECONDS)
-    // 30s in, minus the 5s of count-in shown before it.
-    expect(videoStartFor(c)).toBe(25)
+    // 30s in, minus the count-in shown before it.
+    expect(videoStartFor(c)).toBe(30 - COUNT_IN_SECONDS)
   })
 
   it('has no count-in when the video starts immediately', () => {

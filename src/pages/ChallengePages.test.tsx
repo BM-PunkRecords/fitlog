@@ -113,7 +113,7 @@ describe('ChallengePlayPage', () => {
     render(<App />)
     await user.click(await screen.findByRole('button', { name: '시작' }))
     // Skip past the count-in.
-    fakeNow = 5000
+    fakeNow = COUNT_IN * 1000
 
     // The first step is on screen with its full length showing.
     await waitFor(() =>

@@ -43,7 +43,7 @@ export function totalSeconds(challenge: Challenge): number {
 }
 
 /** 시작 버튼과 첫 동작 사이에 두는 준비 시간(초). */
-export const COUNT_IN_SECONDS = 5
+export const COUNT_IN_SECONDS = 3
 
 /**
  * 이 챌린지의 준비 시간.
