@@ -3,8 +3,7 @@ import {
   applyRowEdit,
   buildRoutineSessionItems,
   formatElapsed,
-  setSessionExerciseRest,
-} from './format'
+  setSessionExerciseRest, sessionItemName } from './format'
 import type { Session, SessionExercise } from '../types/models'
 
 describe('formatElapsed', () => {
@@ -123,5 +122,30 @@ describe('setSessionExerciseRest', () => {
   it('does not mutate the original session', () => {
     setSessionExerciseRest(session, 0, 15)
     expect(session.items[0].restSecondsDefault).toBe(90)
+  })
+})
+
+describe('sessionItemName', () => {
+  const catalog = new Map([['0025', { name: 'Barbell Bench Press' }]])
+  const translate = (n: string) => (n === 'Barbell Bench Press' ? '바벨 벤치프레스' : n)
+
+  it('prefers the catalog name', () => {
+    const name = sessionItemName({ exerciseId: '0025', displayName: '무시됨' }, catalog, translate)
+    expect(name).toBe('바벨 벤치프레스')
+  })
+
+  // Challenge moves with no catalog entry used to surface their internal id
+  // ("challenge:abs-1min:1") in the history screen.
+  it('falls back to the recorded name for items outside the catalog', () => {
+    const name = sessionItemName(
+      { exerciseId: 'challenge:abs-1min:1', displayName: '플랭크 잭' },
+      catalog,
+      translate,
+    )
+    expect(name).toBe('플랭크 잭')
+  })
+
+  it('shows the id only when nothing else was recorded', () => {
+    expect(sessionItemName({ exerciseId: 'unknown-id' }, catalog, translate)).toBe('unknown-id')
   })
 })

@@ -19,6 +19,14 @@ export interface SessionSet {
 }
 
 export interface SessionExercise {
+  /**
+   * 카탈로그에 없는 동작의 표시 이름(챌린지 동작 등).
+   *
+   * 기록은 "그때 무엇을 했는가"라 나중에 카탈로그나 챌린지 구성이 바뀌어도
+   * 그대로 남아야 한다. 그래서 이름을 참조로 두지 않고 기록 시점에 박아 둔다.
+   * 카탈로그에 있는 운동이면 비워 두고 카탈로그 이름을 쓴다.
+   */
+  displayName?: string
   exerciseId: string
   order: number
   sets: SessionSet[]

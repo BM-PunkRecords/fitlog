@@ -142,3 +142,21 @@ export function applyRowEdit(
     }),
   }
 }
+
+/**
+ * 기록에 남은 운동의 표시 이름.
+ *
+ * 카탈로그에 있으면 그 이름(한글)을, 없으면 기록 시점에 박아 둔 `displayName`을
+ * 쓴다. 둘 다 없을 때만 내부 id가 보이는데, 그건 데이터가 깨진 경우다 — 챌린지
+ * 동작처럼 카탈로그에 없는 항목이 `challenge:abs-1min:1` 같은 식별자로 노출되던
+ * 버그를 막기 위한 순서다.
+ */
+export function sessionItemName(
+  item: { exerciseId: string; displayName?: string },
+  byId: Map<string, { name: string }>,
+  translate: (name: string) => string,
+): string {
+  const ex = byId.get(item.exerciseId)
+  if (ex) return translate(ex.name)
+  return item.displayName ?? item.exerciseId
+}

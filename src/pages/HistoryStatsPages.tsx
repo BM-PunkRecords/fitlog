@@ -2,10 +2,16 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { EmptyState, NavCard, PageHeader, SectionHeader, Stat } from '../components/primitives'
 import { useAppData } from '../context/AppDataContext'
-import { formatDateKey } from '../lib/format'
-import { formatMetricSet, metricTypeOf } from '../lib/metrics'
+import { formatDateKey, sessionItemName } from '../lib/format'
+import { formatMetricSet, metricTypeOf, formatDuration } from '../lib/metrics'
 import { tKo } from '../lib/tKo'
-import { exerciseVolume, sessionVolume } from '../store/volume'
+import {
+  exerciseVolume,
+  sessionCompletedSets,
+  sessionDurationSec,
+  sessionElapsedSec,
+  sessionVolume,
+} from '../store/volume'
 import { weeklyStats } from '../store/stats'
 import type { Session } from '../types/models'
 
@@ -53,13 +59,18 @@ export function HistoryPage() {
               >
                 <span className="card-title">{s.routineId ? '루틴 세션' : '자유운동'}</span>
                 <span className="card-meta">
-                  {s.items.length}개 운동 · 볼륨 {sessionVolume(s)}kg
+                  {s.items.length}개 운동
+                  {sessionVolume(s) > 0
+                    ? ` · 볼륨 ${sessionVolume(s)}kg`
+                    : sessionDurationSec(s) > 0
+                      ? ` · ${formatDuration(sessionDurationSec(s))}`
+                      : ''}
                 </span>
                 {s.items.length > 0 && (
                   <span className="card-meta">
                     {s.items
                       .slice(0, 3)
-                      .map((i) => tKo(byId.get(i.exerciseId)?.name ?? i.exerciseId))
+                      .map((i) => sessionItemName(i, byId, tKo))
                       .join(', ')}
                   </span>
                 )}
@@ -124,19 +135,32 @@ export function SessionDetailPage() {
         ← 기록
       </Link>
       <PageHeader title="세션 상세" description={formatDateKey(session.endedAt ?? session.startedAt)} />
-      <div className="stat">
-        <span className="stat-label muted">총 볼륨</span>
-        <span className="stat-number stat-number-brand">{sessionVolume(session)} kg</span>
+      {/* 볼륨은 중량 운동에서만 의미가 있다. 시간으로만 하는 세션(챌린지·유산소)에
+          `0 kg`만 띄우면 아무것도 안 한 것처럼 보이므로, 있는 지표만 고른다. */}
+      <div className="stat-grid">
+        {sessionVolume(session) > 0 && (
+          <Stat label="총 볼륨" value={`${sessionVolume(session)} kg`} tone="brand" />
+        )}
+        {sessionDurationSec(session) > 0 && (
+          <Stat
+            label="운동 시간"
+            value={formatDuration(sessionDurationSec(session))}
+            tone={sessionVolume(session) > 0 ? undefined : 'brand'}
+          />
+        )}
+        <Stat label="세트" value={`${sessionCompletedSets(session)}개`} />
+        {sessionElapsedSec(session) > 0 && (
+          <Stat label="소요" value={formatDuration(sessionElapsedSec(session))} />
+        )}
       </div>
       {session.items.map((item) => {
-        const ex = byId.get(item.exerciseId)
         const type = metricTypeOf(item)
         const vol = exerciseVolume(item)
         const prev = previousByExercise.get(item.exerciseId)
         const delta = prev === undefined ? null : vol - prev
         return (
           <div key={`${item.exerciseId}-${item.order}`} className="card stack">
-            <strong className="card-title">{ex ? tKo(ex.name) : item.exerciseId}</strong>
+            <strong className="card-title">{sessionItemName(item, byId, tKo)}</strong>
             {type === 'weight_reps' && (
               <div style={{ color: 'var(--accent)' }}>
                 볼륨 {vol} kg

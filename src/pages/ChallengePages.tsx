@@ -156,6 +156,9 @@ export function ChallengePlayPage() {
         .map((step, order) => ({
           exerciseId: step.exerciseId ?? `challenge:${challenge.id}:${order}`,
           order,
+          // 카탈로그에 없는 동작은 이름을 함께 남긴다 — 안 그러면 기록 화면에
+          // 위 내부 식별자가 그대로 보인다.
+          displayName: step.name,
           metricType: 'duration' as const,
           sets: [{ setNumber: 1, weightKg: 0, reps: 0, durationSec: step.seconds, completed: true }],
         })),
