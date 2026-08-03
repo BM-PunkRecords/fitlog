@@ -27,6 +27,8 @@ export interface SessionExercise {
    * 카탈로그에 있는 운동이면 비워 두고 카탈로그 이름을 쓴다.
    */
   displayName?: string
+  /** 이 운동에 남긴 메모(기구 번호·자세 감각·컨디션 등). 세션마다 따로 남는다. */
+  note?: string
   exerciseId: string
   order: number
   sets: SessionSet[]
@@ -60,6 +62,8 @@ export interface Routine {
 }
 
 export interface AppSettings {
+  /** 칼로리 추정에 쓰는 체중(kg). 없으면 칼로리를 표시하지 않는다. */
+  bodyWeightKg?: number
   defaultRestSeconds: number
   weightUnit: 'kg'
   /** Favorited catalog / custom exercise ids */

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { EmptyState, NavCard, PageHeader, SectionHeader, Stat } from '../components/primitives'
 import { useAppData } from '../context/AppDataContext'
+import { estimateSessionCalories } from '../lib/calories'
 import { formatDateKey, sessionItemName } from '../lib/format'
 import { formatMetricSet, metricTypeOf, formatDuration } from '../lib/metrics'
 import { tKo } from '../lib/tKo'
@@ -85,7 +86,7 @@ export function HistoryPage() {
 
 export function SessionDetailPage() {
   const { id } = useParams()
-  const { store, exerciseById: byId } = useAppData()
+  const { store, exerciseById: byId, settings } = useAppData()
   const [session, setSession] = useState<Session | null>(null)
   const [previousByExercise, setPreviousByExercise] = useState<Map<string, number>>(new Map())
 
@@ -129,6 +130,11 @@ export function SessionDetailPage() {
     )
   }
 
+  // 체중을 모르면 계산하지 않는다 — 아래에서 통째로 숨긴다.
+  const calories = estimateSessionCalories(session, settings.bodyWeightKg, (exerciseId) =>
+    byId.get(exerciseId),
+  )
+
   return (
     <div className="stack page-enter">
       <Link to="/history" className="muted interactive">
@@ -149,6 +155,7 @@ export function SessionDetailPage() {
           />
         )}
         <Stat label="세트" value={`${sessionCompletedSets(session)}개`} />
+        {calories !== null && <Stat label="칼로리(추정)" value={`${calories} kcal`} />}
         {sessionElapsedSec(session) > 0 && (
           <Stat label="소요" value={formatDuration(sessionElapsedSec(session))} />
         )}
@@ -179,6 +186,8 @@ export function SessionDetailPage() {
                 {s.completed ? '' : ' (미완료)'}
               </div>
             ))}
+            {/* 메모는 그날 무엇을 느꼈는지라 기록에서 다시 볼 수 있어야 한다. */}
+            {item.note && <p className="session-note muted">{item.note}</p>}
           </div>
         )
       })}

@@ -618,6 +618,92 @@ body.lock-pull-refresh {
   overscroll-behavior-y: contain;
 }
 
+/* 기록에 남은 메모 — 줄바꿈을 살리고 세트 목록과 구분되게 들여쓴다. */
+.session-note {
+  margin: 4px 0 0;
+  padding-left: 10px;
+  border-left: 2px solid var(--stroke-subtle);
+  white-space: pre-wrap;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* 세션 헤더 — 스크롤해도 따라온다. 운동 중에는 세트를 채우느라 화면을 내리는데,
+   경과 시간이 위로 사라지면 확인하려고 스크롤을 되돌려야 한다.
+   앱 셸 좌우 패딩만큼 음수 마진으로 빼내 화면 폭을 꽉 채운다. */
+.session-header {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: calc(var(--seed-dimension-x5, 20px) * -1) calc(var(--seed-dimension-x4, 16px) * -1) 0;
+  padding: 10px var(--seed-dimension-x4, 16px);
+  background: var(--bg);
+  border-bottom: 1px solid var(--stroke-subtle);
+}
+
+.session-header-back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  min-height: 32px;
+  margin-left: -6px;
+  flex-shrink: 0;
+}
+
+.session-header-count {
+  flex-shrink: 0;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 운동별 메모 — 접힌 줄은 한 줄만 차지하고, 내용이 있으면 미리보기를 보여준다. */
+.exercise-note {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.note-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+}
+
+.note-caret {
+  color: var(--text-muted);
+  width: 12px;
+  flex-shrink: 0;
+}
+
+.note-label {
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.note-preview {
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.note-input {
+  resize: vertical;
+  line-height: 1.5;
+}
+
 .exercise-card {
   position: relative;
 }

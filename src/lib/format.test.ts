@@ -1,10 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import {
-  applyRowEdit,
+import { applyRowEdit,
   buildRoutineSessionItems,
   formatElapsed,
-  setSessionExerciseRest, sessionItemName } from './format'
-import type { Session, SessionExercise } from '../types/models'
+  setSessionExerciseRest, sessionItemName, appendSet, isExerciseComplete } from './format'
+import type { Session, SessionExercise, SessionSet } from '../types/models'
 
 describe('formatElapsed', () => {
   it('formats under an hour as MM:SS', () => {
@@ -147,5 +146,78 @@ describe('sessionItemName', () => {
 
   it('shows the id only when nothing else was recorded', () => {
     expect(sessionItemName({ exerciseId: 'unknown-id' }, catalog, translate)).toBe('unknown-id')
+  })
+})
+
+describe('appendSet', () => {
+  const base = (sets: SessionSet[]): SessionExercise => ({
+    exerciseId: 'a',
+    order: 0,
+    sets,
+  })
+
+  // Most people repeat the same load across sets; retyping it every time is
+  // pure friction.
+  it('copies the previous set values onto the new row', () => {
+    const item = appendSet(base([{ setNumber: 1, weightKg: 60, reps: 8, completed: true }]))
+    expect(item.sets).toHaveLength(2)
+    expect(item.sets[1]).toMatchObject({ setNumber: 2, weightKg: 60, reps: 8 })
+  })
+
+  it('never inherits the completed flag', () => {
+    const item = appendSet(base([{ setNumber: 1, weightKg: 60, reps: 8, completed: true }]))
+    expect(item.sets[1].completed) .toBe(false)
+  })
+
+  it('carries timed and distance fields when present', () => {
+    const item = appendSet(
+      base([
+        { setNumber: 1, weightKg: 0, reps: 0, durationSec: 90, distanceKm: 1.5, completed: true },
+      ]),
+    )
+    expect(item.sets[1].durationSec).toBe(90)
+    expect(item.sets[1].distanceKm).toBe(1.5)
+  })
+
+  it('omits fields the previous set did not have', () => {
+    const item = appendSet(base([{ setNumber: 1, weightKg: 60, reps: 8, completed: false }]))
+    expect(item.sets[1].durationSec).toBeUndefined()
+    expect(item.sets[1].distanceKm).toBeUndefined()
+  })
+
+  it('starts from zero when there is no previous set', () => {
+    const item = appendSet(base([]))
+    expect(item.sets[0]).toMatchObject({ setNumber: 1, weightKg: 0, reps: 0, completed: false })
+  })
+})
+
+describe('isExerciseComplete', () => {
+  const item = (sets: SessionSet[]): SessionExercise => ({ exerciseId: 'a', order: 0, sets })
+
+  it('is true once every set is ticked', () => {
+    expect(
+      isExerciseComplete(
+        item([
+          { setNumber: 1, weightKg: 0, reps: 0, completed: true },
+          { setNumber: 2, weightKg: 0, reps: 0, completed: true },
+        ]),
+      ),
+    ).toBe(true)
+  })
+
+  it('is false while any set remains', () => {
+    expect(
+      isExerciseComplete(
+        item([
+          { setNumber: 1, weightKg: 0, reps: 0, completed: true },
+          { setNumber: 2, weightKg: 0, reps: 0, completed: false },
+        ]),
+      ),
+    ).toBe(false)
+  })
+
+  // An exercise with no sets has not been done — it just has nothing to do.
+  it('is false for an exercise with no sets', () => {
+    expect(isExerciseComplete(item([]))).toBe(false)
   })
 })

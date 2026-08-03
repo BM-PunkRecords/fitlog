@@ -4,6 +4,7 @@ import { AnimatedStat } from '../components/AnimatedStat'
 import { CompleteBurst } from '../components/CompleteBurst'
 import { DurationField } from '../components/DurationField'
 import { ExerciseInfoSheet } from '../components/ExerciseInfoSheet'
+import { ExerciseNote } from '../components/ExerciseNote'
 import { ExercisePicker } from '../components/ExercisePicker'
 import { ExercisePreview } from '../components/ExercisePreview'
 import { ChevronLeftIcon, ChevronRightIcon, InfoIcon, ReplaceIcon } from '../components/icons'
@@ -16,8 +17,10 @@ import { useAppData } from '../context/AppDataContext'
 import {
   type EditableSetFields,
   type EntryMode,
+  appendSet,
   applyRowEdit,
   formatElapsed,
+  isExerciseComplete,
   sessionItemFromExercise,
   setSessionExerciseRest,
 } from '../lib/format'
@@ -200,6 +203,22 @@ export function SessionPage() {
       if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
         navigator.vibrate?.(12)
       }
+
+      // 마지막 세트를 채웠으면 다음 운동으로 넘어간다. 완료 이펙트를 볼 틈은
+      // 두고, 그 사이 사용자가 직접 움직였으면(인덱스가 바뀌었으면) 넘기지
+      // 않는다 — 손으로 한 조작을 자동 이동이 덮어쓰면 안 된다.
+      const willComplete = isExerciseComplete({
+        ...current,
+        sets: current.sets.map((s) =>
+          s.setNumber === setNumber ? { ...s, completed: true } : s,
+        ),
+      })
+      if (willComplete && index < session.items.length - 1) {
+        const from = index
+        window.setTimeout(() => {
+          setIndex((i) => (i === from ? i + 1 : i))
+        }, 900)
+      }
     } else {
       updateSet(setNumber, { completed: false })
     }
@@ -207,18 +226,7 @@ export function SessionPage() {
 
   const addSet = () => {
     if (!current) return
-    const nextNumber = current.sets.length + 1
-    const items = session.items.map((item, i) =>
-      i === index
-        ? {
-            ...item,
-            sets: [
-              ...item.sets,
-              { setNumber: nextNumber, weightKg: 0, reps: 0, completed: false },
-            ],
-          }
-        : item,
-    )
+    const items = session.items.map((item, i) => (i === index ? appendSet(item) : item))
     void persist({ ...session, items })
   }
 
@@ -231,6 +239,14 @@ export function SessionPage() {
             sets: item.sets.slice(0, -1).map((s, idx) => ({ ...s, setNumber: idx + 1 })),
           }
         : item,
+    )
+    void persist({ ...session, items })
+  }
+
+  const setNote = (note: string) => {
+    if (!current) return
+    const items = session.items.map((item, i) =>
+      i === index ? { ...item, note: note || undefined } : item,
     )
     void persist({ ...session, items })
   }
@@ -359,14 +375,14 @@ export function SessionPage() {
 
   return (
     <div className="stack page-enter stagger">
-      <div className="row" style={{ justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <div className="stack" style={{ gap: 4 }}>
-          <div className="session-elapsed" aria-live="polite" title="세션 시간">
-            {elapsedLabel}
-          </div>
-          <Link to="/" className="muted interactive" style={{ fontSize: 13 }}>
-            ← 홈
-          </Link>
+      {/* 운동 중에는 화면을 스크롤하며 세트를 채우므로, 경과 시간은 따라다녀야
+          의미가 있다 — 위로 올라가 사라지면 확인하려고 스크롤을 되돌려야 한다. */}
+      <header className="session-header">
+        <Link to="/" className="muted interactive session-header-back" aria-label="홈으로">
+          <ChevronLeftIcon />
+        </Link>
+        <div className="session-elapsed" aria-live="polite" title="세션 시간">
+          {elapsedLabel}
         </div>
         <div className="progress-pills" aria-hidden>
           {session.items.map((item, i) => {
@@ -379,10 +395,10 @@ export function SessionPage() {
             )
           })}
         </div>
-        <span className="muted">
+        <span className="muted session-header-count">
           {session.items.length === 0 ? '0/0' : `${index + 1}/${session.items.length}`}
         </span>
-      </div>
+      </header>
 
       <div className="card row" style={{ justifyContent: 'space-between', gap: 16 }}>
         <div>
@@ -498,6 +514,7 @@ export function SessionPage() {
                   ))}
                 </select>
               </label>
+              <ExerciseNote value={current.note ?? ''} onChange={setNote} />
               <PreviousRecordDisclosure
                 record={previousRecord}
                 loading={prevLoading}

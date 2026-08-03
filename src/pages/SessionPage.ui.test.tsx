@@ -187,3 +187,95 @@ describe('SessionPage session UI', () => {
     expect(after?.items).toHaveLength(2)
   })
 })
+
+describe('SessionPage set entry', () => {
+  // Repeating the same load is the norm; retyping it every set is friction.
+  it('copies the previous set values onto a new set', async () => {
+    const user = userEvent.setup()
+    const store = new LocalWorkoutStore()
+    const seeded = seedSession()
+    seeded.items[0].sets = [{ setNumber: 1, weightKg: 60, reps: 8, completed: false }]
+    await store.saveSession(seeded)
+
+    render(<App />)
+    await screen.findByRole('button', { name: '운동 대체' })
+    await user.click(screen.getByRole('button', { name: '+ 세트' }))
+
+    await waitFor(() => {
+      const weights = screen.getAllByLabelText(/중량\(kg\)/)
+      expect(weights).toHaveLength(2)
+      expect(weights[1]).toHaveValue(60)
+    })
+    expect(screen.getAllByLabelText(/횟수/)[1]).toHaveValue(8)
+  })
+
+  it('keeps the elapsed time pinned while scrolling', async () => {
+    render(<App />)
+    await screen.findByRole('button', { name: '운동 대체' })
+
+    const header = document.querySelector('.session-header')
+    expect(header).not.toBeNull()
+    expect(header?.querySelector('.session-elapsed')).not.toBeNull()
+  })
+
+  it('saves a per-exercise note', async () => {
+    const user = userEvent.setup()
+    const saveSpy = vi.spyOn(LocalWorkoutStore.prototype, 'saveSession')
+    render(<App />)
+
+    await user.click(await screen.findByRole('button', { name: /메모/ }))
+    await user.type(screen.getByLabelText('운동 메모'), '3번 머신')
+
+    await waitFor(
+      () => {
+        const saved = saveSpy.mock.calls.at(-1)?.[0]
+        expect(saved?.items[0].note).toBe('3번 머신')
+      },
+      { timeout: 3000 },
+    )
+  })
+})
+
+describe('SessionPage auto-advance', () => {
+  async function completeAllSets(user: ReturnType<typeof userEvent.setup>) {
+    const store = new LocalWorkoutStore()
+    const seeded = seedSession()
+    // One set left to tick, already filled in so it can be completed.
+    seeded.items[0].sets = [{ setNumber: 1, weightKg: 60, reps: 8, completed: false }]
+    await store.saveSession(seeded)
+
+    render(<App />)
+    await screen.findByRole('button', { name: '운동 대체' })
+    await user.click(screen.getByRole('button', { name: '세트 1 완료' }))
+  }
+
+  // Finishing the last set means this exercise is done; making the user also
+  // press "next" is a step with no decision in it.
+  it('moves to the next exercise once the last set is ticked', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+    const first = () => document.querySelector('.exercise-card h2')?.textContent
+
+    await completeAllSets(user)
+    const before = first()
+
+    await vi.advanceTimersByTimeAsync(1200)
+
+    await waitFor(() => expect(first()).not.toBe(before))
+  })
+
+  it('stays put when the user already moved on their own', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+
+    await completeAllSets(user)
+    // Jump ahead manually before the auto-advance fires.
+    await user.click(screen.getByRole('button', { name: '다음 운동' }))
+    const chosen = document.querySelector('.exercise-card h2')?.textContent
+
+    await vi.advanceTimersByTimeAsync(1200)
+
+    // The scheduled move must not push past where the user chose to be.
+    expect(document.querySelector('.exercise-card h2')?.textContent).toBe(chosen)
+  })
+})

@@ -160,3 +160,28 @@ export function sessionItemName(
   if (ex) return translate(ex.name)
   return item.displayName ?? item.exerciseId
 }
+
+/**
+ * 세트 한 줄 추가.
+ *
+ * 새 세트는 **바로 위 세트의 값을 그대로 물려받는다** — 같은 무게로 여러 세트를
+ * 하는 게 보통이라 매번 다시 입력하게 만들 이유가 없다. 완료 표시는 당연히
+ * 넘기지 않는다(아직 안 한 세트다).
+ */
+export function appendSet(item: SessionExercise): SessionExercise {
+  const last = item.sets.at(-1)
+  const next: SessionSet = {
+    setNumber: item.sets.length + 1,
+    weightKg: last?.weightKg ?? 0,
+    reps: last?.reps ?? 0,
+    completed: false,
+  }
+  if (last?.durationSec !== undefined) next.durationSec = last.durationSec
+  if (last?.distanceKm !== undefined) next.distanceKm = last.distanceKm
+  return { ...item, sets: [...item.sets, next] }
+}
+
+/** 이 운동의 세트를 전부 완료했는지. 세트가 없으면 완료로 보지 않는다. */
+export function isExerciseComplete(item: SessionExercise): boolean {
+  return item.sets.length > 0 && item.sets.every((s) => s.completed)
+}
