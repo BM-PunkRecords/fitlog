@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { searchExercises } from './searchExercises'
+import { loadCatalog } from './loadCatalog'
 import type { Exercise } from './types'
 
 const sample: Exercise[] = [
@@ -74,5 +75,16 @@ describe('searchExercises', () => {
     expect(searchExercises(sample, '', { bodyPart: 'chest' }).map((e) => e.id)).toEqual([
       '1',
     ])
+  })
+
+  it('finds machine shoulder press and barbell curl by Korean query', () => {
+    const catalog = loadCatalog()
+
+    const shoulder = searchExercises(catalog, '머신 숄더 프레스')
+    expect(shoulder.some((e) => e.name === 'Machine Shoulder Press')).toBe(true)
+
+    // 바벨 컬은 원래 있었지만 한글 별칭이 없어 안 잡히던 항목이다.
+    expect(searchExercises(catalog, '바벨 바이셉 컬').some((e) => e.id === '0031')).toBe(true)
+    expect(searchExercises(catalog, '바벨 이두').some((e) => e.id === '0031')).toBe(true)
   })
 })

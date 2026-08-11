@@ -1554,7 +1554,11 @@
       "standing barbell curl",
       "BB curl",
       "straight bar curl",
-      "barbell arm curl"
+      "barbell arm curl",
+      "바벨 컬",
+      "바벨 바이셉 컬",
+      "바벨 이두 컬",
+      "바벨 이두"
     ],
     "bodyPart": "upper arms",
     "target": "biceps",

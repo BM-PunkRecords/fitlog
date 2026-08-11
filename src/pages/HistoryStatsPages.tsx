@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { BarChart } from '../components/BarChart'
+import { MuscleMap } from '../components/MuscleMap'
 import { EmptyState, NavCard, PageHeader, SectionHeader, Stat } from '../components/primitives'
 import { useAppData } from '../context/AppDataContext'
 import { estimateSessionCalories } from '../lib/calories'
@@ -13,7 +15,12 @@ import {
   sessionElapsedSec,
   sessionVolume,
 } from '../store/volume'
-import { weeklyStats } from '../store/stats'
+import {
+  type RangeKey,
+  bodyPartBreakdown,
+  rangeStats,
+  volumeSeries,
+} from '../store/stats'
 import type { Session } from '../types/models'
 
 export function HistoryPage() {
@@ -195,35 +202,113 @@ export function SessionDetailPage() {
   )
 }
 
+const RANGE_LABELS: Record<RangeKey, string> = {
+  '7d': '최근 7일',
+  '30d': '최근 30일',
+  all: '전체',
+}
+
 export function StatsPage() {
-  const { store } = useAppData()
-  const [stats, setStats] = useState({ sessionCount: 0, totalVolume: 0 })
+  const { store, exerciseById } = useAppData()
+  const [sessions, setSessions] = useState<Session[]>([])
+  const [range, setRange] = useState<RangeKey>('7d')
 
   useEffect(() => {
-    void store.listSessions({ status: 'completed' }).then((sessions) => {
-      setStats(weeklyStats(sessions))
-    })
+    void store.listSessions({ status: 'completed' }).then(setSessions)
   }, [store])
 
+  const stats = useMemo(() => rangeStats(sessions, range), [sessions, range])
+  const series = useMemo(() => volumeSeries(sessions, range), [sessions, range])
+  const breakdown = useMemo(
+    () => bodyPartBreakdown(sessions, (id) => exerciseById.get(id), range),
+    [sessions, range, exerciseById],
+  )
+
   const hasData = stats.sessionCount > 0
+  // 볼륨이 전혀 없는 기간(유산소·시간 운동만 한 주)은 세트 수로 그린다 — 0kg
+  // 막대만 늘어놓으면 아무것도 안 한 것처럼 보인다.
+  const useVolume = stats.totalVolume > 0
+  const bars = series.map((b) => ({
+    label: b.label,
+    value: useVolume ? b.volume : b.sets,
+    detail: b.detail,
+  }))
+  const maxPartSets = Math.max(1, ...breakdown.parts.map((p) => p.sets))
 
   return (
     <div className="stack page-enter">
-      <PageHeader title="통계" description="최근 7일 동안의 운동 요약" />
-      <div className="stat-grid">
-        <Stat label="세션" value={stats.sessionCount} />
-        <Stat label="총 볼륨" value={`${stats.totalVolume} kg`} tone="brand" />
+      <PageHeader title="통계" description={`${RANGE_LABELS[range]} 운동 요약`} />
+
+      <div className="chip-row" role="tablist" aria-label="기간 선택">
+        {(['7d', '30d', 'all'] as const).map((key) => (
+          <button
+            key={key}
+            type="button"
+            role="tab"
+            aria-selected={range === key}
+            className={`chip ${range === key ? 'is-active' : ''}`}
+            onClick={() => setRange(key)}
+          >
+            {RANGE_LABELS[key]}
+          </button>
+        ))}
       </div>
-      {!hasData && (
+
+      {!hasData ? (
         <EmptyState
-          title="이번 주 기록이 아직 없어요"
-          description="운동을 완료하면 최근 7일 세션 수와 총 볼륨이 여기에 쌓여요."
+          title={range === 'all' ? '아직 완료한 운동이 없어요' : `${RANGE_LABELS[range]} 기록이 없어요`}
+          description="운동을 완료하면 세션 수·볼륨·부위 분포가 여기에 쌓여요."
           action={
             <Link to="/" className="btn btn-ghost interactive">
               운동 시작하러 가기
             </Link>
           }
         />
+      ) : (
+        <>
+          <div className="stat-grid">
+            <Stat label="세션" value={stats.sessionCount} />
+            <Stat label="운동한 날" value={`${stats.activeDays}일`} />
+            <Stat label="총 세트" value={`${stats.totalSets}개`} />
+            {stats.totalVolume > 0 && (
+              <Stat label="총 볼륨" value={`${stats.totalVolume} kg`} tone="brand" />
+            )}
+            {stats.totalVolume > 0 && (
+              <Stat label="세션 평균 볼륨" value={`${stats.avgVolume} kg`} />
+            )}
+            {stats.totalDurationSec > 0 && (
+              <Stat label="운동 시간" value={formatDuration(stats.totalDurationSec)} />
+            )}
+          </div>
+
+          {bars.length > 0 && (
+            <section className="card stack">
+              <SectionHeader title={useVolume ? '볼륨 추이' : '세트 추이'} />
+              <BarChart bars={bars} unit={useVolume ? 'kg' : '세트'} />
+            </section>
+          )}
+
+          {breakdown.parts.length > 0 && (
+            <section className="card stack">
+              <SectionHeader title="부위 분포" aside={`${breakdown.parts.length}개 부위`} />
+              <MuscleMap activation={breakdown.activation} />
+              <div className="part-bars">
+                {breakdown.parts.map((p) => (
+                  <div key={p.bodyPart} className="part-bar">
+                    <span className="part-bar-label">{p.label}</span>
+                    <span className="part-bar-track" aria-hidden>
+                      <span
+                        className="part-bar-fill"
+                        style={{ width: `${(p.sets / maxPartSets) * 100}%` }}
+                      />
+                    </span>
+                    <span className="part-bar-value muted">{p.sets}세트</span>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+        </>
       )}
     </div>
   )

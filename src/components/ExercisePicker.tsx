@@ -6,6 +6,7 @@ import { bodyPartKo, equipmentKo, targetKo } from '../lib/labelsKo'
 import { tKo } from '../lib/tKo'
 import { createId } from '../store/createId'
 import type { CustomExercise } from '../types/models'
+import { BODY_REGIONS, BodyPartPicker, regionForBodyPart } from './BodyPartPicker'
 import { ExercisePreview } from './ExercisePreview'
 
 type StatusFilter = 'all' | 'favorite' | 'frequent' | 'recent' | 'custom'
@@ -75,9 +76,11 @@ export function ExercisePicker({
   const [menuId, setMenuId] = useState<string | null>(null)
   const [showTop, setShowTop] = useState(false)
   const [customName, setCustomName] = useState('')
-  const [customBodyPart, setCustomBodyPart] = useState(preferBodyPart || 'upper legs')
-  const [customTarget, setCustomTarget] = useState('quads')
-  const [customEquipment, setCustomEquipment] = useState('smith machine')
+  const defaultRegion = regionForBodyPart(preferBodyPart) ?? BODY_REGIONS[0]
+  const [customRegion, setCustomRegion] = useState(defaultRegion.key)
+  const [customBodyPart, setCustomBodyPart] = useState(defaultRegion.bodyPart)
+  const [customTarget, setCustomTarget] = useState(defaultRegion.target)
+  const [customEquipment, setCustomEquipment] = useState('barbell')
   const [customError, setCustomError] = useState('')
 
   useEffect(() => {
@@ -102,11 +105,6 @@ export function ExercisePicker({
     const rest = [...present].filter((e) => !ordered.includes(e)).sort()
     return [...ordered, ...rest]
   }, [catalog])
-
-  const targets = useMemo(
-    () => [...new Set(catalog.map((e) => e.target))].sort(),
-    [catalog],
-  )
 
   const results = useMemo(() => {
     const excluded = new Set(excludeIds)
@@ -296,33 +294,18 @@ export function ExercisePicker({
             value={customName}
             onChange={(e) => setCustomName(e.target.value)}
           />
-          <div className="row">
-            <select
-              className="field"
-              value={customBodyPart}
-              onChange={(e) => setCustomBodyPart(e.target.value)}
-              aria-label="부위"
-              style={{ flex: 1 }}
-            >
-              {bodyParts.map((part) => (
-                <option key={part} value={part}>
-                  {bodyPartKo(part)}
-                </option>
-              ))}
-            </select>
-            <select
-              className="field"
-              value={customTarget}
-              onChange={(e) => setCustomTarget(e.target.value)}
-              aria-label="주 근육"
-              style={{ flex: 1 }}
-            >
-              {targets.map((t) => (
-                <option key={t} value={t}>
-                  {targetKo(t)}
-                </option>
-              ))}
-            </select>
+          <div className="stack" style={{ gap: 8 }}>
+            <span className="muted" style={{ fontSize: 12 }}>
+              어느 부위 운동인가요? 그림을 눌러 고르세요
+            </span>
+            <BodyPartPicker
+              value={customRegion}
+              onSelect={(r) => {
+                setCustomRegion(r.key)
+                setCustomBodyPart(r.bodyPart)
+                setCustomTarget(r.target)
+              }}
+            />
           </div>
           <select
             className="field"

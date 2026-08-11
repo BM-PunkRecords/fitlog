@@ -104,4 +104,29 @@ describe('SessionPage per-exercise rest preset', () => {
     expect(reloaded?.items[0].restSecondsDefault).toBe(90)
     expect(reloaded?.items[1].restSecondsDefault).toBe(120)
   })
+
+  it('shows the pinned rest countdown when a set is completed', async () => {
+    // Seed the first exercise with a pre-filled set so ticking it completes.
+    const store = new LocalWorkoutStore()
+    const seeded = seedSession()
+    seeded.items[0].sets = [
+      { setNumber: 1, weightKg: 60, reps: 10, completed: false },
+      { setNumber: 2, weightKg: 60, reps: 10, completed: false },
+    ]
+    await store.saveSession(seeded)
+
+    const user = userEvent.setup()
+    render(<App />)
+    await screen.findByRole('button', { name: '운동 대체' })
+
+    // No rest bar until a set is actually completed.
+    expect(screen.queryByText('휴식')).toBeNull()
+
+    await user.click(screen.getByRole('button', { name: '세트 1 완료' }))
+
+    // The countdown docks at the bottom, seeded with this exercise's rest (120s).
+    const bar = (await screen.findByText('휴식')).closest('.rest-bar') as HTMLElement
+    expect(bar).not.toBeNull()
+    expect(within(bar).getByText('120')).toBeInTheDocument()
+  })
 })

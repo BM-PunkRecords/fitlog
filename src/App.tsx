@@ -2,8 +2,10 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { BottomAdBanner } from './components/BottomAdBanner'
 import { BottomChrome } from './components/BottomChrome'
 import { BottomNav } from './components/BottomNav'
+import { RestBar } from './components/RestBar'
 import { StartupSplash } from './components/StartupSplash'
 import { AppDataProvider, useAppData } from './context/AppDataContext'
+import { RestTimerProvider } from './context/RestTimerContext'
 import { ChallengeListPage, ChallengePlayPage } from './pages/ChallengePages'
 import { HomePage } from './pages/HomePage'
 import { RecommendedRoutinePage } from './pages/RecommendedRoutinePage'
@@ -26,27 +28,30 @@ function AppShell() {
 
   return (
     <BrowserRouter>
-      <div className="app-shell">
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/routines/new" element={<RoutineEditPage />} />
-          <Route path="/routines/:id" element={<RoutineDetailPage />} />
-          <Route path="/routines/:id/edit" element={<RoutineEditPage />} />
-          <Route path="/session/:id" element={<SessionPage />} />
-          <Route path="/recommended/:id" element={<RecommendedRoutinePage />} />
-          <Route path="/challenges" element={<ChallengeListPage />} />
-          <Route path="/challenges/:id" element={<ChallengePlayPage />} />
-          <Route path="/history" element={<HistoryPage />} />
-          <Route path="/history/:id" element={<SessionDetailPage />} />
-          <Route path="/stats" element={<StatsPage />} />
-          <Route path="/settings" element={<SettingsPage />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </div>
-      <BottomChrome>
-        <BottomNav />
-        <BottomAdBanner />
-      </BottomChrome>
+      <RestTimerProvider>
+        <div className="app-shell">
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/routines/new" element={<RoutineEditPage />} />
+            <Route path="/routines/:id" element={<RoutineDetailPage />} />
+            <Route path="/routines/:id/edit" element={<RoutineEditPage />} />
+            <Route path="/session/:id" element={<SessionPage />} />
+            <Route path="/recommended/:id" element={<RecommendedRoutinePage />} />
+            <Route path="/challenges" element={<ChallengeListPage />} />
+            <Route path="/challenges/:id" element={<ChallengePlayPage />} />
+            <Route path="/history" element={<HistoryPage />} />
+            <Route path="/history/:id" element={<SessionDetailPage />} />
+            <Route path="/stats" element={<StatsPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </div>
+        <BottomChrome>
+          <RestBar />
+          <BottomNav />
+          <BottomAdBanner />
+        </BottomChrome>
+      </RestTimerProvider>
     </BrowserRouter>
   )
 }

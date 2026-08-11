@@ -1,5 +1,6 @@
 import type { ReactElement } from 'react'
 import { cleanup, render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { HistoryPage, StatsPage } from './HistoryStatsPages'
@@ -73,24 +74,43 @@ describe('HistoryPage hierarchy', () => {
 })
 
 describe('StatsPage emphasis', () => {
-  it('emphasises the weekly numbers and shows an empty hint with no data', async () => {
+  it('offers range tabs and shows an empty hint with no data', async () => {
     renderPage(<StatsPage />)
     expect(screen.getByRole('heading', { level: 1, name: '통계' })).toBeInTheDocument()
     await waitFor(() =>
-      expect(screen.getByText('이번 주 기록이 아직 없어요')).toBeInTheDocument(),
+      expect(screen.getByText(/운동을 완료하면/)).toBeInTheDocument(),
     )
-    expect(screen.getByText('세션')).toBeInTheDocument()
-    expect(screen.getByText('총 볼륨')).toBeInTheDocument()
+    // 7일·30일·전체를 고를 수 있어야 한다(예전엔 최근 7일 고정).
+    expect(screen.getByRole('tab', { name: '최근 7일' })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: '전체' })).toBeInTheDocument()
   })
 
   it('counts recent completed sessions and hides the empty hint', async () => {
     state.sessions = [completedSession()]
     renderPage(<StatsPage />)
 
-    await waitFor(() =>
-      expect(screen.queryByText('이번 주 기록이 아직 없어요')).not.toBeInTheDocument(),
-    )
-    expect(screen.getByText('1')).toBeInTheDocument()
-    expect(screen.getByText('400 kg')).toBeInTheDocument()
+    await waitFor(() => expect(screen.getByText('세션')).toBeInTheDocument())
+    expect(screen.queryByText(/운동을 완료하면/)).not.toBeInTheDocument()
+    // 볼륨만이 아니라 세트·운동한 날·부위 분포까지 나온다.
+    expect(screen.getByText('총 세트')).toBeInTheDocument()
+    expect(screen.getByText('운동한 날')).toBeInTheDocument()
+    expect(screen.getByText('부위 분포')).toBeInTheDocument()
+    expect(screen.getAllByText('400 kg').length).toBeGreaterThan(0)
+  })
+
+  it('switches to the all-time range', async () => {
+    const user = userEvent.setup()
+    // 100일 전 세션 — 7일엔 안 잡히고 전체에서만 잡힌다.
+    const old = completedSession()
+    old.id = 'old'
+    old.endedAt = new Date(Date.now() - 100 * 24 * 60 * 60 * 1000).toISOString()
+    old.startedAt = old.endedAt
+    state.sessions = [old]
+    renderPage(<StatsPage />)
+
+    await waitFor(() => expect(screen.getByText(/운동을 완료하면/)).toBeInTheDocument())
+    await user.click(screen.getByRole('tab', { name: '전체' }))
+    await waitFor(() => expect(screen.queryByText(/운동을 완료하면/)).not.toBeInTheDocument())
+    expect(screen.getByText('세션')).toBeInTheDocument()
   })
 })

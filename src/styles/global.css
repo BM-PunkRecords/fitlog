@@ -500,6 +500,92 @@ a.btn {
   outline-offset: -2px;
 }
 
+/* 휴식 카운트다운 바 — 탭바 바로 위에 도킹. 휴식 중일 때만 렌더된다(RestBar).
+   맨 위에 얇은 진행 막대, 아래에 남은 초 + 컴팩트 컨트롤. */
+.rest-bar {
+  width: 100%;
+  background: var(--bg-elevated);
+  border-top: 1px solid var(--stroke);
+  animation: rise-in 0.22s ease both;
+}
+
+.rest-bar-track {
+  height: 3px;
+  width: 100%;
+  background: color-mix(in srgb, var(--text) 8%, transparent);
+  overflow: hidden;
+}
+
+.rest-bar-fill {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.9s linear;
+}
+
+.rest-bar.is-urgent .rest-bar-fill {
+  background: var(--danger);
+}
+
+.rest-bar-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 12px;
+}
+
+.rest-bar-count {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+
+.rest-bar-label {
+  color: var(--text-muted);
+  font-size: var(--seed-font-size-t3, 0.8125rem);
+}
+
+.rest-bar-value {
+  font-family: var(--font-display);
+  color: var(--text);
+  font-size: 0.95rem;
+}
+
+.rest-bar-value strong {
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+.rest-bar.is-urgent .rest-bar-value,
+.rest-bar.is-urgent .rest-bar-value strong {
+  color: var(--danger);
+  animation: timer-urgent 0.7s ease-in-out infinite;
+}
+
+.rest-bar.is-done .rest-bar-label {
+  color: var(--accent);
+}
+
+.rest-bar-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.rest-bar-btn {
+  padding: 6px 10px;
+  min-height: 40px;
+  font-size: var(--seed-font-size-t3, 0.8125rem);
+}
+
+.rest-bar-close {
+  min-height: 40px;
+  min-width: 40px;
+}
+
 .fab-bar {
   position: sticky;
   bottom: calc(var(--chrome-clear) + 8px);
@@ -944,6 +1030,154 @@ body.lock-pull-refresh {
 
 .muscle-caption {
   font-size: 11px;
+}
+
+/* 통계 볼륨/세트 추이 막대 그래프(BarChart). */
+.barchart {
+  width: 100%;
+}
+
+.barchart-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 128px;
+}
+
+.barchart-col {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  height: 100%;
+}
+
+.barchart-track {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.barchart-fill {
+  width: 70%;
+  min-height: 2px;
+  background: var(--accent);
+  border-radius: 3px 3px 0 0;
+  transition: height 0.25s ease;
+}
+
+.barchart-fill.is-empty {
+  background: color-mix(in srgb, var(--text) 10%, transparent);
+  min-height: 2px;
+}
+
+.barchart-xlabel {
+  font-size: 9px;
+  line-height: 1;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* 부위별 세트 분포 막대. */
+.part-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.part-bar {
+  display: grid;
+  grid-template-columns: 64px 1fr auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.part-bar-label {
+  font-size: 13px;
+  font-weight: var(--seed-font-weight-medium, 600);
+}
+
+.part-bar-track {
+  height: 10px;
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--text) 8%, transparent);
+  overflow: hidden;
+}
+
+.part-bar-fill {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  border-radius: 5px;
+  transition: width 0.3s ease;
+}
+
+.part-bar-value {
+  font-size: 12px;
+  min-width: 40px;
+  text-align: right;
+}
+
+/* 커스텀 운동 부위 선택 — 인체 도해 카드 그리드(BodyPartPicker). */
+.bodypart-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.bodypart-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 4px 6px;
+  background: var(--bg-input);
+  border: 1px solid var(--stroke-subtle);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.bodypart-card.is-selected {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 14%, var(--bg-input));
+}
+
+.bodypart-card:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent) 70%, transparent);
+  outline-offset: 1px;
+}
+
+.bodypart-figure {
+  width: 52px;
+}
+
+.bodypart-figure .rbh-wrapper {
+  width: 100%;
+}
+
+.bodypart-figure .rbh {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.bodypart-label {
+  font-size: 12px;
+  font-weight: var(--seed-font-weight-medium, 600);
+  color: var(--text);
+  text-align: center;
+}
+
+.bodypart-card.is-selected .bodypart-label {
+  color: var(--accent);
 }
 
 .muscle-summary {

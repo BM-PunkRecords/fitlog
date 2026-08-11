@@ -11,9 +11,9 @@ import { ChevronLeftIcon, ChevronRightIcon, InfoIcon, ReplaceIcon } from '../com
 import { NumericField } from '../components/NumericField'
 import { PreviousRecordDisclosure } from '../components/PreviousRecord'
 import { RestField } from '../components/RestField'
-import { RestTimer } from '../components/RestTimer'
 import { Sheet } from '../components/Sheet'
 import { useAppData } from '../context/AppDataContext'
+import { useRestTimer } from '../context/RestTimerContext'
 import {
   type EditableSetFields,
   type EntryMode,
@@ -56,7 +56,7 @@ export function SessionPage() {
   const [error, setError] = useState('')
   const [showInfo, setShowInfo] = useState(false)
   const [pickerMode, setPickerMode] = useState<PickerMode>(null)
-  const [restToken, setRestToken] = useState(0)
+  const { startRest, dismiss: dismissRest } = useRestTimer()
   const [burstSet, setBurstSet] = useState<number | null>(null)
   const [flashSet, setFlashSet] = useState<number | null>(null)
   const [now, setNow] = useState(() => Date.now())
@@ -111,6 +111,10 @@ export function SessionPage() {
   useEffect(() => {
     setCascadeStart(null)
   }, [session?.id, index])
+
+  // 세션 화면을 벗어나면(종료·폐기·뒤로가기) 하단 휴식 바도 접는다. 휴식은
+  // 운동에 속한 것이지 앱 전체에 계속 떠 있을 것이 아니다.
+  useEffect(() => () => dismissRest(), [dismissRest])
 
   // Completed history is read once per session load and reused across
   // exercises/renders so previous records never hit IndexedDB per set entry.
@@ -195,7 +199,9 @@ export function SessionPage() {
       }
       setError('')
       updateSet(setNumber, { completed: true })
-      setRestToken((n) => n + 1)
+      // 세트를 완료하면 이 운동의 휴식 시간으로 하단 바 카운트다운을 시작한다.
+      // 탭 제스처 안에서 호출돼야 이후 신호음이 나므로 여기서 startRest 한다.
+      startRest(resolveRest(current.restSecondsDefault, settings.defaultRestSeconds))
       setBurstSet(setNumber)
       setFlashSet(setNumber)
       window.setTimeout(() => setBurstSet(null), 600)
@@ -646,10 +652,8 @@ export function SessionPage() {
             />
           </div>
 
-          <RestTimer
-            initialSeconds={resolveRest(current.restSecondsDefault, settings.defaultRestSeconds)}
-            restartToken={restToken}
-          />
+          {/* 라이브 휴식 카운트다운은 여기가 아니라 하단 고정 바(<RestBar>)에 뜬다 —
+              세트를 채우며 스크롤해도 남은 시간이 늘 보이도록. */}
 
           {/* Exercise navigation: prev/next are a matched pair with the position
               between them, so moving through the session reads as one control

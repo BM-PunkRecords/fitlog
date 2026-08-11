@@ -650,5 +650,48 @@
     "videos": {},
     "thumbnails": {},
     "source": "supplement"
+  },
+  {
+    "id": "yo-machine-shoulder-press",
+    "name": "Machine Shoulder Press",
+    "aliases": [
+      "머신 숄더 프레스",
+      "머신 오버헤드 프레스",
+      "숄더 프레스 머신",
+      "machine shoulder press",
+      "military press machine",
+      "shoulder press machine",
+      "overhead press machine"
+    ],
+    "bodyPart": "shoulders",
+    "target": "shoulders",
+    "secondaryMuscles": [
+      "triceps"
+    ],
+    "equipment": "leverage machine",
+    "difficulty": "beginner",
+    "compound": true,
+    "instructions": "숄더 프레스 머신에 앉아 무게를 선택한다. 손잡이를 양옆으로 잡고 팔꿈치를 굽혀 몸통과 나란히 둔다. 숨을 내쉬며 손잡이를 위로 밀어 팔을 완전히 편다. 맨 위에서 1초간 수축을 유지한다. 숨을 들이쉬며 손잡이를 천천히 시작 위치로 내린다. 정해진 횟수만큼 반복한다.",
+    "steps": [
+      "숄더 프레스 머신에 앉아 무게를 선택한다.",
+      "손잡이를 양옆으로 잡고 팔꿈치를 굽혀 몸통과 나란히 둔다. 이것이 시작 자세다.",
+      "숨을 내쉬며 손잡이를 위로 밀어 팔을 완전히 편다. 맨 위에서 1초간 수축을 유지한다.",
+      "숨을 들이쉬며 손잡이를 천천히 시작 위치로 내린다.",
+      "정해진 횟수만큼 반복한다."
+    ],
+    "formCues": [
+      "팔꿈치를 몸통과 일직선으로 유지",
+      "허리가 뜨지 않게 코어에 힘"
+    ],
+    "commonMistakes": [
+      "반동으로 밀어 올림",
+      "손잡이를 끝까지 내리지 않음"
+    ],
+    "videos": {},
+    "thumbnails": {
+      "male": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Machine_Shoulder_Military_Press/0.jpg",
+      "female": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Machine_Shoulder_Military_Press/0.jpg"
+    },
+    "source": "supplement"
   }
 ]
