@@ -34,7 +34,7 @@ import {
   metricFields,
   metricTypeOf,
 } from '../lib/metrics'
-import { findPreviousRecord } from '../lib/previousRecord'
+import { findPreviousRecord, isPristineExercise, prefillFromPrevious } from '../lib/previousRecord'
 import { type SwipePoint, detectSwipe, isSwipeExempt } from '../lib/swipe'
 import { tKo } from '../lib/tKo'
 import {
@@ -69,6 +69,13 @@ export function SessionPage() {
   // Which direction the last move came from, so the incoming exercise slides in
   // from the side the finger travelled. Cleared once the animation is spent.
   const [swipeFrom, setSwipeFrom] = useState<'prev' | 'next' | null>(null)
+  // Current index read from a delayed callback (auto-advance) without stale
+  // closures, so we never advance past where the user has since moved.
+  const indexRef = useRef(index)
+  indexRef.current = index
+  // Exercises already considered for previous-record autofill, so a filled or
+  // deliberately-cleared exercise is never re-filled behind the user.
+  const autofilled = useRef<Set<string>>(new Set())
 
   useEffect(() => {
     if (!id) return
@@ -151,6 +158,31 @@ export function SessionPage() {
     await store.saveSession(next)
   }
 
+  // 이전 기록 자동 채우기 — 아직 손대지 않은 운동에 한해, 지난번 무게·횟수를
+  // 세트에 미리 넣는다(완료 표시는 안 함). 운동마다 한 번만 시도한다.
+  useEffect(() => {
+    if (!session || session.status !== 'in_progress' || prevLoading) return
+    const item = session.items[index]
+    if (!item || !previousRecord) return
+    const key = `${index}:${item.exerciseId}`
+    if (autofilled.current.has(key)) return
+    autofilled.current.add(key)
+    if (!isPristineExercise(item)) return
+    const items = session.items.map((it, i) =>
+      i === index ? prefillFromPrevious(it, previousRecord) : it,
+    )
+    void persist({ ...session, items })
+    // persist는 매 렌더 새로 만들어지므로 의존성에서 뺀다 — key 가드가 재실행을 막는다.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session?.id, index, previousRecord, prevLoading])
+
+  // 다른 운동으로 넘어가면 맨 위(운동 헤더)부터 보이도록 스크롤을 되돌린다 —
+  // 세트를 채우며 내려간 자리에 다음 운동이 시작되면 위로 다시 올려야 한다.
+  useEffect(() => {
+    if (!session) return
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [session?.id, index])
+
   if (!session) {
     return (
       <div className="stack page-enter">
@@ -222,7 +254,10 @@ export function SessionPage() {
       if (willComplete && index < session.items.length - 1) {
         const from = index
         window.setTimeout(() => {
-          setIndex((i) => (i === from ? i + 1 : i))
+          // 그 사이 사용자가 직접 움직였으면 자동 이동은 취소한다.
+          if (indexRef.current !== from) return
+          setSwipeFrom('next')
+          setIndex(from + 1)
         }, 900)
       }
     } else {
@@ -293,12 +328,19 @@ export function SessionPage() {
   const hasPrev = index > 0
   const hasNext = index < session.items.length - 1
 
+  // Moving between exercises always plays the slide-in — whether it came from a
+  // swipe, the prev/next buttons, or the auto-advance after the last set — so
+  // every transition reads as one, not just touch gestures.
   const goPrev = () => {
-    if (hasPrev) setIndex(index - 1)
+    if (!hasPrev) return
+    setSwipeFrom('prev')
+    setIndex(index - 1)
   }
 
   const goNext = () => {
-    if (hasNext) setIndex(index + 1)
+    if (!hasNext) return
+    setSwipeFrom('next')
+    setIndex(index + 1)
   }
 
   // Swipe left/right moves between exercises. It is an addition to the
@@ -324,13 +366,9 @@ export function SessionPage() {
     if (!dir) return
 
     // At a boundary the gesture is simply inert, matching the disabled buttons.
-    if (dir === 'next' && hasNext) {
-      setSwipeFrom('next')
-      goNext()
-    } else if (dir === 'prev' && hasPrev) {
-      setSwipeFrom('prev')
-      goPrev()
-    }
+    // goNext/goPrev already set the slide direction.
+    if (dir === 'next') goNext()
+    else if (dir === 'prev') goPrev()
   }
 
   // Skipping drops the exercise from the session, which loses any sets already

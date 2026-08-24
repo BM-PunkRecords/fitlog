@@ -52,6 +52,11 @@ export function PreviousRecordDisclosure({
                   <span>{formatMetricSet(set, record.metricType)}</span>
                 </div>
               ))}
+              {/* 지난번 메모(기구 번호·자세 느낌 등)를 함께 보여준다 — 그때 무엇을
+                  적어 뒀는지 다시 읽으려고 기록 화면까지 갈 필요가 없도록. */}
+              {record.note && (
+                <p className="prev-record-note muted">📝 {record.note}</p>
+              )}
             </>
           ) : (
             <p className="muted" style={{ fontSize: 13, margin: 0 }}>

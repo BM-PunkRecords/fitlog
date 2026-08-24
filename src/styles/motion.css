@@ -111,6 +111,18 @@
 
 /* 스와이프로 운동을 넘길 때, 손가락이 이동한 쪽에서 새 카드가 따라 들어온다.
    방향 감각을 확인시켜 주는 짧은 진입 모션이며 위치는 즉시 제자리다. */
+/* 시연 2프레임 크로스페이드 — alternate로 시작↔끝 자세를 오간다. */
+@keyframes frame-cross {
+  0%,
+  35% {
+    opacity: 0;
+  }
+  65%,
+  100% {
+    opacity: 1;
+  }
+}
+
 @keyframes swipe-in-from-right {
   from {
     opacity: 0;

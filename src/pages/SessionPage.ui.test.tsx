@@ -279,3 +279,65 @@ describe('SessionPage auto-advance', () => {
     expect(document.querySelector('.exercise-card h2')?.textContent).toBe(chosen)
   })
 })
+
+describe('SessionPage previous-record autofill', () => {
+  async function seedPrevious(opts: { note?: string } = {}) {
+    const store = new LocalWorkoutStore()
+    const prior: Session = {
+      id: 'sess-prev-1',
+      routineId: null,
+      startedAt: new Date(Date.now() - 86_400_000).toISOString(),
+      endedAt: new Date(Date.now() - 86_400_000 + 3_600_000).toISOString(),
+      status: 'completed',
+      items: [
+        {
+          exerciseId: BENCH,
+          order: 0,
+          note: opts.note,
+          sets: [
+            { setNumber: 1, weightKg: 60, reps: 10, completed: true },
+            { setNumber: 2, weightKg: 60, reps: 9, completed: true },
+          ],
+        },
+      ],
+    }
+    await store.saveSession(prior)
+  }
+
+  it('prefills empty sets from the last completed session without marking them done', async () => {
+    await seedPrevious()
+    render(<App />)
+    await screen.findByRole('button', { name: '운동 대체' })
+
+    const weight1 = await screen.findByLabelText('세트 1 중량(kg)')
+    await waitFor(() => expect(weight1).toHaveValue(60))
+    expect(screen.getByLabelText('세트 1 횟수')).toHaveValue(10)
+    expect(screen.getByLabelText('세트 2 중량(kg)')).toHaveValue(60)
+    // 미리 채우기는 완료가 아니다 — 완료 버튼은 아직 비어 있는 ○.
+    expect(screen.getByRole('button', { name: '세트 1 완료' })).toHaveTextContent('○')
+  })
+
+  it('leaves a touched exercise alone (no overwrite)', async () => {
+    // 사용자가 이미 값을 넣은 운동으로 시작한다 — 자동 채우기가 덮어쓰면 안 된다.
+    const store = new LocalWorkoutStore()
+    const seeded = seedSession()
+    seeded.items[0].sets = [{ setNumber: 1, weightKg: 42, reps: 5, completed: false }]
+    await store.saveSession(seeded)
+    await seedPrevious()
+
+    render(<App />)
+    await screen.findByRole('button', { name: '운동 대체' })
+    const weight1 = await screen.findByLabelText('세트 1 중량(kg)')
+    expect(weight1).toHaveValue(42)
+  })
+
+  it('shows the previous note in the 이전 기록 panel', async () => {
+    const user = userEvent.setup()
+    await seedPrevious({ note: '3번 머신, 손목 시큰' })
+    render(<App />)
+    await screen.findByRole('button', { name: '운동 대체' })
+
+    await user.click(screen.getByRole('button', { name: /이전 기록/ }))
+    expect(await screen.findByText(/3번 머신, 손목 시큰/)).toBeInTheDocument()
+  })
+})

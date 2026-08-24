@@ -121,3 +121,28 @@ export function ChevronRightIcon({ size = 18, className }: IconProps) {
     </svg>
   )
 }
+
+/** 덤벨 — 시연 사진이 없을 때 자리 표시로 쓴다. */
+export function DumbbellIcon({ size = 28, className }: IconProps) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      width={size}
+      height={size}
+      fill="none"
+      className={className}
+      aria-hidden
+      focusable="false"
+    >
+      <g
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M6.5 9v6M4 10.5v3M17.5 9v6M20 10.5v3M6.5 12h11" />
+      </g>
+    </svg>
+  )
+}

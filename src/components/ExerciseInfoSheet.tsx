@@ -18,6 +18,7 @@ interface Props {
 
 export function ExerciseInfoSheet({ exercise, onClose }: Props) {
   const [videoFailed, setVideoFailed] = useState(false)
+  const [thumbFailed, setThumbFailed] = useState(false)
   const videoUrl = exercise.videos.male ?? exercise.videos.female
   const thumb = exercise.thumbnails.male ?? exercise.thumbnails.female
   const nameKo = tKo(exercise.name)
@@ -32,7 +33,22 @@ export function ExerciseInfoSheet({ exercise, onClose }: Props) {
           {exercise.name}
         </div>
       )}
-      {!videoFailed && videoUrl ? (
+      {exercise.frames && exercise.frames.length >= 2 && !thumbFailed ? (
+        // 시작→끝 두 프레임 크로스페이드 시연(원본 영상 CDN 폐쇄 대체).
+        <span
+          className="exercise-frames info-frames"
+          role="img"
+          aria-label={`${nameKo} 시연`}
+        >
+          <img src={exercise.frames[0]} alt="" onError={() => setThumbFailed(true)} />
+          <img
+            className="exercise-frames-top"
+            src={exercise.frames[1]}
+            alt=""
+            onError={() => setThumbFailed(true)}
+          />
+        </span>
+      ) : !videoFailed && videoUrl ? (
         <video
           key={videoUrl}
           src={videoUrl}
@@ -43,8 +59,14 @@ export function ExerciseInfoSheet({ exercise, onClose }: Props) {
           onError={() => setVideoFailed(true)}
         />
       ) : (
-        thumb && (
-          <img src={thumb} alt="" style={{ width: '100%', borderRadius: 12 }} />
+        thumb &&
+        !thumbFailed && (
+          <img
+            src={thumb}
+            alt=""
+            style={{ width: '100%', borderRadius: 12 }}
+            onError={() => setThumbFailed(true)}
+          />
         )
       )}
 

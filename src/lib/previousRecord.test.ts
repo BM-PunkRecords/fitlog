@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { findPreviousRecord } from './previousRecord'
-import type { MetricType, Session, SessionSet, SessionStatus } from '../types/models'
+import {
+  findPreviousRecord,
+  isPristineExercise,
+  prefillFromPrevious,
+  type PreviousRecord,
+} from './previousRecord'
+import type { MetricType, Session, SessionExercise, SessionSet, SessionStatus } from '../types/models'
 
 const set = (
   setNumber: number,
@@ -136,5 +141,63 @@ describe('findPreviousRecord', () => {
     )
     expect(findPreviousRecord([otherExercise], current, 'bench')).toBeNull()
     expect(findPreviousRecord([], current, 'bench')).toBeNull()
+  })
+
+  it('carries the previous note so it can be shown again', () => {
+    const withNote = session(
+      's-note',
+      '2026-07-25T09:00:00.000Z',
+      'completed',
+      [{ exerciseId: 'bench', sets: [set(1, 50, 10)] }],
+      '2026-07-25T10:00:00.000Z',
+    )
+    withNote.items[0].note = '3번 머신, 손목 시큰'
+    expect(findPreviousRecord([withNote], current, 'bench')?.note).toBe('3번 머신, 손목 시큰')
+  })
+})
+
+const item = (sets: SessionSet[]): SessionExercise => ({
+  exerciseId: 'bench',
+  order: 0,
+  sets,
+})
+
+describe('isPristineExercise', () => {
+  it('is true only when every set is empty and untouched', () => {
+    expect(isPristineExercise(item([set(1, 0, 0, false), set(2, 0, 0, false)]))).toBe(true)
+    expect(isPristineExercise(item([set(1, 40, 0, false)]))).toBe(false) // weight entered
+    expect(isPristineExercise(item([set(1, 0, 8, false)]))).toBe(false) // reps entered
+    expect(isPristineExercise(item([set(1, 0, 0, true)]))).toBe(false) // completed
+    expect(
+      isPristineExercise(
+        item([{ setNumber: 1, weightKg: 0, reps: 0, durationSec: 30, completed: false }]),
+      ),
+    ).toBe(false) // time entered
+  })
+})
+
+describe('prefillFromPrevious', () => {
+  it('copies weight/reps into fresh, uncompleted sets and adopts the metric', () => {
+    const record: PreviousRecord = {
+      date: '2026-07-25T10:00:00.000Z',
+      metricType: 'weight_reps',
+      sets: [set(1, 60, 10), set(2, 60, 9), set(3, 55, 8)],
+    }
+    const filled = prefillFromPrevious(item([set(1, 0, 0, false)]), record)
+    expect(filled.sets).toHaveLength(3)
+    expect(filled.sets.map((s) => [s.weightKg, s.reps])).toEqual([[60, 10], [60, 9], [55, 8]])
+    expect(filled.sets.every((s) => !s.completed)).toBe(true)
+    expect(filled.metricType).toBe('weight_reps')
+  })
+
+  it('preserves duration/distance fields for time-based records', () => {
+    const record: PreviousRecord = {
+      date: '2026-07-25T10:00:00.000Z',
+      metricType: 'duration_distance',
+      sets: [{ setNumber: 1, weightKg: 0, reps: 0, durationSec: 1200, distanceKm: 4, completed: true }],
+    }
+    const filled = prefillFromPrevious(item([set(1, 0, 0, false)]), record)
+    expect(filled.sets[0]).toMatchObject({ durationSec: 1200, distanceKm: 4, completed: false })
+    expect(filled.metricType).toBe('duration_distance')
   })
 })

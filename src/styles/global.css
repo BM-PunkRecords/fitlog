@@ -620,6 +620,51 @@ a.btn {
   background: #000;
 }
 
+/* 시작/끝 두 프레임을 겹쳐 크로스페이드로 움직임을 흉내 낸 시연(ExercisePreview).
+   원본 영상 CDN이 폐쇄돼 free-exercise-db 스틸 2장으로 대체한다. */
+.exercise-frames {
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+  padding: 0;
+}
+
+.exercise-frames img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.exercise-frames-top {
+  animation: frame-cross 1.8s ease-in-out infinite alternate;
+}
+
+/* 운동 정보 시트의 시연은 전체 폭 정사각으로 크게 보여준다. */
+.info-frames {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 12px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .exercise-frames-top {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+/* 시연 사진이 없을 때의 자리 표시 — 깨진 이미지 대신 덤벨 글리프. */
+.thumb-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: color-mix(in srgb, var(--text) 35%, transparent);
+  border: 1px solid var(--stroke-subtle);
+}
+
 .set-grid {
   display: grid;
   grid-template-columns: 40px 1fr 1fr 48px;
@@ -1696,4 +1741,12 @@ body.lock-pull-refresh {
 
 .prev-record-set > .muted {
   min-width: 16px;
+}
+
+.prev-record-note {
+  margin: 4px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
 }

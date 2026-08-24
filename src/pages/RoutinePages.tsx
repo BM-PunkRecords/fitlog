@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { ExercisePicker } from '../components/ExercisePicker'
+import { ExercisePreview } from '../components/ExercisePreview'
 import { MuscleMap } from '../components/MuscleMap'
 import { RestField } from '../components/RestField'
 import { Sheet } from '../components/Sheet'
@@ -108,11 +109,11 @@ export function RoutineEditPage() {
           return (
             <div key={`${eid}-${index}`} className="card stack">
               <div className="row">
-                <img
-                  className="thumb"
-                  src={ex?.thumbnails.male ?? ex?.thumbnails.female}
-                  alt=""
-                />
+                {ex ? (
+                  <ExercisePreview exercise={ex} media="image" />
+                ) : (
+                  <div className="thumb thumb-placeholder" aria-hidden />
+                )}
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div>{ex ? tKo(ex.name) : eid}</div>
                   <div className="muted">{ex ? targetKo(ex.target) : ''}</div>
@@ -229,7 +230,11 @@ export function RoutineDetailPage() {
         const isDefault = !hasRoutineRestOverride(routine, eid)
         return (
           <div key={eid} className="card row">
-            <img className="thumb" src={ex?.thumbnails.male ?? ex?.thumbnails.female} alt="" />
+            {ex ? (
+              <ExercisePreview exercise={ex} media="image" />
+            ) : (
+              <div className="thumb thumb-placeholder" aria-hidden />
+            )}
             <div style={{ flex: 1, minWidth: 0 }}>
               <strong>{ex ? tKo(ex.name) : eid}</strong>
               <div className="muted">
